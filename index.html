@@ -3,562 +3,411 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Безопасный P2P Чат</title>
-    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <title>WebRTC P2P Чат</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
             padding: 20px;
-            color: #333;
+            background-color: #f5f5f5;
         }
-        
         .container {
             background: white;
+            padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 500px;
-            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        
-        .header {
-            background: #4a6fa5;
-            color: white;
-            padding: 20px;
+        h1 {
             text-align: center;
+            color: #333;
+            margin-bottom: 20px;
         }
-        
-        .header h1 {
-            margin: 0;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .content {
-            padding: 20px;
-        }
-        
-        .auth-section, .chat-section {
-            transition: all 0.3s ease;
-        }
-        
-        .chat-section {
-            display: none;
-        }
-        
-        .input-group {
-            margin-bottom: 15px;
-        }
-        
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-        
-        input[type="password"], input[type="text"] {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        
-        input[type="password"]:focus, input[type="text"]:focus {
-            border-color: #4a6fa5;
-            outline: none;
-        }
-        
-        .btn {
-            background: #4a6fa5;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            width: 100%;
-            transition: background 0.3s;
-        }
-        
-        .btn:hover {
-            background: #3a5a80;
-        }
-        
-        .btn-secondary {
-            background: #6c757d;
-        }
-        
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-        
-        .btn-danger {
-            background: #dc3545;
-        }
-        
-        .btn-danger:hover {
-            background: #c82333;
-        }
-        
         .status {
             padding: 10px;
-            border-radius: 4px;
+            margin: 10px 0;
+            border-radius: 5px;
             text-align: center;
-            margin: 15px 0;
-            font-weight: 500;
+            font-weight: bold;
         }
-        
-        .status.connected {
-            background: #d4edda;
-            color: #155724;
+        .disconnected {
+            background-color: #ffebee;
+            color: #c62828;
         }
-        
-        .status.disconnected {
-            background: #f8d7da;
-            color: #721c24;
+        .connected {
+            background-color: #e8f5e9;
+            color: #2e7d32;
         }
-        
-        .status.connecting {
-            background: #fff3cd;
-            color: #856404;
+        .connecting {
+            background-color: #fff8e1;
+            color: #f57f17;
         }
-        
-        .messages-container {
+        #messages {
             height: 300px;
             border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 15px;
-            overflow-y: auto;
-            margin: 15px 0;
-            background: #fafafa;
-        }
-        
-        .message {
+            padding: 10px;
             margin: 10px 0;
-            padding: 10px 15px;
-            border-radius: 18px;
+            overflow-y: auto;
+            background-color: #fafafa;
+            border-radius: 5px;
+        }
+        .message {
+            margin: 8px 0;
+            padding: 8px 12px;
+            border-radius: 8px;
             max-width: 80%;
-            word-wrap: break-word;
         }
-        
         .my-message {
-            background: #e3f2fd;
+            background-color: #e3f2fd;
             margin-left: auto;
-            border-bottom-right-radius: 4px;
+            text-align: right;
         }
-        
         .their-message {
-            background: #ffffff;
+            background-color: #f5f5f5;
             margin-right: auto;
-            border-bottom-left-radius: 4px;
-            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
         }
-        
-        .message-info {
-            font-size: 12px;
-            color: #777;
-            margin-top: 5px;
+        input, textarea, button {
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
-        
-        .info-text {
-            font-size: 14px;
-            color: #666;
-            margin: 15px 0;
-            text-align: center;
-        }
-        
-        .input-row {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .input-row input {
-            flex: 1;
-        }
-        
-        .input-row button {
-            width: auto;
-        }
-        
-        .password-strength {
-            height: 5px;
-            margin-top: 5px;
-            border-radius: 2px;
-            transition: all 0.3s;
-        }
-        
-        .weak { background: #dc3545; width: 33%; }
-        .medium { background: #ffc107; width: 66%; }
-        .strong { background: #28a745; width: 100%; }
-        
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px;
-            border-radius: 4px;
+        button {
+            background-color: #4CAF50;
             color: white;
-            opacity: 0;
-            transition: opacity 0.5s;
-            z-index: 1000;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
         }
-        
-        .notification.error {
-            background: #dc3545;
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
         }
-        
-        .notification.success {
-            background: #28a745;
+        button.secondary {
+            background-color: #2196F3;
+        }
+        button.danger {
+            background-color: #f44336;
+        }
+        .sdp-area {
+            margin: 10px 0;
+        }
+        .sdp-area textarea {
+            height: 100px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .instructions {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .step {
+            margin: 8px 0;
+        }
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1><span style="font-size: 1.5em;">🔒</span> Безопасный P2P Чат</h1>
+        <h1>WebRTC P2P Чат</h1>
+        
+        <div class="instructions">
+            <h3>Инструкция по подключению:</h3>
+            <div class="step">1. На первом устройстве нажмите "Создать предложение"</div>
+            <div class="step">2. Скопируйте SDP предложение из текстового поля</div>
+            <div class="step">3. На втором устройстве вставьте SDP в поле "Чужое SDP" и нажмите "Принять предложение"</div>
+            <div class="step">4. Скопируйте ответное SDP со второго устройства</div>
+            <div class="step">5. На первом устройстве вставьте ответ в поле "Чужое SDP" и нажмите "Установить ответ"</div>
+            <div class="step">6. Соединение установлено! Можно общаться</div>
         </div>
         
-        <div class="content">
-            <div class="auth-section" id="auth">
-                <h2>Введите секретный код чата</h2>
-                <div class="input-group">
-                    <label for="room-password">Секретный код:</label>
-                    <input type="password" id="room-password" placeholder="Минимум 8 символов">
-                    <div id="password-strength" class="password-strength"></div>
-                </div>
-                
-                <button class="btn" id="join-btn">Войти в чат</button>
-                <button class="btn btn-secondary" id="generate-btn">Сгенерировать код</button>
-                
-                <p class="info-text">⚠️ Оба пользователя должны ввести одинаковый код для подключения</p>
-                <p class="info-text">🔗 <a href="#" id="share-link">Скопировать ссылку для приглашения</a></p>
-            </div>
-
-            <div class="chat-section" id="chat">
-                <h2>Приватный чат</h2>
-                <div id="status" class="status disconnected">Не подключен</div>
-                
-                <div class="messages-container" id="messages"></div>
-                
-                <div class="input-row">
-                    <input type="text" id="message-input" placeholder="Введите сообщение..." disabled>
-                    <button class="btn" id="send-btn" disabled>Отправить</button>
-                </div>
-                
-                <button class="btn btn-danger" id="disconnect-btn">Отключиться</button>
-            </div>
+        <div id="status" class="status disconnected">Не подключен</div>
+        
+        <div id="messages"></div>
+        
+        <div class="sdp-area">
+            <label>Ваше SDP предложение:</label>
+            <textarea id="localSdp" readonly placeholder="Нажмите 'Создать предложение'"></textarea>
+            <button id="createOfferBtn">Создать предложение</button>
+            <button id="copySdpBtn" class="secondary">Скопировать SDP</button>
         </div>
+        
+        <div class="sdp-area">
+            <label>Чужое SDP (вставьте сюда SDP другого устройства):</label>
+            <textarea id="remoteSdp" placeholder="Вставьте SDP с другого устройства здесь"></textarea>
+            <button id="setAnswerBtn">Установить ответ</button>
+            <button id="acceptOfferBtn" class="secondary">Принять предложение</button>
+        </div>
+        
+        <input type="text" id="messageInput" placeholder="Введите сообщение..." disabled>
+        <button id="sendBtn" disabled>Отправить сообщение</button>
+        <button id="disconnectBtn" class="danger" disabled>Отключиться</button>
     </div>
 
-    <div id="notification" class="notification"></div>
-
     <script>
-        // Инициализация PeerJS
-        const peer = new Peer();
-        let conn = null;
-        let roomPassword = '';
-        let peerId = '';
-        let reconnectAttempts = 0;
-        const maxReconnectAttempts = 5;
-
-        // Генерация ID на основе пароля
-        function generatePeerId(password) {
-            let hash = 0;
-            for (let i = 0; i < password.length; i++) {
-                hash = ((hash << 5) - hash) + password.charCodeAt(i);
-                hash = hash & hash;
-            }
-            return 'chat-' + Math.abs(hash).toString(36);
+        // Элементы интерфейса
+        const statusDiv = document.getElementById('status');
+        const messagesDiv = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const localSdpTextarea = document.getElementById('localSdp');
+        const remoteSdpTextarea = document.getElementById('remoteSdp');
+        const createOfferBtn = document.getElementById('createOfferBtn');
+        const copySdpBtn = document.getElementById('copySdpBtn');
+        const setAnswerBtn = document.getElementById('setAnswerBtn');
+        const acceptOfferBtn = document.getElementById('acceptOfferBtn');
+        const sendBtn = document.getElementById('sendBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        
+        // WebRTC переменные
+        let peerConnection = null;
+        let dataChannel = null;
+        
+        // Конфигурация STUN серверов (бесплатные от Google)
+        const configuration = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+        };
+        
+        // Установка статуса
+        function setStatus(status, text) {
+            statusDiv.className = 'status ' + status;
+            statusDiv.textContent = text;
+            console.log('Status:', status, text);
         }
-
-        // Проверка сложности пароля
-        function checkPasswordStrength() {
-            const password = document.getElementById('room-password').value;
-            const strengthBar = document.getElementById('password-strength');
-            
-            if (password.length === 0) {
-                strengthBar.className = 'password-strength';
-                return;
-            }
-            
-            let strength = 0;
-            if (password.length >= 8) strength++;
-            if (password.length >= 12) strength++;
-            if (/[A-Z]/.test(password)) strength++;
-            if (/[0-9]/.test(password)) strength++;
-            if (/[^A-Za-z0-9]/.test(password)) strength++;
-            
-            if (strength < 2) {
-                strengthBar.className = 'password-strength weak';
-            } else if (strength < 4) {
-                strengthBar.className = 'password-strength medium';
-            } else {
-                strengthBar.className = 'password-strength strong';
-            }
+        
+        // Добавление сообщения в чат
+        function addMessage(text, isMyMessage = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ' + (isMyMessage ? 'my-message' : 'their-message');
+            messageDiv.textContent = text;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
-
-        // Генерация безопасного пароля
-        function generatePassword() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            let password = '';
-            for (let i = 0; i < 12; i++) {
-                password += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            document.getElementById('room-password').value = password;
-            checkPasswordStrength();
-            updateShareLink();
-        }
-
-        // Обновление ссылки для общего доступа
-        function updateShareLink() {
-            const password = document.getElementById('room-password').value;
-            if (password) {
-                const url = new URL(window.location);
-                url.searchParams.set('secret', password);
+        
+        // Создание PeerConnection
+        function createPeerConnection() {
+            try {
+                peerConnection = new RTCPeerConnection(configuration);
                 
-                const shareLink = document.getElementById('share-link');
-                shareLink.href = url.toString();
-                shareLink.onclick = function(e) {
-                    e.preventDefault();
-                    navigator.clipboard.writeText(url.toString()).then(() => {
-                        showNotification('Ссылка скопирована в буфер обмена', 'success');
-                    });
+                // Обработчик входящего канала данных
+                peerConnection.ondatachannel = (event) => {
+                    console.log('Получен канал данных');
+                    dataChannel = event.channel;
+                    setupDataChannel();
                 };
-            }
-        }
-
-        // Показ уведомлений
-        function showNotification(message, type) {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.className = `notification ${type}`;
-            notification.style.opacity = 1;
-            
-            setTimeout(() => {
-                notification.style.opacity = 0;
-            }, 3000);
-        }
-
-        // Подключение к чату
-        function joinChat() {
-            roomPassword = document.getElementById('room-password').value.trim();
-            if (!roomPassword) {
-                showNotification('Введите секретный код!', 'error');
-                return;
-            }
-            
-            if (roomPassword.length < 8) {
-                showNotification('Слишком короткий код. Используйте не менее 8 символов.', 'error');
-                return;
-            }
-
-            peerId = generatePeerId(roomPassword);
-            peer._id = peerId;
-            
-            document.getElementById('auth').style.display = 'none';
-            document.getElementById('chat').style.display = 'block';
-            updateStatus('connecting', 'Подключение...');
-            
-            // Обработчик входящих подключений
-            peer.on('connection', function(connection) {
-                if (conn && conn.open) {
-                    connection.close();
-                    return;
-                }
                 
-                conn = connection;
-                setupConnection();
-                updateStatus('connected', 'Подключен');
-                reconnectAttempts = 0;
-            });
-
-            peer.on('error', function(err) {
-                console.error('Ошибка PeerJS:', err);
-                if (err.type === 'peer-unavailable') {
-                    updateStatus('disconnected', 'Ожидание собеседника...');
-                } else {
-                    updateStatus('disconnected', 'Ошибка подключения');
-                    showNotification('Ошибка подключения: ' + err, 'error');
-                }
-                
-                // Попытка переподключения
-                if (reconnectAttempts < maxReconnectAttempts) {
-                    setTimeout(() => {
-                        reconnectAttempts++;
-                        tryConnect();
-                    }, 2000 * reconnectAttempts);
-                }
-            });
-
-            // Попытка подключения к собеседнику
-            tryConnect();
-        }
-
-        function tryConnect() {
-            if (!conn || !conn.open) {
-                try {
-                    conn = peer.connect(peerId);
-                    setupConnection();
-                } catch (e) {
-                    console.error('Ошибка при подключении:', e);
-                    updateStatus('disconnected', 'Ожидание собеседника...');
-                }
-            }
-        }
-
-        function setupConnection() {
-            conn.on('data', function(data) {
-                if (data.type === 'message') {
-                    addMessage(data.text, false);
-                    // Уведомление о новом сообщении
-                    if (document.hidden) {
-                        showNotification('Новое сообщение', 'success');
+                // Обработчики ICE кандидатов
+                peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        console.log('Новый ICE кандидат:', event.candidate);
                     }
-                }
-            });
-            
-            conn.on('open', function() {
-                updateStatus('connected', 'Подключен');
-                document.getElementById('message-input').disabled = false;
-                document.getElementById('send-btn').disabled = false;
-                addMessage('Соединение установлено!', false, true);
-                reconnectAttempts = 0;
-            });
-            
-            conn.on('close', function() {
-                updateStatus('disconnected', 'Соединение разорвано');
-                document.getElementById('message-input').disabled = true;
-                document.getElementById('send-btn').disabled = true;
-                addMessage('Соединение разорвано. Попытка переподключения...', false, true);
+                };
                 
-                // Попытка переподключения
-                if (reconnectAttempts < maxReconnectAttempts) {
-                    setTimeout(() => {
-                        reconnectAttempts++;
-                        tryConnect();
-                    }, 2000 * reconnectAttempts);
+                peerConnection.onconnectionstatechange = () => {
+                    console.log('Состояние соединения:', peerConnection.connectionState);
+                    if (peerConnection.connectionState === 'connected') {
+                        setStatus('connected', 'Подключен');
+                        messageInput.disabled = false;
+                        sendBtn.disabled = false;
+                        disconnectBtn.disabled = false;
+                    } else if (peerConnection.connectionState === 'disconnected') {
+                        setStatus('disconnected', 'Отключен');
+                        resetConnection();
+                    }
+                };
+                
+                return true;
+            } catch (error) {
+                console.error('Ошибка создания PeerConnection:', error);
+                setStatus('disconnected', 'Ошибка: ' + error.message);
+                return false;
+            }
+        }
+        
+        // Настройка канала данных
+        function setupDataChannel() {
+            dataChannel.onopen = () => {
+                console.log('Канал данных открыт');
+                setStatus('connected', 'Подключен');
+                messageInput.disabled = false;
+                sendBtn.disabled = false;
+                disconnectBtn.disabled = false;
+                addMessage('Соединение установлено! Можно общаться.');
+            };
+            
+            dataChannel.onclose = () => {
+                console.log('Канал данных закрыт');
+                setStatus('disconnected', 'Соединение разорвано');
+                resetConnection();
+            };
+            
+            dataChannel.onmessage = (event) => {
+                console.log('Получено сообщение:', event.data);
+                addMessage(event.data, false);
+            };
+            
+            dataChannel.onerror = (error) => {
+                console.error('Ошибка канала данных:', error);
+            };
+        }
+        
+        // Создание предложения (offer)
+        async function createOffer() {
+            if (!createPeerConnection()) return;
+            
+            try {
+                setStatus('connecting', 'Создание предложения...');
+                
+                // Создаем канал данных
+                dataChannel = peerConnection.createDataChannel('chat');
+                setupDataChannel();
+                
+                // Создаем предложение
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+                
+                // Ждем установления local description
+                await waitForIceGathering(peerConnection);
+                
+                // Показываем SDP предложение
+                localSdpTextarea.value = JSON.stringify(peerConnection.localDescription);
+                
+                setStatus('connecting', 'Предложение создано. Скопируйте SDP и отправьте другому устройству.');
+                
+            } catch (error) {
+                console.error('Ошибка создания предложения:', error);
+                setStatus('disconnected', 'Ошибка: ' + error.message);
+            }
+        }
+        
+        // Принятие предложения (answer)
+        async function acceptOffer() {
+            if (!createPeerConnection()) return;
+            
+            try {
+                const remoteOffer = JSON.parse(remoteSdpTextarea.value);
+                if (!remoteOffer || remoteOffer.type !== 'offer') {
+                    throw new Error('Неверное SDP предложение');
+                }
+                
+                setStatus('connecting', 'Принятие предложения...');
+                
+                // Устанавливаем удаленное предложение
+                await peerConnection.setRemoteDescription(remoteOffer);
+                
+                // Создаем ответ
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                
+                // Ждем установления local description
+                await waitForIceGathering(peerConnection);
+                
+                // Показываем SDP ответ
+                localSdpTextarea.value = JSON.stringify(peerConnection.localDescription);
+                
+                setStatus('connecting', 'Ответ создан. Скопируйте SDP и отправьте обратно.');
+                
+            } catch (error) {
+                console.error('Ошибка принятия предложения:', error);
+                setStatus('disconnected', 'Ошибка: ' + error.message);
+            }
+        }
+        
+        // Установка ответа
+        async function setAnswer() {
+            try {
+                const remoteAnswer = JSON.parse(remoteSdpTextarea.value);
+                if (!remoteAnswer || remoteAnswer.type !== 'answer') {
+                    throw new Error('Неверный SDP ответ');
+                }
+                
+                setStatus('connecting', 'Установка ответа...');
+                await peerConnection.setRemoteDescription(remoteAnswer);
+                
+            } catch (error) {
+                console.error('Ошибка установки ответа:', error);
+                setStatus('disconnected', 'Ошибка: ' + error.message);
+            }
+        }
+        
+        // Ожидание сбора ICE кандидатов
+        function waitForIceGathering(pc) {
+            return new Promise((resolve) => {
+                if (pc.iceGatheringState === 'complete') {
+                    resolve();
+                } else {
+                    const checkState = () => {
+                        if (pc.iceGatheringState === 'complete') {
+                            pc.removeEventListener('icegatheringstatechange', checkState);
+                            resolve();
+                        }
+                    };
+                    pc.addEventListener('icegatheringstatechange', checkState);
                 }
             });
-            
-            conn.on('error', function(err) {
-                console.error('Ошибка соединения:', err);
-                showNotification('Ошибка соединения: ' + err, 'error');
-            });
         }
-
-        function updateStatus(status, text) {
-            const statusElement = document.getElementById('status');
-            statusElement.textContent = text;
-            statusElement.className = `status ${status}`;
-        }
-
+        
+        // Отправка сообщения
         function sendMessage() {
-            const messageInput = document.getElementById('message-input');
-            const text = messageInput.value.trim();
-            
-            if (text && conn && conn.open) {
-                conn.send({ type: 'message', text: text });
-                addMessage(text, true);
+            const message = messageInput.value.trim();
+            if (message && dataChannel && dataChannel.readyState === 'open') {
+                dataChannel.send(message);
+                addMessage(message, true);
                 messageInput.value = '';
             }
         }
-
-        function addMessage(text, isMyMessage, isSystem = false) {
-            const messages = document.getElementById('messages');
-            const messageDiv = document.createElement('div');
-            
-            if (isSystem) {
-                messageDiv.className = 'message';
-                messageDiv.style.textAlign = 'center';
-                messageDiv.style.color = '#666';
-                messageDiv.style.fontStyle = 'italic';
-                messageDiv.textContent = text;
-            } else {
-                messageDiv.className = 'message ' + (isMyMessage ? 'my-message' : 'their-message');
-                messageDiv.textContent = text;
-                
-                const infoDiv = document.createElement('div');
-                infoDiv.className = 'message-info';
-                const time = new Date().toLocaleTimeString();
-                infoDiv.textContent = (isMyMessage ? 'Я' : 'Собеседник') + ' • ' + time;
-                messageDiv.appendChild(infoDiv);
+        
+        // Сброс соединения
+        function resetConnection() {
+            if (dataChannel) {
+                dataChannel.close();
+                dataChannel = null;
+            }
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
             }
             
-            messages.appendChild(messageDiv);
-            messages.scrollTop = messages.scrollHeight;
+            messageInput.disabled = true;
+            sendBtn.disabled = true;
+            disconnectBtn.disabled = true;
+            localSdpTextarea.value = '';
+            remoteSdpTextarea.value = '';
         }
-
-        function disconnect() {
-            if (conn) {
-                conn.close();
-                conn = null;
-            }
-            
-            document.getElementById('chat').style.display = 'none';
-            document.getElementById('auth').style.display = 'block';
-            document.getElementById('messages').innerHTML = '';
-            peer.disconnect();
+        
+        // Копирование SDP в буфер обмена
+        function copySdpToClipboard() {
+            localSdpTextarea.select();
+            document.execCommand('copy');
+            alert('SDP скопировано в буфер обмена!');
         }
-
-        // Инициализация при загрузке
-        document.addEventListener('DOMContentLoaded', function() {
-            // Автоподключение по URL параметру
-            const urlParams = new URLSearchParams(window.location.search);
-            const secret = urlParams.get('secret');
-            if (secret) {
-                document.getElementById('room-password').value = secret;
-                checkPasswordStrength();
-                updateShareLink();
-                // Автоподключение только если параметр присутствует
-                setTimeout(() => {
-                    if (document.getElementById('room-password').value) {
-                        joinChat();
-                    }
-                }, 1000);
+        
+        // Обработчики событий
+        createOfferBtn.addEventListener('click', createOffer);
+        copySdpBtn.addEventListener('click', copySdpToClipboard);
+        acceptOfferBtn.addEventListener('click', acceptOffer);
+        setAnswerBtn.addEventListener('click', setAnswer);
+        sendBtn.addEventListener('click', sendMessage);
+        disconnectBtn.addEventListener('click', resetConnection);
+        
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
             }
-            
-            // Назначение обработчиков событий
-            document.getElementById('join-btn').addEventListener('click', joinChat);
-            document.getElementById('generate-btn').addEventListener('click', generatePassword);
-            document.getElementById('send-btn').addEventListener('click', sendMessage);
-            document.getElementById('disconnect-btn').addEventListener('click', disconnect);
-            document.getElementById('room-password').addEventListener('input', checkPasswordStrength);
-            document.getElementById('room-password').addEventListener('input', updateShareLink);
-            
-            // Отправка сообщения по Enter
-            document.getElementById('message-input').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    sendMessage();
-                }
-            });
-            
-            updateShareLink();
-            
-            // Уведомление при закрытии вкладки
-            window.addEventListener('beforeunload', function(e) {
-                if (conn && conn.open) {
-                    const message = 'Вы уверены, что хотите покинуть чат?';
-                    e.returnValue = message;
-                    return message;
-                }
-            });
         });
+        
+        // Информационное сообщение
+        addMessage('Добро пожаловать в P2P чат! Следуйте инструкциям выше для подключения.');
     </script>
 </body>
 </html>

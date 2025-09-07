@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebRTC P2P Чат (Полная версия)</title>
+    <title>WebRTC P2P Чат (Исправленная версия)</title>
     <style>
         * {
             box-sizing: border-box;
@@ -215,7 +215,15 @@
             padding: 8px;
             background: #f5f5f5;
             border-radius: 4px;
-            display: none;
+        }
+        .copyable {
+            cursor: pointer;
+            border: 1px dashed #4A6CF7;
+            padding: 10px;
+            border-radius: 8px;
+            background: #f0f5ff;
+            margin: 10px 0;
+            font-size: 14px;
         }
         @media (max-width: 600px) {
             .input-group {
@@ -227,13 +235,13 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>WebRTC P2P Чат (Полная версия)</h1>
+            <h1>WebRTC P2P Чат (Исправленная версия)</h1>
             <p>Просто создайте ссылку и отправьте другу</p>
         </div>
         
         <div class="content">
             <div id="status" class="status disconnected">Не подключен</div>
-            <div id="debugInfo" class="debug-info"></div>
+            <div id="debugInfo" class="debug-info">Отладка: Инициализация...</div>
             
             <div class="section" id="setupSection">
                 <div class="section-title">Подключение</div>
@@ -251,6 +259,10 @@
                         <div class="step-number">3</div>
                         <div>Когда пользователь перейдет по ссылке, соединение установится автоматически</div>
                     </div>
+                    <div class="step">
+                        <div class="step-number">!</div>
+                        <div><strong>Важно:</strong> Для работы необходимо разрешить обмен ICE-кандидатами</div>
+                    </div>
                 </div>
                 
                 <div class="input-group">
@@ -263,6 +275,17 @@
                         <button id="copyLinkBtn" class="secondary">Копировать</button>
                     </div>
                     <p style="font-size: 12px; color: #666; margin-top: 5px;">Отправьте эту ссылку другому пользователю. Когда он перейдет по ней, соединение установится автоматически.</p>
+                </div>
+
+                <div id="iceExchange" style="display: none;">
+                    <div class="section-title">Обмен ICE-кандидатами</div>
+                    <p>Скопируйте ваш ICE-кандидат и отправьте другому пользователю:</p>
+                    <div id="localIce" class="copyable">Ожидание ICE-кандидатов...</div>
+                    <p>Вставьте ICE-кандидат от другого пользователя:</p>
+                    <div class="input-group">
+                        <textarea id="remoteIceInput" placeholder="Вставьте ICE-кандидат здесь"></textarea>
+                        <button id="addIceBtn">Добавить ICE</button>
+                    </div>
                 </div>
             </div>
             
@@ -300,19 +323,26 @@
         const linkArea = document.getElementById('linkArea');
         const chatSection = document.getElementById('chatSection');
         const notification = document.getElementById('notification');
+        const iceExchange = document.getElementById('iceExchange');
+        const localIceDiv = document.getElementById('localIce');
+        const remoteIceInput = document.getElementById('remoteIceInput');
+        const addIceBtn = document.getElementById('addIceBtn');
         
         // WebRTC переменные
         let peerConnection = null;
         let dataChannel = null;
         let isOfferer = false;
         let localIceCandidates = [];
+        let hasRemoteDescription = false;
         
         // Конфигурация STUN серверов
         const configuration = {
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
                 { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'stun:stun2.l.google.com:19302' }
+                { urls: 'stun:stun2.l.google.com:19302' },
+                { urls: 'stun:stun3.l.google.com:19302' },
+                { urls: 'stun:stun4.l.google.com:19302' }
             ]
         };
         
@@ -330,6 +360,7 @@
                     setupSection.style.display = 'block';
                     linkArea.style.display = 'none';
                     createLinkBtn.style.display = 'none';
+                    iceExchange.style.display = 'block';
                     
                     // Создаем PeerConnection и обрабатываем предложение
                     createPeerConnection();
@@ -352,7 +383,6 @@
         
         // Отладочная информация
         function debug(message) {
-            debugInfoDiv.style.display = 'block';
             debugInfoDiv.textContent = message;
             console.log(message);
         }
@@ -390,8 +420,13 @@
                 // Обработчики ICE кандидатов
                 peerConnection.onicecandidate = (event) => {
                     if (event.candidate) {
-                        debug('Новый ICE кандидат: ' + event.candidate.candidate);
+                        debug('Новый ICE кандидат: ' + JSON.stringify(event.candidate));
                         localIceCandidates.push(event.candidate);
+                        
+                        // Показываем ICE кандидат для обмена
+                        if (isOfferer) {
+                            localIceDiv.textContent = JSON.stringify(event.candidate);
+                        }
                     } else {
                         debug('Все ICE кандидаты собраны');
                     }
@@ -408,6 +443,7 @@
                         // Показываем чат
                         setupSection.style.display = 'none';
                         chatSection.style.display = 'block';
+                        iceExchange.style.display = 'none';
                     } else if (peerConnection.connectionState === 'disconnected' || 
                                peerConnection.connectionState === 'failed') {
                         setStatus('disconnected', 'Отключен');
@@ -433,7 +469,7 @@
                 messageInput.disabled = false;
                 sendBtn.disabled = false;
                 disconnectBtn.disabled = false;
-                addMessage('Соединение установлено! Можно общаться.', true);
+                addMessage('Соединение установлено! Можно общаться.', false);
             };
             
             dataChannel.onclose = () => {
@@ -481,7 +517,7 @@
                         };
                         peerConnection.addEventListener('icegatheringstatechange', checkState);
                         // Таймаут на случай, если событие не произойдет
-                        setTimeout(resolve, 2000);
+                        setTimeout(resolve, 3000);
                     }
                 });
                 
@@ -492,6 +528,7 @@
                 // Показываем ссылку
                 connectionLink.value = link;
                 linkArea.style.display = 'flex';
+                iceExchange.style.display = 'block';
                 
                 setStatus('connecting', 'Ссылка создана. Отправьте её другому пользователю.');
                 
@@ -519,17 +556,37 @@
                 // Устанавливаем удаленное предложение
                 await peerConnection.setRemoteDescription(offer);
                 debug('Удаленное описание установлено');
+                hasRemoteDescription = true;
                 
                 // Создаем ответ
                 const answer = await peerConnection.createAnswer();
                 await peerConnection.setLocalDescription(answer);
                 debug('Ответ создан');
                 
-                setStatus('connecting', 'Подключение устанавливается...');
+                // Показываем ICE кандидаты для обмена
+                localIceDiv.textContent = JSON.stringify(answer);
+                
+                setStatus('connecting', 'Подключение устанавливается. Обменяйтесь ICE-кандидатами.');
                 
             } catch (error) {
                 console.error('Ошибка обработки предложения:', error);
                 setStatus('disconnected', 'Ошибка: ' + error.message);
+            }
+        }
+        
+        // Добавление ICE кандидата от удаленного пира
+        async function addIceCandidate() {
+            try {
+                const iceCandidate = JSON.parse(remoteIceInput.value);
+                if (iceCandidate && peerConnection) {
+                    await peerConnection.addIceCandidate(iceCandidate);
+                    debug('Добавлен ICE кандидат: ' + JSON.stringify(iceCandidate));
+                    remoteIceInput.value = '';
+                    showNotification('ICE кандидат добавлен');
+                }
+            } catch (error) {
+                console.error('Ошибка добавления ICE кандидата:', error);
+                showNotification('Ошибка добавления ICE кандидата');
             }
         }
         
@@ -558,11 +615,13 @@
             sendBtn.disabled = true;
             disconnectBtn.disabled = true;
             localIceCandidates = [];
+            hasRemoteDescription = false;
             
             // Показываем панель setup
             setupSection.style.display = 'block';
             chatSection.style.display = 'none';
             linkArea.style.display = 'none';
+            iceExchange.style.display = 'none';
             createLinkBtn.style.display = 'block';
             
             // Очищаем чат
@@ -583,11 +642,24 @@
             showNotification('Ссылка скопирована в буфер обмена!');
         }
         
+        // Копирование ICE кандидата в буфер обмена
+        function copyIceToClipboard() {
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = localIceDiv.textContent;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+            showNotification('ICE кандидат скопирован!');
+        }
+        
         // Обработчики событий
         createLinkBtn.addEventListener('click', createOffer);
         copyLinkBtn.addEventListener('click', copyLinkToClipboard);
         sendBtn.addEventListener('click', sendMessage);
         disconnectBtn.addEventListener('click', resetConnection);
+        addIceBtn.addEventListener('click', addIceCandidate);
+        localIceDiv.addEventListener('click', copyIceToClipboard);
         
         messageInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {

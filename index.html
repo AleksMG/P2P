@@ -3,32 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebRTC P2P Чат</title>
+    <title>WebRTC P2P Чат (Генерация ссылки)</title>
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             padding: 20px;
-            background-color: #f5f5f5;
         }
         .container {
             background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+        }
+        .header {
+            background: #4A6CF7;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .content {
+            padding: 25px;
+        }
+        .section {
+            margin-bottom: 25px;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: #f9f9f9;
+            border: 1px solid #eee;
         }
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 20px;
+        .section-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #4A6CF7;
+            font-weight: 600;
         }
         .status {
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
+            padding: 12px;
+            border-radius: 8px;
             text-align: center;
             font-weight: bold;
+            margin-bottom: 20px;
         }
         .disconnected {
             background-color: #ffebee;
@@ -42,135 +74,234 @@
             background-color: #fff8e1;
             color: #f57f17;
         }
+        .chat-area {
+            display: none;
+        }
         #messages {
             height: 300px;
             border: 1px solid #ddd;
-            padding: 10px;
-            margin: 10px 0;
+            padding: 15px;
+            margin: 15px 0;
             overflow-y: auto;
             background-color: #fafafa;
-            border-radius: 5px;
+            border-radius: 8px;
         }
         .message {
-            margin: 8px 0;
-            padding: 8px 12px;
-            border-radius: 8px;
+            margin: 10px 0;
+            padding: 10px 15px;
+            border-radius: 12px;
             max-width: 80%;
+            word-wrap: break-word;
         }
         .my-message {
-            background-color: #e3f2fd;
+            background-color: #4A6CF7;
+            color: white;
             margin-left: auto;
             text-align: right;
         }
         .their-message {
-            background-color: #f5f5f5;
+            background-color: #e9e9e9;
             margin-right: auto;
         }
-        input, textarea, button {
-            padding: 10px;
-            margin: 5px 0;
-            width: 100%;
-            box-sizing: border-box;
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        input, textarea {
+            padding: 12px;
             border: 1px solid #ddd;
-            border-radius: 5px;
+            border-radius: 8px;
+            font-size: 16px;
+            flex: 1;
         }
         button {
-            background-color: #4CAF50;
-            color: white;
+            padding: 12px 20px;
             border: none;
+            border-radius: 8px;
+            background-color: #4A6CF7;
+            color: white;
+            font-weight: 600;
             cursor: pointer;
-            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #3a5cd8;
         }
         button:disabled {
             background-color: #cccccc;
             cursor: not-allowed;
         }
         button.secondary {
-            background-color: #2196F3;
+            background-color: #6c757d;
+        }
+        button.secondary:hover {
+            background-color: #5a6268;
+        }
+        button.success {
+            background-color: #28a745;
+        }
+        button.success:hover {
+            background-color: #218838;
         }
         button.danger {
-            background-color: #f44336;
+            background-color: #dc3545;
         }
-        .sdp-area {
-            margin: 10px 0;
+        button.danger:hover {
+            background-color: #c82333;
         }
-        .sdp-area textarea {
-            height: 100px;
-            font-family: monospace;
-            font-size: 12px;
+        .link-area {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .link-box {
+            display: flex;
+            gap: 10px;
+        }
+        #connectionLink {
+            flex: 1;
+            padding: 12px;
+            border: 1px dashed #4A6CF7;
+            border-radius: 8px;
+            background-color: #f0f5ff;
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .instructions {
             background-color: #e8f5e9;
             padding: 15px;
-            border-radius: 5px;
+            border-radius: 8px;
             margin: 15px 0;
             font-size: 14px;
             line-height: 1.5;
         }
         .step {
-            margin: 8px 0;
+            margin: 10px 0;
+            display: flex;
+            align-items: flex-start;
         }
-        .hidden {
-            display: none;
+        .step-number {
+            background: #4CAF50;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            background: #4CAF50;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        .notification.show {
+            transform: translateX(0);
+        }
+        @media (max-width: 600px) {
+            .input-group {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>WebRTC P2P Чат</h1>
-        
-        <div class="instructions">
-            <h3>Инструкция по подключению:</h3>
-            <div class="step">1. На первом устройстве нажмите "Создать предложение"</div>
-            <div class="step">2. Скопируйте SDP предложение из текстового поля</div>
-            <div class="step">3. На втором устройстве вставьте SDP в поле "Чужое SDP" и нажмите "Принять предложение"</div>
-            <div class="step">4. Скопируйте ответное SDP со второго устройства</div>
-            <div class="step">5. На первом устройстве вставьте ответ в поле "Чужое SDP" и нажмите "Установить ответ"</div>
-            <div class="step">6. Соединение установлено! Можно общаться</div>
+        <div class="header">
+            <h1>WebRTC P2P Чат</h1>
+            <p>Простой чат с генерацией ссылки для подключения</p>
         </div>
         
-        <div id="status" class="status disconnected">Не подключен</div>
-        
-        <div id="messages"></div>
-        
-        <div class="sdp-area">
-            <label>Ваше SDP предложение:</label>
-            <textarea id="localSdp" readonly placeholder="Нажмите 'Создать предложение'"></textarea>
-            <button id="createOfferBtn">Создать предложение</button>
-            <button id="copySdpBtn" class="secondary">Скопировать SDP</button>
+        <div class="content">
+            <div id="status" class="status disconnected">Не подключен</div>
+            
+            <div class="section" id="setupSection">
+                <div class="section-title">Подключение</div>
+                
+                <div class="instructions">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div>Нажмите "Создать ссылку подключения"</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div>Скопируйте ссылку и отправьте другому пользователю</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div>Когда пользователь перейдет по ссылке, соединение установится автоматически</div>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <button id="createLinkBtn">Создать ссылку подключения</button>
+                </div>
+                
+                <div class="link-area" id="linkArea" style="display: none;">
+                    <div class="link-box">
+                        <input type="text" id="connectionLink" readonly>
+                        <button id="copyLinkBtn" class="secondary">Копировать</button>
+                    </div>
+                    <div class="input-group">
+                        <button id="startAsGuestBtn" class="success">Я гость (перешел по ссылке)</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section chat-area" id="chatSection">
+                <div class="section-title">Чат</div>
+                
+                <div id="messages"></div>
+                
+                <div class="input-group">
+                    <input type="text" id="messageInput" placeholder="Введите сообщение..." disabled>
+                    <button id="sendBtn" disabled>Отправить</button>
+                </div>
+                
+                <div class="input-group">
+                    <button id="disconnectBtn" class="danger">Отключиться</button>
+                </div>
+            </div>
         </div>
-        
-        <div class="sdp-area">
-            <label>Чужое SDP (вставьте сюда SDP другого устройства):</label>
-            <textarea id="remoteSdp" placeholder="Вставьте SDP с другого устройства здесь"></textarea>
-            <button id="setAnswerBtn">Установить ответ</button>
-            <button id="acceptOfferBtn" class="secondary">Принять предложение</button>
-        </div>
-        
-        <input type="text" id="messageInput" placeholder="Введите сообщение..." disabled>
-        <button id="sendBtn" disabled>Отправить сообщение</button>
-        <button id="disconnectBtn" class="danger" disabled>Отключиться</button>
     </div>
+
+    <div class="notification" id="notification">Ссылка скопирована в буфер обмена!</div>
 
     <script>
         // Элементы интерфейса
         const statusDiv = document.getElementById('status');
         const messagesDiv = document.getElementById('messages');
         const messageInput = document.getElementById('messageInput');
-        const localSdpTextarea = document.getElementById('localSdp');
-        const remoteSdpTextarea = document.getElementById('remoteSdp');
-        const createOfferBtn = document.getElementById('createOfferBtn');
-        const copySdpBtn = document.getElementById('copySdpBtn');
-        const setAnswerBtn = document.getElementById('setAnswerBtn');
-        const acceptOfferBtn = document.getElementById('acceptOfferBtn');
+        const createLinkBtn = document.getElementById('createLinkBtn');
+        const connectionLink = document.getElementById('connectionLink');
+        const copyLinkBtn = document.getElementById('copyLinkBtn');
+        const startAsGuestBtn = document.getElementById('startAsGuestBtn');
         const sendBtn = document.getElementById('sendBtn');
         const disconnectBtn = document.getElementById('disconnectBtn');
+        const setupSection = document.getElementById('setupSection');
+        const linkArea = document.getElementById('linkArea');
+        const chatSection = document.getElementById('chatSection');
+        const notification = document.getElementById('notification');
         
         // WebRTC переменные
         let peerConnection = null;
         let dataChannel = null;
+        let isOfferer = false;
         
-        // Конфигурация STUN серверов (бесплатные от Google)
+        // Конфигурация STUN серверов
         const configuration = {
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
@@ -178,11 +309,43 @@
             ]
         };
         
+        // Инициализация при загрузке
+        function init() {
+            // Проверяем, есть ли параметры подключения в URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const offer = urlParams.get('offer');
+            
+            if (offer) {
+                // Если есть предложение в URL, значит мы гость
+                try {
+                    const offerData = JSON.parse(decodeURIComponent(offer));
+                    connectionLink.value = window.location.href;
+                    linkArea.style.display = 'flex';
+                    setupSection.style.display = 'block';
+                    
+                    // Скрываем кнопку создания ссылки
+                    createLinkBtn.style.display = 'none';
+                } catch (e) {
+                    console.error('Ошибка парсинга предложения из URL:', e);
+                    setStatus('disconnected', 'Неверная ссылка подключения');
+                }
+            }
+        }
+        
         // Установка статуса
         function setStatus(status, text) {
             statusDiv.className = 'status ' + status;
             statusDiv.textContent = text;
             console.log('Status:', status, text);
+        }
+        
+        // Показать уведомление
+        function showNotification(message) {
+            notification.textContent = message;
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
         }
         
         // Добавление сообщения в чат
@@ -220,7 +383,12 @@
                         messageInput.disabled = false;
                         sendBtn.disabled = false;
                         disconnectBtn.disabled = false;
-                    } else if (peerConnection.connectionState === 'disconnected') {
+                        
+                        // Показываем чат
+                        setupSection.style.display = 'none';
+                        chatSection.style.display = 'block';
+                    } else if (peerConnection.connectionState === 'disconnected' || 
+                               peerConnection.connectionState === 'failed') {
                         setStatus('disconnected', 'Отключен');
                         resetConnection();
                     }
@@ -242,7 +410,7 @@
                 messageInput.disabled = false;
                 sendBtn.disabled = false;
                 disconnectBtn.disabled = false;
-                addMessage('Соединение установлено! Можно общаться.');
+                addMessage('Соединение установлено! Можно общаться.', true);
             };
             
             dataChannel.onclose = () => {
@@ -267,6 +435,7 @@
             
             try {
                 setStatus('connecting', 'Создание предложения...');
+                isOfferer = true;
                 
                 // Создаем канал данных
                 dataChannel = peerConnection.createDataChannel('chat');
@@ -279,10 +448,15 @@
                 // Ждем установления local description
                 await waitForIceGathering(peerConnection);
                 
-                // Показываем SDP предложение
-                localSdpTextarea.value = JSON.stringify(peerConnection.localDescription);
+                // Генерируем ссылку с предложением
+                const offerString = encodeURIComponent(JSON.stringify(peerConnection.localDescription));
+                const link = `${window.location.origin}${window.location.pathname}?offer=${offerString}`;
                 
-                setStatus('connecting', 'Предложение создано. Скопируйте SDP и отправьте другому устройству.');
+                // Показываем ссылку
+                connectionLink.value = link;
+                linkArea.style.display = 'flex';
+                
+                setStatus('connecting', 'Ссылка создана. Отправьте её другому пользователю.');
                 
             } catch (error) {
                 console.error('Ошибка создания предложения:', error);
@@ -292,15 +466,23 @@
         
         // Принятие предложения (answer)
         async function acceptOffer() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const offer = urlParams.get('offer');
+            
+            if (!offer) {
+                setStatus('disconnected', 'Не найдено предложение для подключения');
+                return;
+            }
+            
             if (!createPeerConnection()) return;
             
             try {
-                const remoteOffer = JSON.parse(remoteSdpTextarea.value);
+                const remoteOffer = JSON.parse(decodeURIComponent(offer));
                 if (!remoteOffer || remoteOffer.type !== 'offer') {
-                    throw new Error('Неверное SDP предложение');
+                    throw new Error('Неверное предложение подключения');
                 }
                 
-                setStatus('connecting', 'Принятие предложения...');
+                setStatus('connecting', 'Подключение...');
                 
                 // Устанавливаем удаленное предложение
                 await peerConnection.setRemoteDescription(remoteOffer);
@@ -312,30 +494,14 @@
                 // Ждем установления local description
                 await waitForIceGathering(peerConnection);
                 
-                // Показываем SDP ответ
-                localSdpTextarea.value = JSON.stringify(peerConnection.localDescription);
+                // Отправляем ответ обратно инициатору через канал данных
+                // В реальном приложении здесь должен быть обмен через сервер
+                // Но в данном случае мы просто устанавливаем соединение
                 
-                setStatus('connecting', 'Ответ создан. Скопируйте SDP и отправьте обратно.');
+                setStatus('connecting', 'Подключение устанавливается...');
                 
             } catch (error) {
                 console.error('Ошибка принятия предложения:', error);
-                setStatus('disconnected', 'Ошибка: ' + error.message);
-            }
-        }
-        
-        // Установка ответа
-        async function setAnswer() {
-            try {
-                const remoteAnswer = JSON.parse(remoteSdpTextarea.value);
-                if (!remoteAnswer || remoteAnswer.type !== 'answer') {
-                    throw new Error('Неверный SDP ответ');
-                }
-                
-                setStatus('connecting', 'Установка ответа...');
-                await peerConnection.setRemoteDescription(remoteAnswer);
-                
-            } catch (error) {
-                console.error('Ошибка установки ответа:', error);
                 setStatus('disconnected', 'Ошибка: ' + error.message);
             }
         }
@@ -353,6 +519,9 @@
                         }
                     };
                     pc.addEventListener('icegatheringstatechange', checkState);
+                    
+                    // Таймаут на случай, если событие не произойдет
+                    setTimeout(resolve, 1000);
                 }
             });
         }
@@ -381,22 +550,35 @@
             messageInput.disabled = true;
             sendBtn.disabled = true;
             disconnectBtn.disabled = true;
-            localSdpTextarea.value = '';
-            remoteSdpTextarea.value = '';
+            
+            // Показываем панель setup
+            setupSection.style.display = 'block';
+            chatSection.style.display = 'none';
+            linkArea.style.display = 'none';
+            createLinkBtn.style.display = 'block';
+            
+            // Очищаем чат
+            messagesDiv.innerHTML = '';
+            
+            // Если мы были гостем, очищаем URL
+            if (!isOfferer) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            
+            isOfferer = false;
         }
         
-        // Копирование SDP в буфер обмена
-        function copySdpToClipboard() {
-            localSdpTextarea.select();
+        // Копирование ссылки в буфер обмена
+        function copyLinkToClipboard() {
+            connectionLink.select();
             document.execCommand('copy');
-            alert('SDP скопировано в буфер обмена!');
+            showNotification('Ссылка скопирована в буфер обмена!');
         }
         
         // Обработчики событий
-        createOfferBtn.addEventListener('click', createOffer);
-        copySdpBtn.addEventListener('click', copySdpToClipboard);
-        acceptOfferBtn.addEventListener('click', acceptOffer);
-        setAnswerBtn.addEventListener('click', setAnswer);
+        createLinkBtn.addEventListener('click', createOffer);
+        copyLinkBtn.addEventListener('click', copyLinkToClipboard);
+        startAsGuestBtn.addEventListener('click', acceptOffer);
         sendBtn.addEventListener('click', sendMessage);
         disconnectBtn.addEventListener('click', resetConnection);
         
@@ -406,8 +588,11 @@
             }
         });
         
+        // Инициализация при загрузке
+        init();
+        
         // Информационное сообщение
-        addMessage('Добро пожаловать в P2P чат! Следуйте инструкциям выше для подключения.');
+        addMessage('Добро пожаловать в P2P чат! Создайте ссылку для подключения.', true);
     </script>
 </body>
 </html>

@@ -4,22 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Безопасный P2P Чат</title>
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <style>
-        :root {
-            --primary-color: #4a6fa5;
-            --secondary-color: #6e9cd2;
-            --background-color: #f5f7fa;
-            --message-self: #e3f2fd;
-            --message-other: #ffffff;
-            --error-color: #f44336;
-            --success-color: #4caf50;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--background-color);
-            max-width: 800px;
-            margin: 0 auto;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             padding: 20px;
             color: #333;
         }
@@ -27,56 +26,127 @@
         .container {
             background: white;
             border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
         }
         
-        h1, h2 {
-            color: var(--primary-color);
+        .header {
+            background: #4a6fa5;
+            color: white;
+            padding: 20px;
             text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        .auth-section, .chat-section {
+            transition: all 0.3s ease;
+        }
+        
+        .chat-section {
+            display: none;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
         }
         
         input[type="password"], input[type="text"] {
             width: 100%;
-            padding: 12px;
-            margin: 8px 0;
+            padding: 12px 15px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            box-sizing: border-box;
             font-size: 16px;
+            transition: border-color 0.3s;
         }
         
-        button {
-            background-color: var(--primary-color);
+        input[type="password"]:focus, input[type="text"]:focus {
+            border-color: #4a6fa5;
+            outline: none;
+        }
+        
+        .btn {
+            background: #4a6fa5;
             color: white;
-            padding: 12px 20px;
-            margin: 8px 0;
             border: none;
+            padding: 12px 20px;
             border-radius: 4px;
             cursor: pointer;
-            width: 100%;
             font-size: 16px;
-            transition: background-color 0.3s;
+            width: 100%;
+            transition: background 0.3s;
         }
         
-        button:hover {
-            background-color: var(--secondary-color);
+        .btn:hover {
+            background: #3a5a80;
         }
         
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
+        .btn-secondary {
+            background: #6c757d;
         }
         
-        #messages {
-            height: 400px;
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+        
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status.connecting {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .messages-container {
+            height: 300px;
             border: 1px solid #ddd;
             border-radius: 4px;
             padding: 15px;
             overflow-y: auto;
             margin: 15px 0;
-            background-color: #fafafa;
+            background: #fafafa;
         }
         
         .message {
@@ -88,13 +158,13 @@
         }
         
         .my-message {
-            background-color: var(--message-self);
+            background: #e3f2fd;
             margin-left: auto;
             border-bottom-right-radius: 4px;
         }
         
         .their-message {
-            background-color: var(--message-other);
+            background: #ffffff;
             margin-right: auto;
             border-bottom-left-radius: 4px;
             box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
@@ -106,27 +176,36 @@
             margin-top: 5px;
         }
         
-        .status {
-            padding: 8px;
-            border-radius: 4px;
+        .info-text {
+            font-size: 14px;
+            color: #666;
+            margin: 15px 0;
             text-align: center;
-            margin: 10px 0;
         }
         
-        .status.connected {
-            background-color: #e8f5e9;
-            color: var(--success-color);
+        .input-row {
+            display: flex;
+            gap: 10px;
         }
         
-        .status.disconnected {
-            background-color: #ffebee;
-            color: var(--error-color);
+        .input-row input {
+            flex: 1;
         }
         
-        .status.connecting {
-            background-color: #fff8e1;
-            color: #ff8f00;
+        .input-row button {
+            width: auto;
         }
+        
+        .password-strength {
+            height: 5px;
+            margin-top: 5px;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+        
+        .weak { background: #dc3545; width: 33%; }
+        .medium { background: #ffc107; width: 66%; }
+        .strong { background: #28a745; width: 100%; }
         
         .notification {
             position: fixed;
@@ -141,64 +220,49 @@
         }
         
         .notification.error {
-            background-color: var(--error-color);
+            background: #dc3545;
         }
         
         .notification.success {
-            background-color: var(--success-color);
-        }
-        
-        .password-strength {
-            height: 5px;
-            margin-top: 5px;
-            border-radius: 2px;
-            transition: all 0.3s;
-        }
-        
-        .weak { background-color: #f44336; width: 33%; }
-        .medium { background-color: #ff9800; width: 66%; }
-        .strong { background-color: #4caf50; width: 100%; }
-        
-        .info-text {
-            font-size: 14px;
-            color: #666;
-            margin: 5px 0;
-        }
-        
-        .copy-btn {
-            width: auto;
-            padding: 6px 12px;
-            margin: 0;
-            font-size: 14px;
+            background: #28a745;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔒 Безопасный P2P Чат</h1>
-        
-        <div id="auth">
-            <h2>Введите секретный код чата</h2>
-            <div class="info-text">Используйте сложный код длиной не менее 8 символов</div>
-            <input type="password" id="room-password" placeholder="Секретный код">
-            <div id="password-strength" class="password-strength"></div>
-            <button id="join-btn">Войти в чат</button>
-            <button id="generate-btn">Сгенерировать безопасный код</button>
-            <p class="info-text">⚠️ Оба пользователя должны ввести одинаковый код для подключения</p>
-            <p class="info-text">🔗 Вы можете поделиться ссылкой: 
-                <button id="copy-link-btn" class="copy-btn">Скопировать ссылку чата</button>
-            </p>
+        <div class="header">
+            <h1><span style="font-size: 1.5em;">🔒</span> Безопасный P2P Чат</h1>
         </div>
-
-        <div id="chat" style="display: none;">
-            <h2>Приватный чат</h2>
-            <div id="status" class="status disconnected">Не подключен</div>
-            <div id="messages"></div>
-            <div style="display: flex;">
-                <input type="text" id="message-input" placeholder="Ваше сообщение..." disabled style="flex: 1;">
-                <button id="send-btn" disabled style="width: auto; margin-left: 10px;">Отправить</button>
+        
+        <div class="content">
+            <div class="auth-section" id="auth">
+                <h2>Введите секретный код чата</h2>
+                <div class="input-group">
+                    <label for="room-password">Секретный код:</label>
+                    <input type="password" id="room-password" placeholder="Минимум 8 символов">
+                    <div id="password-strength" class="password-strength"></div>
+                </div>
+                
+                <button class="btn" id="join-btn">Войти в чат</button>
+                <button class="btn btn-secondary" id="generate-btn">Сгенерировать код</button>
+                
+                <p class="info-text">⚠️ Оба пользователя должны ввести одинаковый код для подключения</p>
+                <p class="info-text">🔗 <a href="#" id="share-link">Скопировать ссылку для приглашения</a></p>
             </div>
-            <button id="disconnect-btn" style="background-color: #f44336;">Отключиться</button>
+
+            <div class="chat-section" id="chat">
+                <h2>Приватный чат</h2>
+                <div id="status" class="status disconnected">Не подключен</div>
+                
+                <div class="messages-container" id="messages"></div>
+                
+                <div class="input-row">
+                    <input type="text" id="message-input" placeholder="Введите сообщение..." disabled>
+                    <button class="btn" id="send-btn" disabled>Отправить</button>
+                </div>
+                
+                <button class="btn btn-danger" id="disconnect-btn">Отключиться</button>
+            </div>
         </div>
     </div>
 
@@ -213,15 +277,14 @@
         let reconnectAttempts = 0;
         const maxReconnectAttempts = 5;
 
-        // Генерация более безопасного ID на основе пароля
+        // Генерация ID на основе пароля
         function generatePeerId(password) {
-            // Используем более надежный алгоритм
-            const encoder = new TextEncoder();
-            const data = encoder.encode(password);
-            return crypto.subtle.digest('SHA-256', data).then(hash => {
-                const hashArray = Array.from(new Uint8Array(hash));
-                return 'secure-chat-' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 16);
-            });
+            let hash = 0;
+            for (let i = 0; i < password.length; i++) {
+                hash = ((hash << 5) - hash) + password.charCodeAt(i);
+                hash = hash & hash;
+            }
+            return 'chat-' + Math.abs(hash).toString(36);
         }
 
         // Проверка сложности пароля
@@ -252,9 +315,9 @@
 
         // Генерация безопасного пароля
         function generatePassword() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             let password = '';
-            for (let i = 0; i < 16; i++) {
+            for (let i = 0; i < 12; i++) {
                 password += chars.charAt(Math.floor(Math.random() * chars.length));
             }
             document.getElementById('room-password').value = password;
@@ -269,8 +332,14 @@
                 const url = new URL(window.location);
                 url.searchParams.set('secret', password);
                 
-                // Сохраняем URL для копирования
-                document.getElementById('copy-link-btn').setAttribute('data-url', url.toString());
+                const shareLink = document.getElementById('share-link');
+                shareLink.href = url.toString();
+                shareLink.onclick = function(e) {
+                    e.preventDefault();
+                    navigator.clipboard.writeText(url.toString()).then(() => {
+                        showNotification('Ссылка скопирована в буфер обмена', 'success');
+                    });
+                };
             }
         }
 
@@ -287,7 +356,7 @@
         }
 
         // Подключение к чату
-        async function joinChat() {
+        function joinChat() {
             roomPassword = document.getElementById('room-password').value.trim();
             if (!roomPassword) {
                 showNotification('Введите секретный код!', 'error');
@@ -299,53 +368,46 @@
                 return;
             }
 
-            try {
-                peerId = await generatePeerId(roomPassword);
-                peer._id = peerId;
+            peerId = generatePeerId(roomPassword);
+            peer._id = peerId;
+            
+            document.getElementById('auth').style.display = 'none';
+            document.getElementById('chat').style.display = 'block';
+            updateStatus('connecting', 'Подключение...');
+            
+            // Обработчик входящих подключений
+            peer.on('connection', function(connection) {
+                if (conn && conn.open) {
+                    connection.close();
+                    return;
+                }
                 
-                document.getElementById('auth').style.display = 'none';
-                document.getElementById('chat').style.display = 'block';
-                updateStatus('connecting', 'Подключение...');
-                
-                console.log('Мой ID:', peerId);
-                
-                // Обработчик входящих подключений
-                peer.on('connection', function(connection) {
-                    if (conn && conn.open) {
-                        connection.close();
-                        return;
-                    }
-                    
-                    conn = connection;
-                    setupConnection();
-                    updateStatus('connected', 'Подключен');
-                    reconnectAttempts = 0;
-                });
+                conn = connection;
+                setupConnection();
+                updateStatus('connected', 'Подключен');
+                reconnectAttempts = 0;
+            });
 
-                peer.on('error', function(err) {
-                    console.error('Ошибка PeerJS:', err);
-                    if (err.type === 'peer-unavailable') {
-                        updateStatus('disconnected', 'Ожидание собеседника...');
-                    } else {
-                        updateStatus('disconnected', 'Ошибка подключения');
-                        showNotification('Ошибка подключения: ' + err, 'error');
-                    }
-                    
-                    // Попытка переподключения
-                    if (reconnectAttempts < maxReconnectAttempts) {
-                        setTimeout(() => {
-                            reconnectAttempts++;
-                            tryConnect();
-                        }, 2000 * reconnectAttempts);
-                    }
-                });
+            peer.on('error', function(err) {
+                console.error('Ошибка PeerJS:', err);
+                if (err.type === 'peer-unavailable') {
+                    updateStatus('disconnected', 'Ожидание собеседника...');
+                } else {
+                    updateStatus('disconnected', 'Ошибка подключения');
+                    showNotification('Ошибка подключения: ' + err, 'error');
+                }
+                
+                // Попытка переподключения
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    setTimeout(() => {
+                        reconnectAttempts++;
+                        tryConnect();
+                    }, 2000 * reconnectAttempts);
+                }
+            });
 
-                // Попытка подключения к собеседнику
-                tryConnect();
-            } catch (error) {
-                console.error('Ошибка при генерации ID:', error);
-                showNotification('Ошибка при создании чата', 'error');
-            }
+            // Попытка подключения к собеседнику
+            tryConnect();
         }
 
         function tryConnect() {
@@ -478,14 +540,6 @@
             document.getElementById('disconnect-btn').addEventListener('click', disconnect);
             document.getElementById('room-password').addEventListener('input', checkPasswordStrength);
             document.getElementById('room-password').addEventListener('input', updateShareLink);
-            document.getElementById('copy-link-btn').addEventListener('click', function() {
-                const url = this.getAttribute('data-url');
-                if (url) {
-                    navigator.clipboard.writeText(url).then(() => {
-                        showNotification('Ссылка скопирована в буфер обмена', 'success');
-                    });
-                }
-            });
             
             // Отправка сообщения по Enter
             document.getElementById('message-input').addEventListener('keypress', function(e) {

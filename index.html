@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebRTC P2P Чат (Генерация ссылки)</title>
+    <title>WebRTC P2P Чат (Исправленный)</title>
     <style>
         * {
             box-sizing: border-box;
@@ -211,6 +211,11 @@
         .notification.show {
             transform: translateX(0);
         }
+        .ice-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
         @media (max-width: 600px) {
             .input-group {
                 flex-direction: column;
@@ -221,12 +226,13 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>WebRTC P2P Чат</h1>
-            <p>Простой чат с генерацией ссылки для подключения</p>
+            <h1>WebRTC P2P Чат (Исправленный)</h1>
+            <p>Теперь с полной поддержкой ICE-кандидатов</p>
         </div>
         
         <div class="content">
             <div id="status" class="status disconnected">Не подключен</div>
+            <div id="iceStatus" class="ice-info">ICE: Не активно</div>
             
             <div class="section" id="setupSection">
                 <div class="section-title">Подключение</div>
@@ -234,29 +240,35 @@
                 <div class="instructions">
                     <div class="step">
                         <div class="step-number">1</div>
-                        <div>Нажмите "Создать ссылку подключения"</div>
+                        <div>Нажмите "Создать подключение" чтобы начать</div>
                     </div>
                     <div class="step">
                         <div class="step-number">2</div>
-                        <div>Скопируйте ссылку и отправьте другому пользователю</div>
+                        <div>Скопируйте код подключения и отправьте другому пользователю</div>
                     </div>
                     <div class="step">
                         <div class="step-number">3</div>
-                        <div>Когда пользователь перейдет по ссылке, соединение установится автоматически</div>
+                        <div>Вставьте полученный код и нажмите "Подключиться"</div>
                     </div>
                 </div>
                 
                 <div class="input-group">
-                    <button id="createLinkBtn">Создать ссылку подключения</button>
+                    <button id="createConnectionBtn">Создать подключение</button>
                 </div>
                 
-                <div class="link-area" id="linkArea" style="display: none;">
-                    <div class="link-box">
-                        <input type="text" id="connectionLink" readonly>
-                        <button id="copyLinkBtn" class="secondary">Копировать</button>
+                <div class="link-area" id="connectionArea" style="display: none;">
+                    <div class="input-group">
+                        <textarea id="localConnectionData" readonly placeholder="Данные подключения появятся здесь..." rows="5"></textarea>
                     </div>
                     <div class="input-group">
-                        <button id="startAsGuestBtn" class="success">Я гость (перешел по ссылке)</button>
+                        <button id="copyDataBtn" class="secondary">Копировать данные</button>
+                    </div>
+                    
+                    <div class="input-group">
+                        <textarea id="remoteConnectionData" placeholder="Вставьте сюда данные от другого пользователя..." rows="5"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <button id="connectBtn" class="success">Подключиться</button>
                     </div>
                 </div>
             </div>
@@ -278,21 +290,23 @@
         </div>
     </div>
 
-    <div class="notification" id="notification">Ссылка скопирована в буфер обмена!</div>
+    <div class="notification" id="notification">Данные скопированы в буфер обмена!</div>
 
     <script>
         // Элементы интерфейса
         const statusDiv = document.getElementById('status');
+        const iceStatusDiv = document.getElementById('iceStatus');
         const messagesDiv = document.getElementById('messages');
         const messageInput = document.getElementById('messageInput');
-        const createLinkBtn = document.getElementById('createLinkBtn');
-        const connectionLink = document.getElementById('connectionLink');
-        const copyLinkBtn = document.getElementById('copyLinkBtn');
-        const startAsGuestBtn = document.getElementById('startAsGuestBtn');
+        const createConnectionBtn = document.getElementById('createConnectionBtn');
+        const localConnectionData = document.getElementById('localConnectionData');
+        const remoteConnectionData = document.getElementById('remoteConnectionData');
+        const copyDataBtn = document.getElementById('copyDataBtn');
+        const connectBtn = document.getElementById('connectBtn');
         const sendBtn = document.getElementById('sendBtn');
         const disconnectBtn = document.getElementById('disconnectBtn');
         const setupSection = document.getElementById('setupSection');
-        const linkArea = document.getElementById('linkArea');
+        const connectionArea = document.getElementById('connectionArea');
         const chatSection = document.getElementById('chatSection');
         const notification = document.getElementById('notification');
         
@@ -300,43 +314,28 @@
         let peerConnection = null;
         let dataChannel = null;
         let isOfferer = false;
+        let localIceCandidates = [];
+        let hasRemoteDescription = false;
         
         // Конфигурация STUN серверов
         const configuration = {
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' }
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' }
             ]
         };
-        
-        // Инициализация при загрузке
-        function init() {
-            // Проверяем, есть ли параметры подключения в URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const offer = urlParams.get('offer');
-            
-            if (offer) {
-                // Если есть предложение в URL, значит мы гость
-                try {
-                    const offerData = JSON.parse(decodeURIComponent(offer));
-                    connectionLink.value = window.location.href;
-                    linkArea.style.display = 'flex';
-                    setupSection.style.display = 'block';
-                    
-                    // Скрываем кнопку создания ссылки
-                    createLinkBtn.style.display = 'none';
-                } catch (e) {
-                    console.error('Ошибка парсинга предложения из URL:', e);
-                    setStatus('disconnected', 'Неверная ссылка подключения');
-                }
-            }
-        }
         
         // Установка статуса
         function setStatus(status, text) {
             statusDiv.className = 'status ' + status;
             statusDiv.textContent = text;
             console.log('Status:', status, text);
+        }
+        
+        // Установка ICE статуса
+        function setIceStatus(text) {
+            iceStatusDiv.textContent = 'ICE: ' + text;
         }
         
         // Показать уведомление
@@ -373,7 +372,21 @@
                 peerConnection.onicecandidate = (event) => {
                     if (event.candidate) {
                         console.log('Новый ICE кандидат:', event.candidate);
+                        localIceCandidates.push(event.candidate);
+                        setIceStatus(`Получено кандидатов: ${localIceCandidates.length}`);
+                        
+                        // Обновляем данные подключения
+                        updateConnectionData();
+                    } else {
+                        console.log('Все ICE кандидаты собраны');
+                        setIceStatus(`Все кандидаты собраны: ${localIceCandidates.length}`);
+                        updateConnectionData();
                     }
+                };
+                
+                peerConnection.onicegatheringstatechange = () => {
+                    console.log('ICE состояние:', peerConnection.iceGatheringState);
+                    setIceStatus(peerConnection.iceGatheringState);
                 };
                 
                 peerConnection.onconnectionstatechange = () => {
@@ -391,7 +404,13 @@
                                peerConnection.connectionState === 'failed') {
                         setStatus('disconnected', 'Отключен');
                         resetConnection();
+                    } else {
+                        setStatus('connecting', peerConnection.connectionState);
                     }
+                };
+                
+                peerConnection.onsignalingstatechange = () => {
+                    console.log('Signaling состояние:', peerConnection.signalingState);
                 };
                 
                 return true;
@@ -400,6 +419,19 @@
                 setStatus('disconnected', 'Ошибка: ' + error.message);
                 return false;
             }
+        }
+        
+        // Обновление данных подключения
+        function updateConnectionData() {
+            if (!peerConnection) return;
+            
+            const connectionData = {
+                type: isOfferer ? 'offer' : 'answer',
+                sdp: peerConnection.localDescription ? peerConnection.localDescription.sdp : null,
+                iceCandidates: localIceCandidates
+            };
+            
+            localConnectionData.value = JSON.stringify(connectionData, null, 2);
         }
         
         // Настройка канала данных
@@ -435,6 +467,7 @@
             
             try {
                 setStatus('connecting', 'Создание предложения...');
+                setIceStatus('Сбор кандидатов...');
                 isOfferer = true;
                 
                 // Создаем канал данных
@@ -445,18 +478,10 @@
                 const offer = await peerConnection.createOffer();
                 await peerConnection.setLocalDescription(offer);
                 
-                // Ждем установления local description
-                await waitForIceGathering(peerConnection);
-                
-                // Генерируем ссылку с предложением
-                const offerString = encodeURIComponent(JSON.stringify(peerConnection.localDescription));
-                const link = `${window.location.origin}${window.location.pathname}?offer=${offerString}`;
-                
-                // Показываем ссылку
-                connectionLink.value = link;
-                linkArea.style.display = 'flex';
-                
-                setStatus('connecting', 'Ссылка создана. Отправьте её другому пользователю.');
+                // Ждем некоторое время для сбора ICE кандидатов
+                setTimeout(() => {
+                    setStatus('connecting', 'Предложение создано. Скопируйте данные и отправьте другому пользователю.');
+                }, 2000);
                 
             } catch (error) {
                 console.error('Ошибка создания предложения:', error);
@@ -464,66 +489,57 @@
             }
         }
         
-        // Принятие предложения (answer)
-        async function acceptOffer() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const offer = urlParams.get('offer');
-            
-            if (!offer) {
-                setStatus('disconnected', 'Не найдено предложение для подключения');
+        // Обработка полученных данных подключения
+        async function processConnectionData() {
+            const remoteDataText = remoteConnectionData.value.trim();
+            if (!remoteDataText) {
+                alert('Введите данные подключения');
                 return;
             }
             
-            if (!createPeerConnection()) return;
-            
             try {
-                const remoteOffer = JSON.parse(decodeURIComponent(offer));
-                if (!remoteOffer || remoteOffer.type !== 'offer') {
-                    throw new Error('Неверное предложение подключения');
+                const remoteData = JSON.parse(remoteDataText);
+                
+                if (!peerConnection) {
+                    if (!createPeerConnection()) return;
                 }
                 
-                setStatus('connecting', 'Подключение...');
+                // Устанавливаем удаленное описание
+                if (remoteData.sdp) {
+                    await peerConnection.setRemoteDescription(remoteData);
+                    hasRemoteDescription = true;
+                    setStatus('connecting', 'Установлено удаленное описание');
+                }
                 
-                // Устанавливаем удаленное предложение
-                await peerConnection.setRemoteDescription(remoteOffer);
+                // Добавляем ICE кандидаты
+                if (remoteData.iceCandidates && remoteData.iceCandidates.length > 0) {
+                    for (const candidate of remoteData.iceCandidates) {
+                        try {
+                            await peerConnection.addIceCandidate(candidate);
+                            console.log('Добавлен ICE кандидат:', candidate);
+                        } catch (e) {
+                            console.warn('Ошибка добавления ICE кандидата:', e);
+                        }
+                    }
+                    setStatus('connecting', `Добавлено ${remoteData.iceCandidates.length} ICE кандидатов`);
+                }
                 
-                // Создаем ответ
-                const answer = await peerConnection.createAnswer();
-                await peerConnection.setLocalDescription(answer);
-                
-                // Ждем установления local description
-                await waitForIceGathering(peerConnection);
-                
-                // Отправляем ответ обратно инициатору через канал данных
-                // В реальном приложении здесь должен быть обмен через сервер
-                // Но в данном случае мы просто устанавливаем соединение
-                
-                setStatus('connecting', 'Подключение устанавливается...');
+                // Если мы не инициатор и получили предложение, создаем ответ
+                if (!isOfferer && remoteData.type === 'offer') {
+                    setStatus('connecting', 'Создание ответа...');
+                    const answer = await peerConnection.createAnswer();
+                    await peerConnection.setLocalDescription(answer);
+                    
+                    setTimeout(() => {
+                        setStatus('connecting', 'Ответ создан. Скопируйте данные и отправьте обратно.');
+                    }, 2000);
+                }
                 
             } catch (error) {
-                console.error('Ошибка принятия предложения:', error);
+                console.error('Ошибка обработки данных:', error);
                 setStatus('disconnected', 'Ошибка: ' + error.message);
+                alert('Ошибка обработки данных: ' + error.message);
             }
-        }
-        
-        // Ожидание сбора ICE кандидатов
-        function waitForIceGathering(pc) {
-            return new Promise((resolve) => {
-                if (pc.iceGatheringState === 'complete') {
-                    resolve();
-                } else {
-                    const checkState = () => {
-                        if (pc.iceGatheringState === 'complete') {
-                            pc.removeEventListener('icegatheringstatechange', checkState);
-                            resolve();
-                        }
-                    };
-                    pc.addEventListener('icegatheringstatechange', checkState);
-                    
-                    // Таймаут на случай, если событие не произойдет
-                    setTimeout(resolve, 1000);
-                }
-            });
         }
         
         // Отправка сообщения
@@ -550,35 +566,38 @@
             messageInput.disabled = true;
             sendBtn.disabled = true;
             disconnectBtn.disabled = true;
+            localIceCandidates = [];
+            hasRemoteDescription = false;
             
             // Показываем панель setup
             setupSection.style.display = 'block';
             chatSection.style.display = 'none';
-            linkArea.style.display = 'none';
-            createLinkBtn.style.display = 'block';
+            connectionArea.style.display = 'none';
+            createConnectionBtn.style.display = 'block';
             
             // Очищаем чат
             messagesDiv.innerHTML = '';
             
-            // Если мы были гостем, очищаем URL
-            if (!isOfferer) {
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-            
             isOfferer = false;
+            setIceStatus('Не активно');
         }
         
-        // Копирование ссылки в буфер обмена
-        function copyLinkToClipboard() {
-            connectionLink.select();
+        // Копирование данных в буфер обмена
+        function copyDataToClipboard() {
+            localConnectionData.select();
             document.execCommand('copy');
-            showNotification('Ссылка скопирована в буфер обмена!');
+            showNotification('Данные скопированы в буфер обмена!');
         }
         
         // Обработчики событий
-        createLinkBtn.addEventListener('click', createOffer);
-        copyLinkBtn.addEventListener('click', copyLinkToClipboard);
-        startAsGuestBtn.addEventListener('click', acceptOffer);
+        createConnectionBtn.addEventListener('click', () => {
+            createOffer();
+            connectionArea.style.display = 'flex';
+            createConnectionBtn.style.display = 'none';
+        });
+        
+        copyDataBtn.addEventListener('click', copyDataToClipboard);
+        connectBtn.addEventListener('click', processConnectionData);
         sendBtn.addEventListener('click', sendMessage);
         disconnectBtn.addEventListener('click', resetConnection);
         
@@ -588,11 +607,8 @@
             }
         });
         
-        // Инициализация при загрузке
-        init();
-        
         // Информационное сообщение
-        addMessage('Добро пожаловать в P2P чат! Создайте ссылку для подключения.', true);
+        addMessage('Добро пожаловать в P2P чат! Создайте подключение для начала общения.', true);
     </script>
 </body>
 </html>

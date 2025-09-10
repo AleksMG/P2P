@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Byte Homophonic Cipher</title>
+    <title>Unlimited Numerical Homophonic Cipher</title>
     <style>
-        /* Стили остаются без изменений */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             padding: 20px;
             background-color: #1a1a1a;
@@ -84,10 +83,10 @@
         .error { background-color: #ff6b6b; color: #fff; }
         .success { background-color: #4caf50; color: #fff; }
         .key-coefficients {
-            max-height: 400px;
+            max-height: 500px;
             overflow-y: auto;
-            font-size: 12px;
-            line-height: 1.4;
+            font-size: 11px;
+            line-height: 1.3;
             background-color: #2c3e50;
             padding: 15px;
             border-radius: 6px;
@@ -95,11 +94,11 @@
         .coefficient-row {
             display: flex;
             border-bottom: 1px solid #444;
-            padding: 4px 0;
+            padding: 3px 0;
             align-items: center;
         }
         .byte-value {
-            width: 60px;
+            width: 70px;
             font-weight: bold;
             color: #4caf50;
             text-align: center;
@@ -108,14 +107,14 @@
             flex: 1;
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 6px;
         }
         .coeff {
             background-color: #444;
-            padding: 4px 8px;
-            border-radius: 4px;
+            padding: 3px 6px;
+            border-radius: 3px;
             font-family: monospace;
-            font-size: 11px;
+            font-size: 10px;
         }
         .coeff.invertible { background-color: #2d5a2d; }
         .coeff.non-invertible { background-color: #7d2d2d; }
@@ -131,14 +130,14 @@
             border-radius: 6px;
             margin-top: 10px;
             font-family: monospace;
-            font-size: 12px;
-            max-height: 300px;
+            font-size: 11px;
+            max-height: 400px;
             overflow-y: auto;
             white-space: pre-wrap;
         }
         .stats {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 15px;
             margin-top: 20px;
         }
@@ -149,21 +148,27 @@
             text-align: center;
         }
         .stat-value {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #4caf50;
             margin-top: 5px;
         }
-        @media (max-width: 768px) {
+        .number-input {
+            font-family: monospace;
+        }
+        @media (max-width: 1200px) {
+            .stats { grid-template-columns: repeat(2, 1fr); }
             .flex-row { flex-direction: column; }
+        }
+        @media (max-width: 768px) {
             .stats { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Professional Byte Homophonic Cipher</h1>
-        <p>Complete mathematically verified implementation with full diagnostics</p>
+        <h1>Unlimited Numerical Homophonic Cipher</h1>
+        <p>Professional implementation with unlimited coefficients and real numbers</p>
     </div>
 
     <div class="container">
@@ -171,17 +176,33 @@
             <h2>Configuration Parameters</h2>
             <div class="flex-row">
                 <div class="input-group">
-                    <label for="prime">Prime Number (p):</label>
-                    <select id="prime">
-                        <option value="257">257</option>
-                        <option value="509">509</option>
-                        <option value="1021">1021</option>
-                        <option value="65521">65521</option>
-                    </select>
+                    <label for="prime">Prime Modulus (p):</label>
+                    <input type="number" id="prime" value="257" class="number-input">
                 </div>
                 <div class="input-group">
                     <label for="variables">Variables (n):</label>
-                    <input type="number" id="variables" value="4" min="2" max="8">
+                    <input type="number" id="variables" value="4" min="2" max="10" class="number-input">
+                </div>
+                <div class="input-group">
+                    <label for="minCoeff">Min Coefficient:</label>
+                    <input type="number" id="minCoeff" value="-1000" class="number-input">
+                </div>
+                <div class="input-group">
+                    <label for="maxCoeff">Max Coefficient:</label>
+                    <input type="number" id="maxCoeff" value="1000" class="number-input">
+                </div>
+            </div>
+            <div class="flex-row">
+                <div class="input-group">
+                    <label for="decimalPlaces">Decimal Places:</label>
+                    <input type="number" id="decimalPlaces" value="3" min="0" max="10" class="number-input">
+                </div>
+                <div class="input-group">
+                    <label for="useFractions">Use Fractions:</label>
+                    <select id="useFractions">
+                        <option value="false">No</option>
+                        <option value="true">Yes</option>
+                    </select>
                 </div>
             </div>
             <button id="generateKey">Generate New Key</button>
@@ -212,12 +233,12 @@
             <h2>Encryption Process</h2>
             <div class="input-group">
                 <label for="plaintext">Input Text:</label>
-                <textarea id="plaintext">Test message for encryption</textarea>
+                <textarea id="plaintext">Test message for unlimited numerical encryption</textarea>
             </div>
             <button id="encryptBtn">Encrypt</button>
             
             <div class="input-group">
-                <label>Ciphertext (Block Format):</label>
+                <label>Ciphertext (Numerical Blocks):</label>
                 <div class="output" id="ciphertextOutput"></div>
             </div>
         </div>
@@ -250,11 +271,15 @@
             </div>
             <div class="stat-item">
                 <div>Output Size</div>
-                <div class="stat-value" id="outputSize">0 bytes</div>
+                <div class="stat-value" id="outputSize">0 characters</div>
             </div>
             <div class="stat-item">
                 <div>Expansion Ratio</div>
                 <div class="stat-value" id="expansionRatio">1.0x</div>
+            </div>
+            <div class="stat-item">
+                <div>Number Precision</div>
+                <div class="stat-value" id="numberPrecision">3 decimals</div>
             </div>
         </div>
 
@@ -262,7 +287,7 @@
     </div>
 
     <script>
-        class ProfessionalHomophonicCipher {
+        class UnlimitedNumericalCipher {
             constructor() {
                 this.key = null;
                 this.statusElement = document.getElementById('status');
@@ -288,8 +313,30 @@
                 this.verificationElement.textContent = '';
             }
 
-            // Mathematical utility functions
+            formatNumber(num, decimals = 3) {
+                if (Number.isInteger(num)) return num.toString();
+                
+                const factor = Math.pow(10, decimals);
+                const rounded = Math.round(num * factor) / factor;
+                
+                // Avoid scientific notation for large numbers
+                if (Math.abs(rounded) < 1e-6 && rounded !== 0) {
+                    return rounded.toExponential(decimals);
+                }
+                
+                return rounded.toString();
+            }
+
+            parseNumber(str) {
+                if (str.includes('/')) {
+                    const [numerator, denominator] = str.split('/').map(Number);
+                    return numerator / denominator;
+                }
+                return parseFloat(str);
+            }
+
             mod(n, p) {
+                // Proper modular arithmetic for negative numbers
                 return ((n % p) + p) % p;
             }
 
@@ -318,44 +365,58 @@
                 return this.mod(t, p);
             }
 
-            getRandomInt(min, max) {
-                const randomBuffer = new Uint32Array(1);
-                window.crypto.getRandomValues(randomBuffer);
-                return min + (randomBuffer[0] % (max - min + 1));
+            getRandomNumber(min, max, useFractions = false, decimals = 0) {
+                if (useFractions) {
+                    const numerator = Math.floor(Math.random() * (max - min + 1)) + min;
+                    const denominator = Math.floor(Math.random() * 9) + 1; // 1-9
+                    return numerator / denominator;
+                }
+                
+                if (decimals === 0) {
+                    return Math.floor(Math.random() * (max - min + 1)) + min;
+                }
+                
+                const factor = Math.pow(10, decimals);
+                const range = (max - min) * factor;
+                return min + (Math.floor(Math.random() * (range + 1)) / factor);
             }
 
-            generateKey(p, n) {
+            generateKey() {
+                const p = parseInt(document.getElementById('prime').value);
+                const n = parseInt(document.getElementById('variables').value);
+                const minCoeff = parseInt(document.getElementById('minCoeff').value);
+                const maxCoeff = parseInt(document.getElementById('maxCoeff').value);
+                const useFractions = document.getElementById('useFractions').value === 'true';
+                const decimals = parseInt(document.getElementById('decimalPlaces').value);
+
                 if (p <= 255) {
-                    throw new Error('Prime number must be greater than 255');
+                    throw new Error('Prime modulus must be greater than 255');
                 }
 
                 const coefficients = new Array(256);
                 let invertibleCount = 0;
-                const verificationResults = [];
 
-                this.logVerification(`Starting key generation with p=${p}, n=${n}`);
-                this.logVerification(`Generating coefficients for 256 bytes...`);
+                this.logVerification(`Starting key generation with: p=${p}, n=${n}`);
+                this.logVerification(`Coefficient range: [${minCoeff}, ${maxCoeff}], Fractions: ${useFractions}, Decimals: ${decimals}`);
 
                 for (let byteValue = 0; byteValue < 256; byteValue++) {
                     const coeffs = new Array(n);
                     
                     // Generate random coefficients
                     for (let i = 0; i < n; i++) {
-                        coeffs[i] = this.getRandomInt(1, p - 1);
+                        coeffs[i] = this.getRandomNumber(minCoeff, maxCoeff, useFractions, decimals);
                     }
 
                     // Ensure the last coefficient is invertible
                     let attempts = 0;
                     while (this.modInverse(coeffs[n - 1], p) === null && attempts < 1000) {
-                        coeffs[n - 1] = this.getRandomInt(1, p - 1);
+                        coeffs[n - 1] = this.getRandomNumber(minCoeff, maxCoeff, useFractions, decimals);
                         attempts++;
                     }
 
                     const isInvertible = this.modInverse(coeffs[n - 1], p) !== null;
                     if (isInvertible) {
                         invertibleCount++;
-                    } else {
-                        verificationResults.push(`Byte ${byteValue}: No inverse for a₄=${coeffs[n - 1]} mod ${p}`);
                     }
 
                     coefficients[byteValue] = coeffs;
@@ -376,6 +437,8 @@
                 if (!this.key) return;
                 
                 const { coefficients, n, p } = this.key;
+                const decimals = parseInt(document.getElementById('decimalPlaces').value);
+                
                 let html = `
                     <div class="coefficient-row">
                         <div class="byte-value">Byte</div>
@@ -396,7 +459,8 @@
                         const isLast = i === n - 1;
                         const isInvertible = isLast ? this.modInverse(coeffs[i], p) !== null : true;
                         const coeffClass = isLast ? (isInvertible ? 'coeff invertible' : 'coeff non-invertible') : 'coeff';
-                        html += `<span class="${coeffClass}">${coeffs[i]}</span>`;
+                        const formatted = this.formatNumber(coeffs[i], decimals);
+                        html += `<span class="${coeffClass}">${formatted}</span>`;
                     }
                     
                     html += `</div></div>`;
@@ -411,23 +475,24 @@
                 const encoder = new TextEncoder();
                 const inputBytes = Array.from(encoder.encode(text));
                 const { p, n, coefficients } = this.key;
+                const decimals = parseInt(document.getElementById('decimalPlaces').value);
                 const outputBlocks = [];
                 
                 this.clearVerification();
                 this.logVerification(`Starting encryption of ${inputBytes.length} bytes`);
-                this.logVerification(`Using prime p=${p}, n=${n} variables`);
+                this.logVerification(`Using prime modulus p=${p}, n=${n} variables`);
 
                 for (let i = 0; i < inputBytes.length; i++) {
                     const byte = inputBytes[i];
                     const a = coefficients[byte];
                     const x = new Array(n);
 
-                    // Generate random values for first n-1 variables
+                    // Generate random values for variables (can be any numbers)
                     for (let j = 0; j < n - 1; j++) {
-                        x[j] = this.getRandomInt(0, p - 1);
+                        x[j] = this.getRandomNumber(-1000, 1000, false, decimals);
                     }
 
-                    // Calculate the last variable
+                    // Calculate the last variable to satisfy the equation
                     let sum = 0;
                     for (let j = 0; j < n - 1; j++) {
                         sum = this.mod(sum + a[j] * x[j], p);
@@ -437,7 +502,7 @@
                     const inv = this.modInverse(a[n - 1], p);
                     
                     if (inv === null) {
-                        const errorMsg = `No modular inverse for coefficient a₄=${a[n - 1]} mod ${p} for byte ${byte}`;
+                        const errorMsg = `No modular inverse for coefficient a₄=${this.formatNumber(a[n - 1])} mod ${p}`;
                         this.logVerification(`ERROR: ${errorMsg}`);
                         throw new Error(errorMsg);
                     }
@@ -450,14 +515,13 @@
                         verification = this.mod(verification + a[j] * x[j], p);
                     }
 
-                    // Ensure result is in byte range
                     verification = this.mod(verification, 256);
                     
-                    const correct = verification === byte;
-                    this.logVerification(`Byte ${i}: ${byte} → [${x.join(', ')}] → ${verification} ${correct ? '✓' : '✗'}`);
+                    const correct = Math.abs(verification - byte) < 1e-10;
+                    this.logVerification(`Byte ${i}: ${byte} → [${x.map(num => this.formatNumber(num, decimals)).join(', ')}] → ${verification} ${correct ? '✓' : '✗'}`);
                     
                     if (!correct) {
-                        const errorMsg = `Encryption verification failed for byte ${byte}: expected ${byte}, got ${verification}`;
+                        const errorMsg = `Encryption verification failed: expected ${byte}, got ${verification}`;
                         this.logVerification(`ERROR: ${errorMsg}`);
                         throw new Error(errorMsg);
                     }
@@ -465,7 +529,7 @@
                     outputBlocks.push(x);
                 }
 
-                this.logVerification(`Encryption completed successfully: ${outputBlocks.length} blocks generated`);
+                this.logVerification(`Encryption completed: ${outputBlocks.length} blocks generated`);
                 return outputBlocks;
             }
 
@@ -473,19 +537,17 @@
                 if (!this.key) throw new Error('Key not generated');
                 
                 const { p, n, coefficients } = this.key;
+                const decimals = parseInt(document.getElementById('decimalPlaces').value);
                 const outputBytes = [];
                 
                 this.clearVerification();
                 this.logVerification(`Starting decryption of ${blocks.length} blocks`);
-                this.logVerification(`Using prime p=${p}, n=${n} variables`);
 
                 for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
                     const block = blocks[blockIndex];
                     
                     if (block.length !== n) {
-                        const errorMsg = `Block ${blockIndex} size ${block.length} doesn't match n=${n}`;
-                        this.logVerification(`ERROR: ${errorMsg}`);
-                        throw new Error(errorMsg);
+                        throw new Error(`Block size mismatch: expected ${n}, got ${block.length}`);
                     }
 
                     let found = false;
@@ -497,21 +559,19 @@
                             sum = this.mod(sum + a[j] * block[j], p);
                         }
 
-                        // CRITICAL: Ensure result is in byte range
                         sum = this.mod(sum, 256);
                         
-                        if (sum === byteValue) {
-                            outputBytes.push(sum);
+                        if (Math.abs(sum - byteValue) < 1e-10) {
+                            outputBytes.push(byteValue);
                             found = true;
-                            this.logVerification(`Block ${blockIndex}: [${block.join(', ')}] → Byte ${sum} ✓`);
+                            this.logVerification(`Block ${blockIndex}: → Byte ${byteValue} ✓`);
                             break;
                         }
                     }
 
                     if (!found) {
-                        this.logVerification(`WARNING: Block ${blockIndex}: No exact match found, using best approximation`);
+                        this.logVerification(`WARNING: No exact match for block ${blockIndex}, using best fit`);
                         
-                        // Find best approximation
                         let bestByte = 0;
                         let minError = Infinity;
                         
@@ -533,73 +593,54 @@
                         }
                         
                         outputBytes.push(bestByte);
-                        this.logVerification(`Block ${blockIndex}: [${block.join(', ')}] → Byte ${bestByte} ~ (approximation)`);
+                        this.logVerification(`Block ${blockIndex}: → Byte ${bestByte} ~ (error: ${minError.toFixed(6)})`);
                     }
                 }
 
                 this.logVerification(`Decryption completed: ${outputBytes.length} bytes recovered`);
-                
-                // Исправление: правильное преобразование байтов в текст
-                try {
-                    const decoder = new TextDecoder('utf-8', { fatal: true });
-                    return decoder.decode(new Uint8Array(outputBytes));
-                } catch (e) {
-                    this.logVerification(`UTF-8 decoding error: ${e.message}`);
-                    // Альтернативный метод для некорректных UTF-8 данных
-                    return String.fromCharCode.apply(null, outputBytes);
-                }
+                const decoder = new TextDecoder('utf-8');
+                return decoder.decode(new Uint8Array(outputBytes));
             }
 
             blocksToText(blocks) {
-                // Исправление: более надежный формат для сериализации блоков
-                return blocks.map(block => block.join(',')).join(';');
+                const decimals = parseInt(document.getElementById('decimalPlaces').value);
+                return blocks.map(block => 
+                    `[${block.map(num => this.formatNumber(num, decimals)).join(', ')}]`
+                ).join(' ');
             }
 
             textToBlocks(text) {
-                // Исправление: правильный парсинг блоков из текста
-                try {
-                    if (!text.trim()) {
-                        throw new Error('Empty ciphertext');
+                const blocks = [];
+                const blockRegex = /\[([^\[\]]+)\]/g;
+                let match;
+                
+                while ((match = blockRegex.exec(text)) !== null) {
+                    const numbers = match[1].split(',').map(num => this.parseNumber(num.trim()));
+                    if (numbers.some(isNaN)) {
+                        throw new Error('Invalid number in ciphertext');
                     }
-                    
-                    const blocks = [];
-                    const blockStrings = text.split(';');
-                    
-                    for (let i = 0; i < blockStrings.length; i++) {
-                        const numbers = blockStrings[i].split(',').map(num => {
-                            const parsed = parseInt(num.trim(), 10);
-                            if (isNaN(parsed)) {
-                                throw new Error(`Invalid number: ${num}`);
-                            }
-                            return parsed;
-                        });
-                        
-                        if (numbers.length !== parseInt(document.getElementById('variables').value)) {
-                            throw new Error(`Block ${i} has incorrect number of values: ${numbers.length}`);
-                        }
-                        
-                        blocks.push(numbers);
-                    }
-                    
-                    if (blocks.length === 0) {
-                        throw new Error('No valid blocks found in ciphertext');
-                    }
-                    
-                    return blocks;
-                } catch (error) {
-                    this.logVerification(`Error parsing ciphertext: ${error.message}`);
-                    throw new Error(`Invalid ciphertext format: ${error.message}`);
+                    blocks.push(numbers);
                 }
+                
+                if (blocks.length === 0) {
+                    throw new Error('No valid blocks found in ciphertext');
+                }
+                
+                return blocks;
             }
         }
 
         // Initialize cipher
-        const cipher = new ProfessionalHomophonicCipher();
+        const cipher = new UnlimitedNumericalCipher();
 
         // DOM elements
         const elements = {
             prime: document.getElementById('prime'),
             variables: document.getElementById('variables'),
+            minCoeff: document.getElementById('minCoeff'),
+            maxCoeff: document.getElementById('maxCoeff'),
+            decimalPlaces: document.getElementById('decimalPlaces'),
+            useFractions: document.getElementById('useFractions'),
             generateKey: document.getElementById('generateKey'),
             keyInfo: document.getElementById('keyInfo'),
             keyCoefficients: document.getElementById('keyCoefficients'),
@@ -612,20 +653,17 @@
             verificationInfo: document.getElementById('verificationInfo'),
             inputSize: document.getElementById('inputSize'),
             outputSize: document.getElementById('outputSize'),
-            expansionRatio: document.getElementById('expansionRatio')
+            expansionRatio: document.getElementById('expansionRatio'),
+            numberPrecision: document.getElementById('numberPrecision')
         };
 
         // Event handlers
         elements.generateKey.addEventListener('click', () => {
             try {
-                const p = parseInt(elements.prime.value);
-                const n = parseInt(elements.variables.value);
-                
-                const key = cipher.generateKey(p, n);
-                elements.keyInfo.textContent = `Key: p=${p}, n=${n}, all 256 coefficients verified`;
+                const key = cipher.generateKey();
+                elements.keyInfo.textContent = `Key generated: p=${key.p}, n=${key.n}, unlimited coefficients`;
                 cipher.displayKeyCoefficients();
-                
-                cipher.showStatus('Key generated successfully with complete coefficient matrix');
+                cipher.showStatus('Key generated successfully with unlimited numerical coefficients');
             } catch (error) {
                 cipher.showStatus(`Key generation error: ${error.message}`, 'error');
             }
@@ -642,15 +680,15 @@
                 const inputSize = new TextEncoder().encode(text).length;
                 const blocks = cipher.encrypt(text);
                 const outputText = cipher.blocksToText(blocks);
-                const outputSize = outputText.length;
                 
                 elements.ciphertextOutput.textContent = outputText;
                 elements.ciphertext.value = outputText;
                 elements.inputSize.textContent = `${inputSize} bytes`;
-                elements.outputSize.textContent = `${outputSize} characters`;
-                elements.expansionRatio.textContent = `${(outputSize / Math.max(1, inputSize)).toFixed(2)}x`;
+                elements.outputSize.textContent = `${outputText.length} characters`;
+                elements.expansionRatio.textContent = `${(outputText.length / inputSize).toFixed(2)}x`;
+                elements.numberPrecision.textContent = `${elements.decimalPlaces.value} decimals`;
                 
-                cipher.showStatus('Encryption completed with mathematical verification');
+                cipher.showStatus('Encryption completed with unlimited numerical coefficients');
             } catch (error) {
                 cipher.showStatus(`Encryption error: ${error.message}`, 'error');
             }
@@ -674,7 +712,12 @@
             }
         });
 
-        // Initialize with default key
+        // Update precision display
+        elements.decimalPlaces.addEventListener('change', () => {
+            elements.numberPrecision.textContent = `${elements.decimalPlaces.value} decimals`;
+        });
+
+        // Initialize
         setTimeout(() => {
             elements.generateKey.click();
         }, 100);

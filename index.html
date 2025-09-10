@@ -1,78 +1,93 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fixed Integer Coefficient Homophonic Cipher</title>
+    <title>Гомофоническое шифрование текста</title>
     <style>
-        /* Стили остаются без изменений */
-        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 1600px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #1a1a1a;
-            color: #e0e0e0;
-            line-height: 1.6;
+            background-color: #f0f8ff;
+            color: #333;
         }
-        h1, h2, h3 { color: #4caf50; margin-bottom: 15px; }
-        .header {
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        h1, h2 {
+            color: #2c3e50;
             text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
-            border-radius: 10px;
         }
-        .container { display: flex; flex-direction: column; gap: 20px; }
-        .panel {
-            background-color: #2d2d2d;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        }
-        .input-group { margin-bottom: 15px; }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #4caf50;
+        .formula {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-left: 5px solid #3498db;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            border-radius: 8px;
         }
         input, textarea, button, select {
             width: 100%;
             padding: 12px;
-            border: 1px solid #444;
+            margin: 10px 0;
+            border: 2px solid #ddd;
             border-radius: 6px;
+            box-sizing: border-box;
             font-size: 16px;
-            background-color: #333;
-            color: #fff;
         }
         textarea {
-            min-height: 100px;
+            height: 100px;
             resize: vertical;
-            font-family: monospace;
         }
         button {
-            background-color: #4caf50;
+            background: linear-gradient(145deg, #3498db, #2980b9);
             color: white;
             border: none;
             cursor: pointer;
-            transition: background-color 0.3s;
             font-weight: bold;
-            padding: 12px;
-            margin: 5px 0;
-        }
-        button:hover { background-color: #3d8b40; }
-        .output {
-            background-color: #333;
+            font-size: 18px;
             padding: 15px;
-            border-radius: 6px;
-            margin-top: 10px;
-            font-family: monospace;
-            white-space: pre-wrap;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: linear-gradient(145deg, #2980b9, #3498db);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .key-display {
             word-break: break-all;
-            min-height: 50px;
-            overflow-x: auto;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px dashed #3498db;
+        }
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            background: linear-gradient(145deg, #e8f4fc, #d4e6f1);
+            border-radius: 10px;
+            border: 1px solid #aed6f1;
+        }
+        .step {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
         }
         .status {
             padding: 10px;
@@ -81,677 +96,311 @@
             text-align: center;
             font-weight: bold;
         }
-        .error { background-color: #ff6b6b; color: #fff; }
-        .success { background-color: #4caf50; color: #fff; }
-        .key-coefficients {
-            max-height: 500px;
-            overflow-y: auto;
-            font-size: 11px;
-            line-height: 1.3;
-            background-color: #2c3e50;
-            padding: 15px;
-            border-radius: 6px;
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
-        .coefficient-row {
-            display: flex;
-            border-bottom: 1px solid #444;
-            padding: 3px 0;
-            align-items: center;
-        }
-        .byte-value {
-            width: 70px;
-            font-weight: bold;
-            color: #4caf50;
-            text-align: center;
-        }
-        .coefficients {
-            flex: 1;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-        .coeff {
-            background-color: #444;
-            padding: 3px 6px;
-            border-radius: 3px;
-            font-family: monospace;
-            font-size: 10px;
-        }
-        .coeff.invertible { background-color: #2d5a2d; }
-        .coeff.non-invertible { background-color: #7d2d2d; }
-        .flex-row { 
-            display: flex; 
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        .flex-row > div { flex: 1; }
-        .debug-info {
-            background-color: #2c3e50;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 10px;
-            font-family: monospace;
-            font-size: 11px;
-            max-height: 400px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-        }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-top: 20px;
-        }
-        .stat-item {
-            background-color: #333;
-            padding: 15px;
-            border-radius: 6px;
-            text-align: center;
-        }
-        .stat-value {
-            font-size: 16px;
-            font-weight: bold;
-            color: #4caf50;
-            margin-top: 5px;
-        }
-        .number-input {
-            font-family: monospace;
-        }
-        @media (max-width: 1200px) {
-            .stats { grid-template-columns: repeat(2, 1fr); }
-            .flex-row { flex-direction: column; }
-        }
-        @media (max-width: 768px) {
-            .stats { grid-template-columns: 1fr; }
-        }
-        .issues-panel {
-            background-color: #7d2d2d;
-        }
-        .fixes-panel {
-            background-color: #2d5a2d;
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Fixed Integer Coefficient Homophonic Cipher</h1>
-        <p>Professional implementation with guaranteed decryption</p>
-    </div>
-
     <div class="container">
-        <div class="panel issues-panel">
-            <h2>Обнаруженные проблемы в исходном коде</h2>
-            <div class="output">
-                1. Проверялась обратимость только последнего коэффициента, а не всех<br>
-                2. Алгоритм дешифрования использовал грубый перебор вместо точного решения<br>
-                3. Использование дробных чисел вызывало ошибки округления<br>
-                4. Верификация была неполной и могла давать ложные положительные результаты<br>
-                5. При дешифровании использовалось приближение вместо точного вычисления
-            </div>
+        <h1>🔐 Гомофоническое шифрование текста</h1>
+        
+        <div class="formula">
+            <strong>Математическая основа:</strong><br>
+            • Шифрование бита: c = r² × (-1)<sup>m</sup> mod n<br>
+            • Дешифрование: m = 0, если c - квадратичный вычет mod n, иначе m = 1<br>
+            • n = p × q (простые числа), r - случайное число, m - бит (0 или 1)<br>
+            • Текст → Байты → Биты → Шифрование каждого бита → Объединение
         </div>
 
-        <div class="panel fixes-panel">
-            <h2>Внесенные исправления</h2>
-            <div class="output">
-                1. Все коэффициенты проверяются на обратимость по модулю p<br>
-                2. Дешифрование использует точное математическое решение<br>
-                3. Улучшена точность вычислений с дробными числами<br>
-                4. Добавлена полная верификация на всех этапах<br>
-                5. Гарантировано точное восстановление данных при дешифровании
-            </div>
-        </div>
-
-        <div class="panel">
-            <h2>Configuration Parameters</h2>
-            <div class="flex-row">
-                <div class="input-group">
-                    <label for="prime">Prime Modulus (p):</label>
-                    <input type="number" id="prime" value="257" class="number-input">
-                </div>
-                <div class="input-group">
-                    <label for="variables">Variables (n):</label>
-                    <input type="number" id="variables" value="4" min="2" max="10" class="number-input">
-                </div>
-                <div class="input-group">
-                    <label for="minCoeff">Min Coefficient:</label>
-                    <input type="number" id="minCoeff" value="1" class="number-input">
-                </div>
-                <div class="input-group">
-                    <label for="maxCoeff">Max Coefficient:</label>
-                    <input type="number" id="maxCoeff" value="1000" class="number-input">
-                </div>
-            </div>
-            <div class="flex-row">
-                <div class="input-group">
-                    <label for="cipherMin">Ciphertext Min:</label>
-                    <input type="number" id="cipherMin" value="-1000" class="number-input">
-                </div>
-                <div class="input-group">
-                    <label for="cipherMax">Ciphertext Max:</label>
-                    <input type="number" id="cipherMax" value="1000" class="number-input">
-                </div>
-                <div class="input-group">
-                    <label for="useFractions">Ciphertext Fractions:</label>
-                    <select id="useFractions">
-                        <option value="false">No</option>
-                        <option value="true">Yes</option>
-                    </select>
-                </div>
-            </div>
-            <button id="generateKey">Generate New Key</button>
+        <div class="step">
+            <h2>🔑 Шаг 1: Генерация ключей</h2>
+            <p>Сгенерируйте пару простых чисел для создания ключей шифрования и дешифрования.</p>
+            <button onclick="generateKeys()">🎲 Сгенерировать новые ключи</button>
             
-            <div class="input-group">
-                <label>Key Information:</label>
-                <div class="output" id="keyInfo">No key generated</div>
+            <div id="keyDisplay">
+                <p><strong>Публичный ключ (n):</strong> <span id="publicKey" class="key-display">-</span></p>
+                <p><strong>Секретный ключ (p, q):</strong> <span id="privateKey" class="key-display">-</span></p>
             </div>
         </div>
 
-        <div class="panel">
-            <h2>Complete Key Coefficients Matrix (All Invertible)</h2>
-            <div class="key-coefficients" id="keyCoefficients">
-                <div class="coefficient-row">
-                    <div class="byte-value">Byte</div>
-                    <div class="coefficients">
-                        <span class="coeff">a₁</span>
-                        <span class="coeff">a₂</span>
-                        <span class="coeff">a₃</span>
-                        <span class="coeff">a₄</span>
-                    </div>
+        <div class="grid">
+            <div class="step">
+                <h2>📤 Шаг 2: Шифрование текста</h2>
+                <p>Введите текст для шифрования. Каждый символ будет преобразован в байты, а затем каждый бит будет зашифрован.</p>
+                <textarea id="textToEncrypt" placeholder="Введите текст для шифрования..."></textarea>
+                <button onclick="encryptText()">🚀 Зашифровать текст</button>
+                
+                <div id="encryptionResult" class="result" style="display: none;">
+                    <p><strong>Исходный текст:</strong> <span id="originalText"></span></p>
+                    <p><strong>Шифротекст (hex):</strong> <span id="ciphertextHex"></span></p>
+                    <p><strong>Длина шифротекста:</strong> <span id="ciphertextLength"></span> байт</p>
                 </div>
-                Key coefficients will be displayed here after generation
+            </div>
+
+            <div class="step">
+                <h2>📥 Шаг 3: Дешифрование текста</h2>
+                <p>Введите hex-строку шифротекста для дешифрования (только при наличии секретного ключа).</p>
+                <textarea id="cipherToDecrypt" placeholder="Введите hex-строку шифротекста..."></textarea>
+                <button onclick="decryptText()">🔓 Дешифровать текст</button>
+                
+                <div id="decryptionResult" class="result" style="display: none;">
+                    <p><strong>Шифротекст:</strong> <span id="inputCiphertext"></span></p>
+                    <p><strong>Результат дешифрования:</strong> <span id="decryptedText"></span></p>
+                </div>
             </div>
         </div>
 
-        <div class="panel">
-            <h2>Encryption Process</h2>
-            <div class="input-group">
-                <label for="plaintext">Input Text:</label>
-                <textarea id="plaintext">Test message with integer coefficients</textarea>
-            </div>
-            <button id="encryptBtn">Encrypt</button>
+        <div class="step">
+            <h2>🔍 Шаг 4: Детали преобразования</h2>
+            <p>Посмотрите, как текст преобразуется в биты и обратно:</p>
+            <button onclick="showConversionDetails()">📊 Показать детали преобразования</button>
             
-            <div class="input-group">
-                <label>Ciphertext (Any Numbers):</label>
-                <div class="output" id="ciphertextOutput"></div>
+            <div id="conversionDetails" class="result" style="display: none;">
+                <p><strong>Текст → Байты → Биты:</strong></p>
+                <pre id="textToBits"></pre>
+                <p><strong>Биты → Байты → Текст:</strong></p>
+                <pre id="bitsToText"></pre>
             </div>
         </div>
 
-        <div class="panel">
-            <h2>Decryption Process</h2>
-            <div class="input-group">
-                <label for="ciphertext">Ciphertext Input:</label>
-                <textarea id="ciphertext"></textarea>
-            </div>
-            <button id="decryptBtn">Decrypt</button>
-            
-            <div class="input-group">
-                <label>Decrypted Text:</label>
-                <div class="output" id="decryptedOutput"></div>
-            </div>
-        </div>
-
-        <div class="panel">
-            <h2>Mathematical Verification & Diagnostics</h2>
-            <div class="debug-info" id="verificationInfo">
-                Verification logs will appear here...
-            </div>
-        </div>
-
-        <div class="stats">
-            <div class="stat-item">
-                <div>Input Size</div>
-                <div class="stat-value" id="inputSize">0 bytes</div>
-            </div>
-            <div class="stat-item">
-                <div>Output Size</div>
-                <div class="stat-value" id="outputSize">0 characters</div>
-            </div>
-            <div class="stat-item">
-                <div>Expansion Ratio</div>
-                <div class="stat-value" id="expansionRatio">1.0x</div>
-            </div>
-            <div class="stat-item">
-                <div>Ciphertext Type</div>
-                <div class="stat-value" id="ciphertextType">Integer</div>
-            </div>
-        </div>
-
-        <div id="status"></div>
+        <div id="statusMessage" class="status" style="display: none;"></div>
     </div>
 
     <script>
-        class FixedIntegerCoefficientCipher {
-            constructor() {
-                this.key = null;
-                this.statusElement = document.getElementById('status');
-                this.verificationElement = document.getElementById('verificationInfo');
-            }
+        // Глобальные переменные для хранения ключей
+        let p = null;
+        let q = null;
+        let n = null;
 
-            showStatus(message, type = 'success') {
-                this.statusElement.textContent = message;
-                this.statusElement.className = `status ${type}`;
-                setTimeout(() => {
-                    this.statusElement.textContent = '';
-                    this.statusElement.className = '';
-                }, 5000);
+        // Проверка, является ли число простым (упрощенная версия)
+        function isPrime(num) {
+            if (num <= 1) return false;
+            if (num <= 3) return true;
+            if (num % 2 === 0 || num % 3 === 0) return false;
+            
+            let i = 5;
+            while (i * i <= num) {
+                if (num % i === 0 || num % (i + 2) === 0) return false;
+                i += 6;
             }
+            return true;
+        }
 
-            logVerification(message) {
-                const timestamp = new Date().toLocaleTimeString();
-                this.verificationElement.textContent += `[${timestamp}] ${message}\n`;
-                this.verificationElement.scrollTop = this.verificationElement.scrollHeight;
-            }
+        // Генерация случайного простого числа в диапазоне
+        function generatePrime(min, max) {
+            let prime;
+            do {
+                prime = Math.floor(Math.random() * (max - min + 1)) + min;
+            } while (!isPrime(prime));
+            return prime;
+        }
 
-            clearVerification() {
-                this.verificationElement.textContent = '';
-            }
+        // Вычисление символа Лежандра (a/p)
+        function legendreSymbol(a, p) {
+            if (a % p === 0) return 0;
+            // Используем критерий Эйлера
+            const result = modExp(a, (p - 1) / 2, p);
+            return result === 1 ? 1 : -1;
+        }
 
-            formatNumber(num) {
-                if (Number.isInteger(num)) return num.toString();
-                return num.toFixed(6);
-            }
-
-            parseNumber(str) {
-                // Improved parsing to handle fractions and decimals precisely
-                if (str.includes('/')) {
-                    const [numerator, denominator] = str.split('/').map(Number);
-                    return numerator / denominator;
+        // Модульное возведение в степень (a^b mod m)
+        function modExp(a, b, m) {
+            let result = 1n;
+            a = BigInt(a) % BigInt(m);
+            b = BigInt(b);
+            m = BigInt(m);
+            
+            while (b > 0) {
+                if (b % 2n === 1n) {
+                    result = (result * a) % m;
                 }
-                return parseFloat(str);
+                a = (a * a) % m;
+                b = b / 2n;
             }
+            return Number(result);
+        }
 
-            mod(n, p) {
-                // Proper modulo operation that works with fractions
-                const result = ((n % p) + p) % p;
-                // Handle floating point precision issues
-                return Math.abs(result) < 1e-10 ? 0 : result;
+        // Преобразование текста в массив битов
+        function textToBits(text) {
+            const bits = [];
+            for (let i = 0; i < text.length; i++) {
+                const charCode = text.charCodeAt(i);
+                for (let j = 7; j >= 0; j--) {
+                    bits.push((charCode >> j) & 1);
+                }
             }
+            return bits;
+        }
 
-            gcd(a, b) {
-                a = Math.abs(a);
-                b = Math.abs(b);
-                
-                if (!Number.isInteger(a) || !Number.isInteger(b)) {
-                    // For fractions, find a common denominator
-                    const precision = 1000000;
-                    a = Math.round(a * precision);
-                    b = Math.round(b * precision);
+        // Преобразование массива битов в текст
+        function bitsToText(bits) {
+            const bytes = [];
+            for (let i = 0; i < bits.length; i += 8) {
+                let byte = 0;
+                for (let j = 0; j < 8 && i + j < bits.length; j++) {
+                    byte = (byte << 1) | bits[i + j];
                 }
-                
-                while (b !== 0) {
-                    [a, b] = [b, a % b];
-                }
-                return a;
+                bytes.push(byte);
             }
+            return String.fromCharCode(...bytes);
+        }
 
-            modInverse(a, p) {
-                if (this.gcd(a, p) !== 1) return null;
-                
-                // Extended Euclidean algorithm for integers
-                let [t, newT] = [0, 1];
-                let [r, newR] = [p, a];
-                
-                while (newR !== 0) {
-                    const quotient = Math.floor(r / newR);
-                    [t, newT] = [newT, t - quotient * newT];
-                    [r, newR] = [newR, r - quotient * newR];
-                }
-                
-                if (r > 1) return null;
-                return this.mod(t, p);
+        // Шифрование массива битов
+        function encryptBits(bits, n) {
+            const encryptedBits = [];
+            for (const bit of bits) {
+                const r = Math.floor(Math.random() * (n - 2)) + 1;
+                const rSquared = modExp(r, 2, n);
+                const ciphertext = (bit === 1) ? (n - rSquared) % n : rSquared;
+                encryptedBits.push(ciphertext);
             }
+            return encryptedBits;
+        }
 
-            getRandomInt(min, max) {
-                return Math.floor(Math.random() * (max - min + 1)) + min;
+        // Дешифрование массива чисел в биты
+        function decryptToBits(encryptedNumbers, p, q) {
+            const bits = [];
+            for (const num of encryptedNumbers) {
+                const legendreP = legendreSymbol(num, p);
+                const legendreQ = legendreSymbol(num, q);
+                const isQuadraticResidue = (legendreP === 1 && legendreQ === 1);
+                bits.push(isQuadraticResidue ? 0 : 1);
             }
+            return bits;
+        }
 
-            getRandomCipherValue(min, max, useFractions = false) {
-                if (useFractions) {
-                    // Generate fractions with better precision handling
-                    const denominator = this.getRandomInt(1, 100);
-                    const numerator = this.getRandomInt(min * denominator, max * denominator);
-                    return numerator / denominator;
-                }
-                return this.getRandomInt(min, max);
+        // Генерация ключей
+        function generateKeys() {
+            // Генерируем два простых числа
+            p = generatePrime(10000, 50000);
+            q = generatePrime(10000, 50000);
+            n = p * q;
+            
+            // Отображаем ключи
+            document.getElementById('publicKey').textContent = n;
+            document.getElementById('privateKey').textContent = `p = ${p}, q = ${q}`;
+            
+            showStatus("Ключи успешно сгенерированы!", "success");
+        }
+
+        // Шифрование текста
+        function encryptText() {
+            if (!n) {
+                showStatus("Сначала сгенерируйте ключи!", "error");
+                return;
             }
-
-            generateKey() {
-                const p = parseInt(document.getElementById('prime').value);
-                const n = parseInt(document.getElementById('variables').value);
-                const minCoeff = parseInt(document.getElementById('minCoeff').value);
-                const maxCoeff = parseInt(document.getElementById('maxCoeff').value);
-
-                if (p <= 255) {
-                    throw new Error('Prime modulus must be greater than 255');
-                }
-                if (minCoeff < 1) {
-                    throw new Error('Coefficients must be positive integers ≥ 1');
-                }
-
-                const coefficients = new Array(256);
-                let invertibleCount = 0;
-
-                this.logVerification(`Generating integer coefficients: p=${p}, n=${n}, range=[${minCoeff}, ${maxCoeff}]`);
-
-                for (let byteValue = 0; byteValue < 256; byteValue++) {
-                    const coeffs = new Array(n);
-                    let allInvertible = false;
-                    let attempts = 0;
-                    
-                    // Keep generating until all coefficients are invertible
-                    while (!allInvertible && attempts < 10000) {
-                        allInvertible = true;
-                        
-                        // Generate random INTEGER coefficients
-                        for (let i = 0; i < n; i++) {
-                            coeffs[i] = this.getRandomInt(minCoeff, maxCoeff);
-                        }
-                        
-                        // Check if ALL coefficients are invertible modulo p
-                        for (let i = 0; i < n; i++) {
-                            if (this.modInverse(coeffs[i], p) === null) {
-                                allInvertible = false;
-                                break;
-                            }
-                        }
-                        
-                        attempts++;
-                    }
-                    
-                    if (!allInvertible) {
-                        const errorMsg = `Failed to generate all invertible coefficients for byte ${byteValue} after ${attempts} attempts`;
-                        this.logVerification(`ERROR: ${errorMsg}`);
-                        throw new Error(errorMsg);
-                    }
-                    
-                    invertibleCount++;
-                    coefficients[byteValue] = coeffs;
-                }
-
-                if (invertibleCount !== 256) {
-                    const errorMsg = `Only ${invertibleCount}/256 coefficients are invertible modulo ${p}`;
-                    this.logVerification(`ERROR: ${errorMsg}`);
-                    throw new Error(errorMsg);
-                }
-
-                this.key = { p, n, coefficients };
-                this.logVerification(`Key generation successful: All coefficients are integers and invertible`);
-                return this.key;
+            
+            const text = document.getElementById('textToEncrypt').value;
+            if (!text) {
+                showStatus("Введите текст для шифрования!", "error");
+                return;
             }
-
-            displayKeyCoefficients() {
-                if (!this.key) return;
+            
+            try {
+                // Преобразуем текст в биты
+                const bits = textToBits(text);
                 
-                const { coefficients, n, p } = this.key;
+                // Шифруем каждый бит
+                const encryptedNumbers = encryptBits(bits, n);
                 
-                let html = `
-                    <div class="coefficient-row">
-                        <div class="byte-value">Byte</div>
-                        <div class="coefficients">`;
+                // Преобразуем массив чисел в hex-строку
+                const hexString = encryptedNumbers.map(num => 
+                    num.toString(16).padStart(8, '0')).join('');
                 
-                for (let i = 0; i < n; i++) {
-                    html += `<span class="coeff">a${i+1}</span>`;
-                }
-                html += `</div></div>`;
+                // Показываем результат
+                document.getElementById('originalText').textContent = text;
+                document.getElementById('ciphertextHex').textContent = hexString;
+                document.getElementById('ciphertextLength').textContent = encryptedNumbers.length;
+                document.getElementById('encryptionResult').style.display = 'block';
                 
-                for (let byteValue = 0; byteValue < 256; byteValue++) {
-                    const coeffs = coefficients[byteValue];
-                    html += `<div class="coefficient-row">
-                        <div class="byte-value">${byteValue}</div>
-                        <div class="coefficients">`;
-                    
-                    for (let i = 0; i < n; i++) {
-                        const isInvertible = this.modInverse(coeffs[i], p) !== null;
-                        const coeffClass = isInvertible ? 'coeff invertible' : 'coeff non-invertible';
-                        html += `<span class="${coeffClass}">${coeffs[i]}</span>`;
-                    }
-                    
-                    html += `</div></div>`;
-                }
-                
-                document.getElementById('keyCoefficients').innerHTML = html;
-            }
-
-            encrypt(text) {
-                if (!this.key) throw new Error('Key not generated');
-                
-                const encoder = new TextEncoder();
-                const inputBytes = Array.from(encoder.encode(text));
-                const { p, n, coefficients } = this.key;
-                const cipherMin = parseInt(document.getElementById('cipherMin').value);
-                const cipherMax = parseInt(document.getElementById('cipherMax').value);
-                const useFractions = document.getElementById('useFractions').value === 'true';
-                const outputBlocks = [];
-                
-                this.clearVerification();
-                this.logVerification(`Starting encryption with integer coefficients`);
-                this.logVerification(`Ciphertext range: [${cipherMin}, ${cipherMax}], Fractions: ${useFractions}`);
-
-                for (let i = 0; i < inputBytes.length; i++) {
-                    const byte = inputBytes[i];
-                    const a = coefficients[byte];
-                    const x = new Array(n);
-
-                    // Generate random values for first n-1 variables
-                    for (let j = 0; j < n - 1; j++) {
-                        x[j] = this.getRandomCipherValue(cipherMin, cipherMax, useFractions);
-                    }
-
-                    // Calculate the last variable to satisfy the equation exactly
-                    let sum = 0;
-                    for (let j = 0; j < n - 1; j++) {
-                        sum = this.mod(sum + a[j] * x[j], p);
-                    }
-
-                    const remainder = this.mod(byte - sum, p);
-                    const inv = this.modInverse(a[n - 1], p);
-                    
-                    if (inv === null) {
-                        throw new Error(`Coefficient a₄=${a[n - 1]} not invertible mod ${p}`);
-                    }
-
-                    x[n - 1] = this.mod(remainder * inv, p);
-
-                    // Verify the solution with high precision - use modulo p, not 256!
-                    let verification = 0;
-                    for (let j = 0; j < n; j++) {
-                        verification = this.mod(verification + a[j] * x[j], p);
-                    }
-
-                    // The verification should equal the original byte modulo p
-                    const correct = Math.abs(this.mod(verification, p) - byte) < 1e-12;
-                    this.logVerification(`Byte ${i}: ${byte} → [${x.map(this.formatNumber).join(', ')}] → ${verification} ${correct ? '✓' : '✗'}`);
-                    
-                    if (!correct) {
-                        this.logVerification(`ERROR: Verification failed: expected ${byte}, got ${verification}`);
-                        throw new Error(`Verification failed: expected ${byte}, got ${verification}`);
-                    }
-
-                    outputBlocks.push(x);
-                }
-
-                this.logVerification(`Encryption completed successfully`);
-                return outputBlocks;
-            }
-
-            decrypt(blocks) {
-                if (!this.key) throw new Error('Key not generated');
-                
-                const { p, n, coefficients } = this.key;
-                const outputBytes = [];
-                
-                this.clearVerification();
-                this.logVerification(`Starting decryption of ${blocks.length} blocks`);
-
-                for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
-                    const block = blocks[blockIndex];
-                    
-                    if (block.length !== n) {
-                        throw new Error(`Block size mismatch: expected ${n}, got ${block.length}`);
-                    }
-
-                    // Calculate the sum for each possible byte value and find exact match
-                    let bestMatch = null;
-                    let minError = Infinity;
-                    
-                    for (let byteValue = 0; byteValue < 256; byteValue++) {
-                        const a = coefficients[byteValue];
-                        let sum = 0;
-
-                        for (let j = 0; j < n; j++) {
-                            sum = this.mod(sum + a[j] * block[j], p);
-                        }
-
-                        // The sum should equal the byte value modulo p
-                        const error = Math.abs(this.mod(sum, p) - byteValue);
-                        
-                        if (error < 1e-10) {
-                            // Exact match found
-                            bestMatch = byteValue;
-                            minError = 0;
-                            break;
-                        }
-                        
-                        if (error < minError) {
-                            minError = error;
-                            bestMatch = byteValue;
-                        }
-                    }
-                    
-                    if (minError < 1e-10) {
-                        outputBytes.push(bestMatch);
-                        this.logVerification(`Block ${blockIndex}: → Byte ${bestMatch} ✓ (exact match)`);
-                    } else {
-                        // This should not happen with proper encryption
-                        outputBytes.push(bestMatch);
-                        this.logVerification(`Block ${blockIndex}: → Byte ${bestMatch} ~ (error: ${minError.toFixed(12)})`);
-                    }
-                }
-
-                this.logVerification(`Decryption completed: ${outputBytes.length} bytes recovered`);
-                const decoder = new TextDecoder('utf-8');
-                return decoder.decode(new Uint8Array(outputBytes));
-            }
-
-            blocksToText(blocks) {
-                return blocks.map(block => 
-                    `[${block.map(this.formatNumber).join(', ')}]`
-                ).join(' ');
-            }
-
-            textToBlocks(text) {
-                const blocks = [];
-                const blockRegex = /\[([^\[\]]+)\]/g;
-                let match;
-                
-                while ((match = blockRegex.exec(text)) !== null) {
-                    const numbers = match[1].split(',').map(num => this.parseNumber(num.trim()));
-                    if (numbers.some(isNaN)) {
-                        throw new Error('Invalid number in ciphertext');
-                    }
-                    blocks.push(numbers);
-                }
-                
-                if (blocks.length === 0) {
-                    throw new Error('No valid blocks found in ciphertext');
-                }
-                
-                return blocks;
+                showStatus("Текст успешно зашифрован!", "success");
+            } catch (error) {
+                showStatus("Ошибка при шифровании: " + error.message, "error");
             }
         }
 
-        // Initialize cipher
-        const cipher = new FixedIntegerCoefficientCipher();
-
-        // DOM elements
-        const elements = {
-            prime: document.getElementById('prime'),
-            variables: document.getElementById('variables'),
-            minCoeff: document.getElementById('minCoeff'),
-            maxCoeff: document.getElementById('maxCoeff'),
-            cipherMin: document.getElementById('cipherMin'),
-            cipherMax: document.getElementById('cipherMax'),
-            useFractions: document.getElementById('useFractions'),
-            generateKey: document.getElementById('generateKey'),
-            keyInfo: document.getElementById('keyInfo'),
-            keyCoefficients: document.getElementById('keyCoefficients'),
-            plaintext: document.getElementById('plaintext'),
-            encryptBtn: document.getElementById('encryptBtn'),
-            ciphertextOutput: document.getElementById('ciphertextOutput'),
-            ciphertext: document.getElementById('ciphertext'),
-            decryptBtn: document.getElementById('decryptBtn'),
-            decryptedOutput: document.getElementById('decryptedOutput'),
-            verificationInfo: document.getElementById('verificationInfo'),
-            inputSize: document.getElementById('inputSize'),
-            outputSize: document.getElementById('outputSize'),
-            expansionRatio: document.getElementById('expansionRatio'),
-            ciphertextType: document.getElementById('ciphertextType')
-        };
-
-        // Event handlers
-        elements.generateKey.addEventListener('click', () => {
-            try {
-                const key = cipher.generateKey();
-                elements.keyInfo.textContent = `Key: p=${key.p}, n=${key.n}, all coefficients invertible`;
-                cipher.displayKeyCoefficients();
-                cipher.showStatus('Integer coefficient key generated successfully');
-            } catch (error) {
-                cipher.showStatus(`Key generation error: ${error.message}`, 'error');
+        // Дешифрование текста
+        function decryptText() {
+            if (!p || !q) {
+                showStatus("Секретный ключ не сгенерирован!", "error");
+                return;
             }
-        });
-
-        elements.encryptBtn.addEventListener('click', () => {
+            
+            const hexString = document.getElementById('cipherToDecrypt').value;
+            if (!hexString) {
+                showStatus("Введите hex-строку шифротекста!", "error");
+                return;
+            }
+            
             try {
-                const text = elements.plaintext.value;
-                if (!text.trim()) {
-                    cipher.showStatus('Please enter text to encrypt', 'error');
-                    return;
+                // Преобразуем hex-строку обратно в массив чисел
+                const encryptedNumbers = [];
+                for (let i = 0; i < hexString.length; i += 8) {
+                    const hexByte = hexString.substr(i, 8);
+                    encryptedNumbers.push(parseInt(hexByte, 16));
                 }
-
-                const inputSize = new TextEncoder().encode(text).length;
-                const blocks = cipher.encrypt(text);
-                const outputText = cipher.blocksToText(blocks);
                 
-                elements.ciphertextOutput.textContent = outputText;
-                elements.ciphertext.value = outputText;
-                elements.inputSize.textContent = `${inputSize} bytes`;
-                elements.outputSize.textContent = `${outputText.length} characters`;
-                elements.expansionRatio.textContent = `${(outputText.length / inputSize).toFixed(2)}x`;
-                elements.ciphertextType.textContent = elements.useFractions.value === 'true' ? 'Fraction' : 'Integer';
+                // Дешифруем в биты
+                const bits = decryptToBits(encryptedNumbers, p, q);
                 
-                cipher.showStatus('Encryption completed with integer coefficients');
+                // Преобразуем биты обратно в текст
+                const decryptedText = bitsToText(bits);
+                
+                // Показываем результат
+                document.getElementById('inputCiphertext').textContent = hexString;
+                document.getElementById('decryptedText').textContent = decryptedText;
+                document.getElementById('decryptionResult').style.display = 'block';
+                
+                showStatus("Текст успешно дешифрован!", "success");
             } catch (error) {
-                cipher.showStatus(`Encryption error: ${error.message}`, 'error');
+                showStatus("Ошибка при дешифровании: " + error.message, "error");
             }
-        });
+        }
 
-        elements.decryptBtn.addEventListener('click', () => {
-            try {
-                const text = elements.ciphertext.value;
-                if (!text.trim()) {
-                    cipher.showStatus('Please enter ciphertext to decrypt', 'error');
-                    return;
-                }
+        // Показать детали преобразования
+        function showConversionDetails() {
+            const text = document.getElementById('textToEncrypt').value || "Пример";
+            
+            // Текст → Байты → Биты
+            const bits = textToBits(text);
+            let textToBitsStr = `Текст: "${text}"\n`;
+            textToBitsStr += `Байты: [${Array.from(text).map(c => c.charCodeAt(0)).join(', ')}]\n`;
+            textToBitsStr += `Биты: ${bits.join('')} (${bits.length} бит)\n`;
+            
+            // Биты → Байты → Текст
+            const reconstructedText = bitsToText(bits);
+            let bitsToTextStr = `Биты: ${bits.join('')}\n`;
+            bitsToTextStr += `Байты: [${Array.from(reconstructedText).map(c => c.charCodeAt(0)).join(', ')}]\n`;
+            bitsToTextStr += `Текст: "${reconstructedText}"`;
+            
+            document.getElementById('textToBits').textContent = textToBitsStr;
+            document.getElementById('bitsToText').textContent = bitsToTextStr;
+            document.getElementById('conversionDetails').style.display = 'block';
+        }
 
-                const blocks = cipher.textToBlocks(text);
-                const decryptedText = cipher.decrypt(blocks);
-                
-                elements.decryptedOutput.textContent = decryptedText;
-                cipher.showStatus('Decryption completed successfully');
-            } catch (error) {
-                cipher.showStatus(`Decryption error: ${error.message}`, 'error');
-            }
-        });
+        // Показать статусное сообщение
+        function showStatus(message, type) {
+            const statusElement = document.getElementById('statusMessage');
+            statusElement.textContent = message;
+            statusElement.className = `status ${type}`;
+            statusElement.style.display = 'block';
+            
+            // Автоматически скрыть через 5 секунд
+            setTimeout(() => {
+                statusElement.style.display = 'none';
+            }, 5000);
+        }
 
-        // Update ciphertext type display
-        elements.useFractions.addEventListener('change', () => {
-            elements.ciphertextType.textContent = elements.useFractions.value === 'true' ? 'Fraction' : 'Integer';
-        });
-
-        // Initialize
-        setTimeout(() => {
-            elements.generateKey.click();
-        }, 100);
+        // Инициализация - генерируем ключи при загрузке
+        window.onload = generateKeys;
     </script>
 </body>
 </html>

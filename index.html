@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unlimited Numerical Homophonic Cipher</title>
+    <title>Integer Coefficient Homophonic Cipher</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -167,8 +167,8 @@
 </head>
 <body>
     <div class="header">
-        <h1>Unlimited Numerical Homophonic Cipher</h1>
-        <p>Professional implementation with unlimited coefficients and real numbers</p>
+        <h1>Integer Coefficient Homophonic Cipher</h1>
+        <p>Professional implementation with integer coefficients and unlimited ciphertext numbers</p>
     </div>
 
     <div class="container">
@@ -185,7 +185,7 @@
                 </div>
                 <div class="input-group">
                     <label for="minCoeff">Min Coefficient:</label>
-                    <input type="number" id="minCoeff" value="-1000" class="number-input">
+                    <input type="number" id="minCoeff" value="1" class="number-input">
                 </div>
                 <div class="input-group">
                     <label for="maxCoeff">Max Coefficient:</label>
@@ -194,11 +194,15 @@
             </div>
             <div class="flex-row">
                 <div class="input-group">
-                    <label for="decimalPlaces">Decimal Places:</label>
-                    <input type="number" id="decimalPlaces" value="3" min="0" max="10" class="number-input">
+                    <label for="cipherMin">Ciphertext Min:</label>
+                    <input type="number" id="cipherMin" value="-1000" class="number-input">
                 </div>
                 <div class="input-group">
-                    <label for="useFractions">Use Fractions:</label>
+                    <label for="cipherMax">Ciphertext Max:</label>
+                    <input type="number" id="cipherMax" value="1000" class="number-input">
+                </div>
+                <div class="input-group">
+                    <label for="useFractions">Ciphertext Fractions:</label>
                     <select id="useFractions">
                         <option value="false">No</option>
                         <option value="true">Yes</option>
@@ -214,7 +218,7 @@
         </div>
 
         <div class="panel">
-            <h2>Complete Key Coefficients Matrix</h2>
+            <h2>Complete Key Coefficients Matrix (Integer Only)</h2>
             <div class="key-coefficients" id="keyCoefficients">
                 <div class="coefficient-row">
                     <div class="byte-value">Byte</div>
@@ -233,12 +237,12 @@
             <h2>Encryption Process</h2>
             <div class="input-group">
                 <label for="plaintext">Input Text:</label>
-                <textarea id="plaintext">Test message for unlimited numerical encryption</textarea>
+                <textarea id="plaintext">Test message with integer coefficients</textarea>
             </div>
             <button id="encryptBtn">Encrypt</button>
             
             <div class="input-group">
-                <label>Ciphertext (Numerical Blocks):</label>
+                <label>Ciphertext (Any Numbers):</label>
                 <div class="output" id="ciphertextOutput"></div>
             </div>
         </div>
@@ -278,8 +282,8 @@
                 <div class="stat-value" id="expansionRatio">1.0x</div>
             </div>
             <div class="stat-item">
-                <div>Number Precision</div>
-                <div class="stat-value" id="numberPrecision">3 decimals</div>
+                <div>Ciphertext Type</div>
+                <div class="stat-value" id="ciphertextType">Integer</div>
             </div>
         </div>
 
@@ -287,7 +291,7 @@
     </div>
 
     <script>
-        class UnlimitedNumericalCipher {
+        class IntegerCoefficientCipher {
             constructor() {
                 this.key = null;
                 this.statusElement = document.getElementById('status');
@@ -313,30 +317,16 @@
                 this.verificationElement.textContent = '';
             }
 
-            formatNumber(num, decimals = 3) {
+            formatNumber(num) {
                 if (Number.isInteger(num)) return num.toString();
-                
-                const factor = Math.pow(10, decimals);
-                const rounded = Math.round(num * factor) / factor;
-                
-                // Avoid scientific notation for large numbers
-                if (Math.abs(rounded) < 1e-6 && rounded !== 0) {
-                    return rounded.toExponential(decimals);
-                }
-                
-                return rounded.toString();
+                return num.toFixed(3);
             }
 
             parseNumber(str) {
-                if (str.includes('/')) {
-                    const [numerator, denominator] = str.split('/').map(Number);
-                    return numerator / denominator;
-                }
                 return parseFloat(str);
             }
 
             mod(n, p) {
-                // Proper modular arithmetic for negative numbers
                 return ((n % p) + p) % p;
             }
 
@@ -365,20 +355,17 @@
                 return this.mod(t, p);
             }
 
-            getRandomNumber(min, max, useFractions = false, decimals = 0) {
+            getRandomInt(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+
+            getRandomCipherValue(min, max, useFractions = false) {
                 if (useFractions) {
-                    const numerator = Math.floor(Math.random() * (max - min + 1)) + min;
-                    const denominator = Math.floor(Math.random() * 9) + 1; // 1-9
+                    const numerator = this.getRandomInt(min * 10, max * 10);
+                    const denominator = this.getRandomInt(1, 10);
                     return numerator / denominator;
                 }
-                
-                if (decimals === 0) {
-                    return Math.floor(Math.random() * (max - min + 1)) + min;
-                }
-                
-                const factor = Math.pow(10, decimals);
-                const range = (max - min) * factor;
-                return min + (Math.floor(Math.random() * (range + 1)) / factor);
+                return this.getRandomInt(min, max);
             }
 
             generateKey() {
@@ -386,50 +373,52 @@
                 const n = parseInt(document.getElementById('variables').value);
                 const minCoeff = parseInt(document.getElementById('minCoeff').value);
                 const maxCoeff = parseInt(document.getElementById('maxCoeff').value);
-                const useFractions = document.getElementById('useFractions').value === 'true';
-                const decimals = parseInt(document.getElementById('decimalPlaces').value);
 
                 if (p <= 255) {
                     throw new Error('Prime modulus must be greater than 255');
+                }
+                if (minCoeff < 1) {
+                    throw new Error('Coefficients must be positive integers ≥ 1');
                 }
 
                 const coefficients = new Array(256);
                 let invertibleCount = 0;
 
-                this.logVerification(`Starting key generation with: p=${p}, n=${n}`);
-                this.logVerification(`Coefficient range: [${minCoeff}, ${maxCoeff}], Fractions: ${useFractions}, Decimals: ${decimals}`);
+                this.logVerification(`Generating integer coefficients: p=${p}, n=${n}, range=[${minCoeff}, ${maxCoeff}]`);
 
                 for (let byteValue = 0; byteValue < 256; byteValue++) {
                     const coeffs = new Array(n);
                     
-                    // Generate random coefficients
+                    // Generate random INTEGER coefficients
                     for (let i = 0; i < n; i++) {
-                        coeffs[i] = this.getRandomNumber(minCoeff, maxCoeff, useFractions, decimals);
+                        coeffs[i] = this.getRandomInt(minCoeff, maxCoeff);
                     }
 
                     // Ensure the last coefficient is invertible
                     let attempts = 0;
                     while (this.modInverse(coeffs[n - 1], p) === null && attempts < 1000) {
-                        coeffs[n - 1] = this.getRandomNumber(minCoeff, maxCoeff, useFractions, decimals);
+                        coeffs[n - 1] = this.getRandomInt(minCoeff, maxCoeff);
                         attempts++;
                     }
 
                     const isInvertible = this.modInverse(coeffs[n - 1], p) !== null;
                     if (isInvertible) {
                         invertibleCount++;
+                    } else {
+                        this.logVerification(`WARNING: Byte ${byteValue}: a₄=${coeffs[n - 1]} not invertible mod ${p}`);
                     }
 
                     coefficients[byteValue] = coeffs;
                 }
 
                 if (invertibleCount !== 256) {
-                    const errorMsg = `Key generation failed: Only ${invertibleCount}/256 coefficients are invertible`;
+                    const errorMsg = `Only ${invertibleCount}/256 coefficients are invertible modulo ${p}`;
                     this.logVerification(`ERROR: ${errorMsg}`);
                     throw new Error(errorMsg);
                 }
 
                 this.key = { p, n, coefficients };
-                this.logVerification(`Key generation successful: All 256 coefficients are invertible`);
+                this.logVerification(`Key generation successful: All coefficients are integers and invertible`);
                 return this.key;
             }
 
@@ -437,7 +426,6 @@
                 if (!this.key) return;
                 
                 const { coefficients, n, p } = this.key;
-                const decimals = parseInt(document.getElementById('decimalPlaces').value);
                 
                 let html = `
                     <div class="coefficient-row">
@@ -459,8 +447,7 @@
                         const isLast = i === n - 1;
                         const isInvertible = isLast ? this.modInverse(coeffs[i], p) !== null : true;
                         const coeffClass = isLast ? (isInvertible ? 'coeff invertible' : 'coeff non-invertible') : 'coeff';
-                        const formatted = this.formatNumber(coeffs[i], decimals);
-                        html += `<span class="${coeffClass}">${formatted}</span>`;
+                        html += `<span class="${coeffClass}">${coeffs[i]}</span>`;
                     }
                     
                     html += `</div></div>`;
@@ -475,21 +462,23 @@
                 const encoder = new TextEncoder();
                 const inputBytes = Array.from(encoder.encode(text));
                 const { p, n, coefficients } = this.key;
-                const decimals = parseInt(document.getElementById('decimalPlaces').value);
+                const cipherMin = parseInt(document.getElementById('cipherMin').value);
+                const cipherMax = parseInt(document.getElementById('cipherMax').value);
+                const useFractions = document.getElementById('useFractions').value === 'true';
                 const outputBlocks = [];
                 
                 this.clearVerification();
-                this.logVerification(`Starting encryption of ${inputBytes.length} bytes`);
-                this.logVerification(`Using prime modulus p=${p}, n=${n} variables`);
+                this.logVerification(`Starting encryption with integer coefficients`);
+                this.logVerification(`Ciphertext range: [${cipherMin}, ${cipherMax}], Fractions: ${useFractions}`);
 
                 for (let i = 0; i < inputBytes.length; i++) {
                     const byte = inputBytes[i];
                     const a = coefficients[byte];
                     const x = new Array(n);
 
-                    // Generate random values for variables (can be any numbers)
+                    // Generate random values for first n-1 variables (can be any numbers)
                     for (let j = 0; j < n - 1; j++) {
-                        x[j] = this.getRandomNumber(-1000, 1000, false, decimals);
+                        x[j] = this.getRandomCipherValue(cipherMin, cipherMax, useFractions);
                     }
 
                     // Calculate the last variable to satisfy the equation
@@ -502,9 +491,7 @@
                     const inv = this.modInverse(a[n - 1], p);
                     
                     if (inv === null) {
-                        const errorMsg = `No modular inverse for coefficient a₄=${this.formatNumber(a[n - 1])} mod ${p}`;
-                        this.logVerification(`ERROR: ${errorMsg}`);
-                        throw new Error(errorMsg);
+                        throw new Error(`Coefficient a₄=${a[n - 1]} not invertible mod ${p}`);
                     }
 
                     x[n - 1] = this.mod(remainder * inv, p);
@@ -518,18 +505,16 @@
                     verification = this.mod(verification, 256);
                     
                     const correct = Math.abs(verification - byte) < 1e-10;
-                    this.logVerification(`Byte ${i}: ${byte} → [${x.map(num => this.formatNumber(num, decimals)).join(', ')}] → ${verification} ${correct ? '✓' : '✗'}`);
+                    this.logVerification(`Byte ${i}: ${byte} → [${x.map(this.formatNumber).join(', ')}] → ${verification} ${correct ? '✓' : '✗'}`);
                     
                     if (!correct) {
-                        const errorMsg = `Encryption verification failed: expected ${byte}, got ${verification}`;
-                        this.logVerification(`ERROR: ${errorMsg}`);
-                        throw new Error(errorMsg);
+                        throw new Error(`Verification failed: expected ${byte}, got ${verification}`);
                     }
 
                     outputBlocks.push(x);
                 }
 
-                this.logVerification(`Encryption completed: ${outputBlocks.length} blocks generated`);
+                this.logVerification(`Encryption completed successfully`);
                 return outputBlocks;
             }
 
@@ -537,7 +522,6 @@
                 if (!this.key) throw new Error('Key not generated');
                 
                 const { p, n, coefficients } = this.key;
-                const decimals = parseInt(document.getElementById('decimalPlaces').value);
                 const outputBytes = [];
                 
                 this.clearVerification();
@@ -570,7 +554,7 @@
                     }
 
                     if (!found) {
-                        this.logVerification(`WARNING: No exact match for block ${blockIndex}, using best fit`);
+                        this.logVerification(`WARNING: No exact match for block ${blockIndex}, finding best fit`);
                         
                         let bestByte = 0;
                         let minError = Infinity;
@@ -603,9 +587,8 @@
             }
 
             blocksToText(blocks) {
-                const decimals = parseInt(document.getElementById('decimalPlaces').value);
                 return blocks.map(block => 
-                    `[${block.map(num => this.formatNumber(num, decimals)).join(', ')}]`
+                    `[${block.map(this.formatNumber).join(', ')}]`
                 ).join(' ');
             }
 
@@ -631,7 +614,7 @@
         }
 
         // Initialize cipher
-        const cipher = new UnlimitedNumericalCipher();
+        const cipher = new IntegerCoefficientCipher();
 
         // DOM elements
         const elements = {
@@ -639,7 +622,8 @@
             variables: document.getElementById('variables'),
             minCoeff: document.getElementById('minCoeff'),
             maxCoeff: document.getElementById('maxCoeff'),
-            decimalPlaces: document.getElementById('decimalPlaces'),
+            cipherMin: document.getElementById('cipherMin'),
+            cipherMax: document.getElementById('cipherMax'),
             useFractions: document.getElementById('useFractions'),
             generateKey: document.getElementById('generateKey'),
             keyInfo: document.getElementById('keyInfo'),
@@ -654,16 +638,16 @@
             inputSize: document.getElementById('inputSize'),
             outputSize: document.getElementById('outputSize'),
             expansionRatio: document.getElementById('expansionRatio'),
-            numberPrecision: document.getElementById('numberPrecision')
+            ciphertextType: document.getElementById('ciphertextType')
         };
 
         // Event handlers
         elements.generateKey.addEventListener('click', () => {
             try {
                 const key = cipher.generateKey();
-                elements.keyInfo.textContent = `Key generated: p=${key.p}, n=${key.n}, unlimited coefficients`;
+                elements.keyInfo.textContent = `Key: p=${key.p}, n=${key.n}, integer coefficients`;
                 cipher.displayKeyCoefficients();
-                cipher.showStatus('Key generated successfully with unlimited numerical coefficients');
+                cipher.showStatus('Integer coefficient key generated successfully');
             } catch (error) {
                 cipher.showStatus(`Key generation error: ${error.message}`, 'error');
             }
@@ -686,9 +670,9 @@
                 elements.inputSize.textContent = `${inputSize} bytes`;
                 elements.outputSize.textContent = `${outputText.length} characters`;
                 elements.expansionRatio.textContent = `${(outputText.length / inputSize).toFixed(2)}x`;
-                elements.numberPrecision.textContent = `${elements.decimalPlaces.value} decimals`;
+                elements.ciphertextType.textContent = elements.useFractions.value === 'true' ? 'Fraction' : 'Integer';
                 
-                cipher.showStatus('Encryption completed with unlimited numerical coefficients');
+                cipher.showStatus('Encryption completed with integer coefficients');
             } catch (error) {
                 cipher.showStatus(`Encryption error: ${error.message}`, 'error');
             }
@@ -712,9 +696,9 @@
             }
         });
 
-        // Update precision display
-        elements.decimalPlaces.addEventListener('change', () => {
-            elements.numberPrecision.textContent = `${elements.decimalPlaces.value} decimals`;
+        // Update ciphertext type display
+        elements.useFractions.addEventListener('change', () => {
+            elements.ciphertextType.textContent = elements.useFractions.value === 'true' ? 'Fraction' : 'Integer';
         });
 
         // Initialize

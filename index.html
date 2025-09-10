@@ -3,675 +3,370 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebRTC P2P Чат (Исправленная версия)</title>
+    <title>Омонофонный шифр на основе поля Галуа</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #6e8efb, #a777e3);
-            color: #333;
-            line-height: 1.6;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            max-width: 1000px;
+            margin: 0 auto;
             padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
         }
         .container {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            width: 100%;
-            max-width: 800px;
-            overflow: hidden;
-        }
-        .header {
-            background: #4A6CF7;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-        .header h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-        .content {
-            padding: 25px;
-        }
-        .section {
-            margin-bottom: 25px;
-            padding: 20px;
-            border-radius: 10px;
-            background: #f9f9f9;
-            border: 1px solid #eee;
-        }
-        .section-title {
-            font-size: 18px;
-            margin-bottom: 15px;
-            color: #4A6CF7;
-            font-weight: 600;
-        }
-        .status {
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-        .disconnected {
-            background-color: #ffebee;
-            color: #c62828;
-        }
-        .connected {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-        }
-        .connecting {
-            background-color: #fff8e1;
-            color: #f57f17;
-        }
-        .chat-area {
-            display: none;
-        }
-        #messages {
-            height: 300px;
-            border: 1px solid #ddd;
-            padding: 15px;
-            margin: 15px 0;
-            overflow-y: auto;
-            background-color: #fafafa;
-            border-radius: 8px;
-        }
-        .message {
-            margin: 10px 0;
-            padding: 10px 15px;
-            border-radius: 12px;
-            max-width: 80%;
-            word-wrap: break-word;
-        }
-        .my-message {
-            background-color: #4A6CF7;
-            color: white;
-            margin-left: auto;
-            text-align: right;
-        }
-        .their-message {
-            background-color: #e9e9e9;
-            margin-right: auto;
-        }
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin: 15px 0;
-        }
-        input, textarea {
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            flex: 1;
-        }
-        button {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            background-color: #4A6CF7;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #3a5cd8;
-        }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        button.secondary {
-            background-color: #6c757d;
-        }
-        button.secondary:hover {
-            background-color: #5a6268;
-        }
-        button.success {
-            background-color: #28a745;
-        }
-        button.success:hover {
-            background-color: #218838;
-        }
-        button.danger {
-            background-color: #dc3545;
-        }
-        button.danger:hover {
-            background-color: #c82333;
-        }
-        .link-area {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 20px;
         }
-        .link-box {
-            display: flex;
-            gap: 10px;
-        }
-        #connectionLink {
-            flex: 1;
-            padding: 12px;
-            border: 1px dashed #4A6CF7;
+        .panel {
+            background-color: white;
             border-radius: 8px;
-            background-color: #f0f5ff;
-            font-size: 14px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-        .instructions {
-            background-color: #e8f5e9;
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: monospace;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .output {
+            background-color: #f9f9f9;
             padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            font-size: 14px;
-            line-height: 1.5;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
         }
-        .step {
-            margin: 10px 0;
-            display: flex;
-            align-items: flex-start;
+        .key-display {
+            font-family: monospace;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
         }
-        .step-number {
-            background: #4CAF50;
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-right: 10px;
-            flex-shrink: 0;
-        }
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 8px;
-            background: #4CAF50;
-            color: white;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-            z-index: 1000;
-        }
-        .notification.show {
-            transform: translateX(0);
-        }
-        .debug-info {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-            padding: 8px;
-            background: #f5f5f5;
+        .explanation {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f4fc;
+            border-left: 4px solid #3498db;
             border-radius: 4px;
         }
-        .copyable {
-            cursor: pointer;
-            border: 1px dashed #4A6CF7;
-            padding: 10px;
-            border-radius: 8px;
-            background: #f0f5ff;
-            margin: 10px 0;
-            font-size: 14px;
+        .flex-row {
+            display: flex;
+            gap: 20px;
         }
-        @media (max-width: 600px) {
-            .input-group {
+        .flex-row > div {
+            flex: 1;
+        }
+        @media (max-width: 768px) {
+            .flex-row {
                 flex-direction: column;
             }
         }
     </style>
 </head>
 <body>
+    <h1>Омонофонный шифр на основе поля Галуа</h1>
+    
     <div class="container">
-        <div class="header">
-            <h1>WebRTC P2P Чат (Исправленная версия)</h1>
-            <p>Просто создайте ссылку и отправьте другу</p>
+        <div class="panel">
+            <h2>Параметры шифра</h2>
+            <div class="flex-row">
+                <div class="input-group">
+                    <label for="prime">Простое число (модуль поля Галуа):</label>
+                    <input type="number" id="prime" value="97" min="11" max="999">
+                </div>
+                <div class="input-group">
+                    <label for="variables">Количество переменных в уравнении:</label>
+                    <input type="number" id="variables" value="3" min="2" max="5">
+                </div>
+            </div>
+            <button id="generateKey">Сгенерировать новый ключ</button>
+            
+            <div class="input-group">
+                <label>Текущий ключ (секретные коэффициенты для каждой буквы):</label>
+                <div class="key-display" id="keyDisplay">Ключ не сгенерирован</div>
+            </div>
         </div>
         
-        <div class="content">
-            <div id="status" class="status disconnected">Не подключен</div>
-            <div id="debugInfo" class="debug-info">Отладка: Инициализация...</div>
-            
-            <div class="section" id="setupSection">
-                <div class="section-title">Подключение</div>
-                
-                <div class="instructions">
-                    <div class="step">
-                        <div class="step-number">1</div>
-                        <div>Нажмите "Создать ссылку подключения"</div>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">2</div>
-                        <div>Скопируйте ссылку и отправьте другому пользователю</div>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">3</div>
-                        <div>Когда пользователь перейдет по ссылке, соединение установится автоматически</div>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">!</div>
-                        <div><strong>Важно:</strong> Для работы необходимо разрешить обмен ICE-кандидатами</div>
-                    </div>
-                </div>
-                
-                <div class="input-group">
-                    <button id="createLinkBtn">Создать ссылку подключения</button>
-                </div>
-                
-                <div class="link-area" id="linkArea" style="display: none;">
-                    <div class="link-box">
-                        <input type="text" id="connectionLink" readonly>
-                        <button id="copyLinkBtn" class="secondary">Копировать</button>
-                    </div>
-                    <p style="font-size: 12px; color: #666; margin-top: 5px;">Отправьте эту ссылку другому пользователю. Когда он перейдет по ней, соединение установится автоматически.</p>
-                </div>
-
-                <div id="iceExchange" style="display: none;">
-                    <div class="section-title">Обмен ICE-кандидатами</div>
-                    <p>Скопируйте ваш ICE-кандидат и отправьте другому пользователю:</p>
-                    <div id="localIce" class="copyable">Ожидание ICE-кандидатов...</div>
-                    <p>Вставьте ICE-кандидат от другого пользователя:</p>
-                    <div class="input-group">
-                        <textarea id="remoteIceInput" placeholder="Вставьте ICE-кандидат здесь"></textarea>
-                        <button id="addIceBtn">Добавить ICE</button>
-                    </div>
-                </div>
+        <div class="panel">
+            <h2>Шифрование</h2>
+            <div class="input-group">
+                <label for="plaintext">Исходный текст (только русские буквы):</label>
+                <textarea id="plaintext" placeholder="Введите текст для шифрования">ПРИВЕТ МИР</textarea>
             </div>
+            <button id="encryptBtn">Зашифровать</button>
             
-            <div class="section chat-area" id="chatSection">
-                <div class="section-title">Чат</div>
-                
-                <div id="messages"></div>
-                
-                <div class="input-group">
-                    <input type="text" id="messageInput" placeholder="Введите сообщение..." disabled>
-                    <button id="sendBtn" disabled>Отправить</button>
-                </div>
-                
-                <div class="input-group">
-                    <button id="disconnectBtn" class="danger">Отключиться</button>
-                </div>
+            <div class="input-group">
+                <label>Результат шифрования (омонофоны):</label>
+                <div class="output" id="ciphertextOutput"></div>
             </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Дешифрование</h2>
+            <div class="input-group">
+                <label for="ciphertext">Шифротекст (омонофоны в формате x1,x2,...|...):</label>
+                <textarea id="ciphertext" placeholder="Введите шифротекст для дешифрования"></textarea>
+            </div>
+            <button id="decryptBtn">Дешифровать</button>
+            
+            <div class="input-group">
+                <label>Результат дешифрования:</label>
+                <div class="output" id="decryptedOutput"></div>
+            </div>
+        </div>
+        
+        <div class="explanation">
+            <h3>Как это работает:</h3>
+            <p>Каждой букве алфавита соответствует линейное уравнение в поле Галуа GF(p):</p>
+            <p>a₁x₁ + a₂x₂ + ... + aₙxₙ ≡ c (mod p)</p>
+            <p>где p - простое число, a₁...aₙ - коэффициенты (часть ключа), c - числовой код буквы.</p>
+            <p>При шифровании для каждой буквы случайным образом выбирается решение этого уравнения.</p>
+            <p>При дешифровании для каждого набора чисел проверяется, какому уравнению (букве) оно удовлетворяет.</p>
+            <p>Одна и та же буква шифруется разными наборами чисел (омонофонами), что делает частотный анализ невозможным.</p>
         </div>
     </div>
 
-    <div class="notification" id="notification">Ссылка скопирована в буфер обмена!</div>
-
     <script>
-        // Элементы интерфейса
-        const statusDiv = document.getElementById('status');
-        const debugInfoDiv = document.getElementById('debugInfo');
-        const messagesDiv = document.getElementById('messages');
-        const messageInput = document.getElementById('messageInput');
-        const createLinkBtn = document.getElementById('createLinkBtn');
-        const connectionLink = document.getElementById('connectionLink');
-        const copyLinkBtn = document.getElementById('copyLinkBtn');
-        const sendBtn = document.getElementById('sendBtn');
-        const disconnectBtn = document.getElementById('disconnectBtn');
-        const setupSection = document.getElementById('setupSection');
-        const linkArea = document.getElementById('linkArea');
-        const chatSection = document.getElementById('chatSection');
-        const notification = document.getElementById('notification');
-        const iceExchange = document.getElementById('iceExchange');
-        const localIceDiv = document.getElementById('localIce');
-        const remoteIceInput = document.getElementById('remoteIceInput');
-        const addIceBtn = document.getElementById('addIceBtn');
+        // Алфавит (русские буквы и пробел)
+        const ALPHABET = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ ';
+        const ALPHABET_SIZE = ALPHABET.length;
         
-        // WebRTC переменные
-        let peerConnection = null;
-        let dataChannel = null;
-        let isOfferer = false;
-        let localIceCandidates = [];
-        let hasRemoteDescription = false;
+        // Элементы DOM
+        const primeInput = document.getElementById('prime');
+        const variablesInput = document.getElementById('variables');
+        const generateKeyBtn = document.getElementById('generateKey');
+        const keyDisplay = document.getElementById('keyDisplay');
+        const plaintextInput = document.getElementById('plaintext');
+        const encryptBtn = document.getElementById('encryptBtn');
+        const ciphertextOutput = document.getElementById('ciphertextOutput');
+        const ciphertextInput = document.getElementById('ciphertext');
+        const decryptBtn = document.getElementById('decryptBtn');
+        const decryptedOutput = document.getElementById('decryptedOutput');
         
-        // Конфигурация STUN серверов
-        const configuration = {
-            iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'stun:stun2.l.google.com:19302' },
-                { urls: 'stun:stun3.l.google.com:19302' },
-                { urls: 'stun:stun4.l.google.com:19302' }
-            ]
-        };
+        // Текущий ключ (коэффициенты уравнений для каждой буквы)
+        let currentKey = null;
         
-        // Инициализация при загрузке
-        function init() {
-            // Проверяем, есть ли параметры подключения в URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const offer = urlParams.get('offer');
+        // Генерация случайного числа в диапазоне [min, max]
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+        
+        // Расширенный алгоритм Евклида для нахождения обратного элемента в поле Галуа
+        function modInverse(a, mod) {
+            let t = 0, newT = 1;
+            let r = mod, newR = a;
             
-            if (offer) {
-                // Если есть предложение в URL, значит мы присоединяемся
-                try {
-                    debug('Обнаружено предложение в URL, пытаемся подключиться...');
-                    isOfferer = false;
-                    setupSection.style.display = 'block';
-                    linkArea.style.display = 'none';
-                    createLinkBtn.style.display = 'none';
-                    iceExchange.style.display = 'block';
+            while (newR !== 0) {
+                const quotient = Math.floor(r / newR);
+                [t, newT] = [newT, t - quotient * newT];
+                [r, newR] = [newR, r - quotient * newR];
+            }
+            
+            if (r > 1) return null; // Обратного элемента не существует
+            if (t < 0) t += mod;
+            
+            return t;
+        }
+        
+        // Генерация нового ключа
+        function generateKey() {
+            const p = parseInt(primeInput.value);
+            const n = parseInt(variablesInput.value);
+            
+            if (p <= ALPHABET_SIZE) {
+                alert(`Простое число должно быть больше ${ALPHABET_SIZE} (размера алфавита)`);
+                return;
+            }
+            
+            // Генерируем коэффициенты для каждой буквы
+            const key = {};
+            
+            for (let i = 0; i < ALPHABET_SIZE; i++) {
+                const char = ALPHABET[i];
+                const coefficients = [];
+                
+                // Генерируем n-1 случайных коэффициентов
+                for (let j = 0; j < n - 1; j++) {
+                    coefficients.push(getRandomInt(1, p - 1));
+                }
+                
+                // Последний коэффициент вычисляем так, чтобы уравнение имело решение
+                // a₁x₁ + a₂x₂ + ... + aₙxₙ ≡ i (mod p)
+                // Выбираем aₙ таким, чтобы он был обратимым по модулю p
+                let lastCoefficient;
+                do {
+                    lastCoefficient = getRandomInt(1, p - 1);
+                } while (modInverse(lastCoefficient, p) === null);
+                
+                coefficients.push(lastCoefficient);
+                key[char] = coefficients;
+            }
+            
+            currentKey = { p, n, coefficients: key };
+            updateKeyDisplay();
+        }
+        
+        // Обновление отображения ключа
+        function updateKeyDisplay() {
+            if (!currentKey) {
+                keyDisplay.textContent = 'Ключ не сгенерирован';
+                return;
+            }
+            
+            let keyText = `p = ${currentKey.p}, n = ${currentKey.n}\n`;
+            
+            for (const char of ALPHABET) {
+                if (char === ' ') {
+                    keyText += `[ПРОБЕЛ]: ${currentKey.coefficients[char].join(', ')}\n`;
+                } else {
+                    keyText += `${char}: ${currentKey.coefficients[char].join(', ')}\n`;
+                }
+            }
+            
+            keyDisplay.textContent = keyText;
+        }
+        
+        // Шифрование текста
+        function encrypt() {
+            if (!currentKey) {
+                alert('Сначала сгенерируйте ключ!');
+                return;
+            }
+            
+            const text = plaintextInput.value.toUpperCase();
+            const { p, n, coefficients } = currentKey;
+            let ciphertext = '';
+            
+            for (const char of text) {
+                if (!ALPHABET.includes(char)) {
+                    alert(`Недопустимый символ: ${char}. Разрешены только русские буквы и пробел.`);
+                    return;
+                }
+                
+                // Получаем коэффициенты для текущей буквы
+                const a = coefficients[char];
+                const c = ALPHABET.indexOf(char); // Числовое представление буквы
+                
+                // Генерируем случайные значения для первых n-1 переменных
+                const values = [];
+                for (let i = 0; i < n - 1; i++) {
+                    values.push(getRandomInt(0, p - 1));
+                }
+                
+                // Вычисляем значение последней переменной из уравнения:
+                // a₁x₁ + a₂x₂ + ... + aₙxₙ ≡ c (mod p)
+                let sum = 0;
+                for (let i = 0; i < n - 1; i++) {
+                    sum = (sum + a[i] * values[i]) % p;
+                }
+                
+                // Решаем уравнение: aₙxₙ ≡ (c - sum) mod p
+                const remainder = (c - sum + p) % p;
+                const inv = modInverse(a[n-1], p);
+                const lastValue = (remainder * inv) % p;
+                
+                values.push(lastValue);
+                
+                // Добавляем омонофон к шифротексту
+                if (ciphertext) ciphertext += '|';
+                ciphertext += values.join(',');
+            }
+            
+            ciphertextOutput.textContent = ciphertext;
+            ciphertextInput.value = ciphertext;
+        }
+        
+        // Дешифрование текста
+        function decrypt() {
+            if (!currentKey) {
+                alert('Сначала сгенерируйте ключ!');
+                return;
+            }
+            
+            const ciphertext = ciphertextInput.value;
+            const { p, n, coefficients } = currentKey;
+            let plaintext = '';
+            
+            const homophones = ciphertext.split('|');
+            
+            for (const homophone of homophones) {
+                const values = homophone.split(',').map(v => parseInt(v.trim()));
+                
+                if (values.length !== n) {
+                    alert(`Неверное количество значений в омонофоне: ${homophone}. Ожидается ${n} значений.`);
+                    return;
+                }
+                
+                // Проверяем, для какой буквы выполняется уравнение
+                let found = false;
+                
+                for (const char of ALPHABET) {
+                    const a = coefficients[char];
+                    let sum = 0;
                     
-                    // Создаем PeerConnection и обрабатываем предложение
-                    createPeerConnection();
-                    processOffer(offer);
-                } catch (e) {
-                    console.error('Ошибка обработки предложения из URL:', e);
-                    setStatus('disconnected', 'Ошибка подключения: неверная ссылка');
-                }
-            } else {
-                debug('Предложение в URL не обнаружено, ожидаем создания ссылки');
-            }
-        }
-        
-        // Установка статуса
-        function setStatus(status, text) {
-            statusDiv.className = 'status ' + status;
-            statusDiv.textContent = text;
-            debug('Status: ' + text);
-        }
-        
-        // Отладочная информация
-        function debug(message) {
-            debugInfoDiv.textContent = message;
-            console.log(message);
-        }
-        
-        // Показать уведомление
-        function showNotification(message) {
-            notification.textContent = message;
-            notification.classList.add('show');
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
-        }
-        
-        // Добавление сообщения в чат
-        function addMessage(text, isMyMessage = false) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message ' + (isMyMessage ? 'my-message' : 'their-message');
-            messageDiv.textContent = text;
-            messagesDiv.appendChild(messageDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-        
-        // Создание PeerConnection
-        function createPeerConnection() {
-            try {
-                peerConnection = new RTCPeerConnection(configuration);
-                
-                // Обработчик входящего канала данных
-                peerConnection.ondatachannel = (event) => {
-                    debug('Получен канал данных');
-                    dataChannel = event.channel;
-                    setupDataChannel();
-                };
-                
-                // Обработчики ICE кандидатов
-                peerConnection.onicecandidate = (event) => {
-                    if (event.candidate) {
-                        debug('Новый ICE кандидат: ' + JSON.stringify(event.candidate));
-                        localIceCandidates.push(event.candidate);
-                        
-                        // Показываем ICE кандидат для обмена
-                        if (isOfferer) {
-                            localIceDiv.textContent = JSON.stringify(event.candidate);
-                        }
-                    } else {
-                        debug('Все ICE кандидаты собраны');
+                    for (let i = 0; i < n; i++) {
+                        sum = (sum + a[i] * values[i]) % p;
                     }
-                };
-                
-                peerConnection.onconnectionstatechange = () => {
-                    debug('Состояние соединения: ' + peerConnection.connectionState);
-                    if (peerConnection.connectionState === 'connected') {
-                        setStatus('connected', 'Подключен');
-                        messageInput.disabled = false;
-                        sendBtn.disabled = false;
-                        disconnectBtn.disabled = false;
-                        
-                        // Показываем чат
-                        setupSection.style.display = 'none';
-                        chatSection.style.display = 'block';
-                        iceExchange.style.display = 'none';
-                    } else if (peerConnection.connectionState === 'disconnected' || 
-                               peerConnection.connectionState === 'failed') {
-                        setStatus('disconnected', 'Отключен');
-                        resetConnection();
-                    } else {
-                        setStatus('connecting', 'Подключение: ' + peerConnection.connectionState);
+                    
+                    const c = ALPHABET.indexOf(char);
+                    
+                    if (sum === c) {
+                        plaintext += char;
+                        found = true;
+                        break;
                     }
-                };
-                
-                return true;
-            } catch (error) {
-                console.error('Ошибка создания PeerConnection:', error);
-                setStatus('disconnected', 'Ошибка: ' + error.message);
-                return false;
-            }
-        }
-        
-        // Настройка канала данных
-        function setupDataChannel() {
-            dataChannel.onopen = () => {
-                debug('Канал данных открыт');
-                setStatus('connected', 'Подключен');
-                messageInput.disabled = false;
-                sendBtn.disabled = false;
-                disconnectBtn.disabled = false;
-                addMessage('Соединение установлено! Можно общаться.', false);
-            };
-            
-            dataChannel.onclose = () => {
-                debug('Канал данных закрыт');
-                setStatus('disconnected', 'Соединение разорвано');
-                resetConnection();
-            };
-            
-            dataChannel.onmessage = (event) => {
-                debug('Получено сообщение: ' + event.data);
-                addMessage(event.data, false);
-            };
-            
-            dataChannel.onerror = (error) => {
-                console.error('Ошибка канала данных:', error);
-            };
-        }
-        
-        // Создание предложения (offer) и генерация ссылки
-        async function createOffer() {
-            if (!createPeerConnection()) return;
-            
-            try {
-                setStatus('connecting', 'Создание предложения...');
-                isOfferer = true;
-                
-                // Создаем канал данных
-                dataChannel = peerConnection.createDataChannel('chat');
-                setupDataChannel();
-                
-                // Создаем предложение
-                const offer = await peerConnection.createOffer();
-                await peerConnection.setLocalDescription(offer);
-                
-                // Ждем установления local description и сбора ICE кандидатов
-                await new Promise(resolve => {
-                    if (peerConnection.iceGatheringState === 'complete') {
-                        resolve();
-                    } else {
-                        const checkState = () => {
-                            if (peerConnection.iceGatheringState === 'complete') {
-                                peerConnection.removeEventListener('icegatheringstatechange', checkState);
-                                resolve();
-                            }
-                        };
-                        peerConnection.addEventListener('icegatheringstatechange', checkState);
-                        // Таймаут на случай, если событие не произойдет
-                        setTimeout(resolve, 3000);
-                    }
-                });
-                
-                // Генерируем ссылку с предложением
-                const offerString = encodeURIComponent(JSON.stringify(peerConnection.localDescription));
-                const link = `${window.location.origin}${window.location.pathname}?offer=${offerString}`;
-                
-                // Показываем ссылку
-                connectionLink.value = link;
-                linkArea.style.display = 'flex';
-                iceExchange.style.display = 'block';
-                
-                setStatus('connecting', 'Ссылка создана. Отправьте её другому пользователю.');
-                
-            } catch (error) {
-                console.error('Ошибка создания предложения:', error);
-                setStatus('disconnected', 'Ошибка: ' + error.message);
-            }
-        }
-        
-        // Обработка предложения от другого пользователя
-        async function processOffer(offerString) {
-            try {
-                setStatus('connecting', 'Обработка предложения...');
-                
-                if (!peerConnection) {
-                    if (!createPeerConnection()) return;
                 }
                 
-                const offer = JSON.parse(decodeURIComponent(offerString));
-                
-                if (!offer || offer.type !== 'offer') {
-                    throw new Error('Неверное предложение подключения');
+                if (!found) {
+                    alert(`Не удалось дешифровать омонофон: ${homophone}`);
+                    return;
                 }
-                
-                // Устанавливаем удаленное предложение
-                await peerConnection.setRemoteDescription(offer);
-                debug('Удаленное описание установлено');
-                hasRemoteDescription = true;
-                
-                // Создаем ответ
-                const answer = await peerConnection.createAnswer();
-                await peerConnection.setLocalDescription(answer);
-                debug('Ответ создан');
-                
-                // Показываем ICE кандидаты для обмена
-                localIceDiv.textContent = JSON.stringify(answer);
-                
-                setStatus('connecting', 'Подключение устанавливается. Обменяйтесь ICE-кандидатами.');
-                
-            } catch (error) {
-                console.error('Ошибка обработки предложения:', error);
-                setStatus('disconnected', 'Ошибка: ' + error.message);
-            }
-        }
-        
-        // Добавление ICE кандидата от удаленного пира
-        async function addIceCandidate() {
-            try {
-                const iceCandidate = JSON.parse(remoteIceInput.value);
-                if (iceCandidate && peerConnection) {
-                    await peerConnection.addIceCandidate(iceCandidate);
-                    debug('Добавлен ICE кандидат: ' + JSON.stringify(iceCandidate));
-                    remoteIceInput.value = '';
-                    showNotification('ICE кандидат добавлен');
-                }
-            } catch (error) {
-                console.error('Ошибка добавления ICE кандидата:', error);
-                showNotification('Ошибка добавления ICE кандидата');
-            }
-        }
-        
-        // Отправка сообщения
-        function sendMessage() {
-            const message = messageInput.value.trim();
-            if (message && dataChannel && dataChannel.readyState === 'open') {
-                dataChannel.send(message);
-                addMessage(message, true);
-                messageInput.value = '';
-            }
-        }
-        
-        // Сброс соединения
-        function resetConnection() {
-            if (dataChannel) {
-                dataChannel.close();
-                dataChannel = null;
-            }
-            if (peerConnection) {
-                peerConnection.close();
-                peerConnection = null;
             }
             
-            messageInput.disabled = true;
-            sendBtn.disabled = true;
-            disconnectBtn.disabled = true;
-            localIceCandidates = [];
-            hasRemoteDescription = false;
-            
-            // Показываем панель setup
-            setupSection.style.display = 'block';
-            chatSection.style.display = 'none';
-            linkArea.style.display = 'none';
-            iceExchange.style.display = 'none';
-            createLinkBtn.style.display = 'block';
-            
-            // Очищаем чат
-            messagesDiv.innerHTML = '';
-            
-            isOfferer = false;
-            
-            // Если мы были гостем, очищаем URL
-            if (!isOfferer) {
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
+            decryptedOutput.textContent = plaintext;
         }
         
-        // Копирование ссылки в буфер обмена
-        function copyLinkToClipboard() {
-            connectionLink.select();
-            document.execCommand('copy');
-            showNotification('Ссылка скопирована в буфер обмена!');
-        }
+        // Назначение обработчиков событий
+        generateKeyBtn.addEventListener('click', generateKey);
+        encryptBtn.addEventListener('click', encrypt);
+        decryptBtn.addEventListener('click', decrypt);
         
-        // Копирование ICE кандидата в буфер обмена
-        function copyIceToClipboard() {
-            const tempTextArea = document.createElement('textarea');
-            tempTextArea.value = localIceDiv.textContent;
-            document.body.appendChild(tempTextArea);
-            tempTextArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempTextArea);
-            showNotification('ICE кандидат скопирован!');
-        }
-        
-        // Обработчики событий
-        createLinkBtn.addEventListener('click', createOffer);
-        copyLinkBtn.addEventListener('click', copyLinkToClipboard);
-        sendBtn.addEventListener('click', sendMessage);
-        disconnectBtn.addEventListener('click', resetConnection);
-        addIceBtn.addEventListener('click', addIceCandidate);
-        localIceDiv.addEventListener('click', copyIceToClipboard);
-        
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-        
-        // Инициализация при загрузке
-        init();
-        
-        // Информационное сообщение
-        addMessage('Добро пожаловать в P2P чат! Создайте ссылку для подключения.', true);
+        // Генерация ключа при загрузке
+        window.addEventListener('load', generateKey);
     </script>
 </body>
 </html>

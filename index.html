@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fixed Homophonic Cipher</title>
+    <title>Professional Byte Homophonic Cipher</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
             background-color: #1a1a1a;
@@ -71,6 +71,7 @@
             white-space: pre-wrap;
             word-break: break-all;
             min-height: 50px;
+            overflow-x: auto;
         }
         .status {
             padding: 10px;
@@ -81,23 +82,33 @@
         }
         .error { background-color: #ff6b6b; color: #fff; }
         .success { background-color: #4caf50; color: #fff; }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 20px;
+        .key-coefficients {
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 12px;
+            line-height: 1.4;
         }
-        .stat-item {
-            background-color: #333;
-            padding: 15px;
-            border-radius: 6px;
-            text-align: center;
+        .coefficient-row {
+            display: flex;
+            border-bottom: 1px solid #444;
+            padding: 4px 0;
         }
-        .stat-value {
-            font-size: 18px;
+        .byte-value {
+            width: 50px;
             font-weight: bold;
             color: #4caf50;
-            margin-top: 5px;
+        }
+        .coefficients {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .coeff {
+            background-color: #444;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
         }
         .flex-row { 
             display: flex; 
@@ -105,16 +116,25 @@
             margin-bottom: 15px;
         }
         .flex-row > div { flex: 1; }
+        .debug-info {
+            background-color: #2c3e50;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
         @media (max-width: 768px) {
             .flex-row { flex-direction: column; }
-            .stats { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Fixed Homophonic Cipher - Numbers in Blocks</h1>
-        <p>Proper format without unnecessary expansion</p>
+        <h1>Professional Byte Homophonic Cipher</h1>
+        <p>Complete implementation with full key visibility and mathematical verification</p>
     </div>
 
     <div class="container">
@@ -144,10 +164,17 @@
         </div>
 
         <div class="panel">
+            <h2>Key Coefficients (Full Visibility)</h2>
+            <div class="output key-coefficients" id="keyCoefficients">
+                Key coefficients will be displayed here
+            </div>
+        </div>
+
+        <div class="panel">
             <h2>Encryption</h2>
             <div class="input-group">
                 <label for="plaintext">Input Text:</label>
-                <textarea id="plaintext" placeholder="Enter text to encrypt">Test message</textarea>
+                <textarea id="plaintext">Test message</textarea>
             </div>
             <button id="encryptBtn">Encrypt</button>
             
@@ -161,7 +188,7 @@
             <h2>Decryption</h2>
             <div class="input-group">
                 <label for="ciphertext">Ciphertext (Numbers):</label>
-                <textarea id="ciphertext" placeholder="Enter numbers to decrypt"></textarea>
+                <textarea id="ciphertext"></textarea>
             </div>
             <button id="decryptBtn">Decrypt</button>
             
@@ -171,18 +198,10 @@
             </div>
         </div>
 
-        <div class="stats">
-            <div class="stat-item">
-                <div>Input Size</div>
-                <div class="stat-value" id="inputSize">0 bytes</div>
-            </div>
-            <div class="stat-item">
-                <div>Output Size</div>
-                <div class="stat-value" id="outputSize">0 bytes</div>
-            </div>
-            <div class="stat-item">
-                <div>Expansion Ratio</div>
-                <div class="stat-value" id="expansionRatio">1.0x</div>
+        <div class="panel">
+            <h2>Mathematical Verification</h2>
+            <div class="debug-info" id="verificationInfo">
+                Verification results will be displayed here
             </div>
         </div>
 
@@ -190,10 +209,11 @@
     </div>
 
     <script>
-        class HomophonicCipher {
+        class ProfessionalHomophonicCipher {
             constructor() {
                 this.key = null;
                 this.statusElement = document.getElementById('status');
+                this.verificationElement = document.getElementById('verificationInfo');
             }
 
             showStatus(message, type = 'success') {
@@ -202,21 +222,37 @@
                 setTimeout(() => {
                     this.statusElement.textContent = '';
                     this.statusElement.className = '';
-                }, 3000);
+                }, 5000);
+            }
+
+            logVerification(message) {
+                this.verificationElement.textContent += message + '\n';
+                this.verificationElement.scrollTop = this.verificationElement.scrollHeight;
+            }
+
+            clearVerification() {
+                this.verificationElement.textContent = '';
+            }
+
+            // Correct mathematical functions
+            mod(n, p) {
+                return ((n % p) + p) % p;
             }
 
             gcd(a, b) {
+                a = Math.abs(a);
+                b = Math.abs(b);
                 while (b !== 0) {
                     [a, b] = [b, a % b];
                 }
                 return a;
             }
 
-            modInverse(a, mod) {
-                if (this.gcd(a, mod) !== 1) return null;
+            modInverse(a, p) {
+                if (this.gcd(a, p) !== 1) return null;
                 
                 let [t, newT] = [0, 1];
-                let [r, newR] = [mod, a];
+                let [r, newR] = [p, a];
                 
                 while (newR !== 0) {
                     const quotient = Math.floor(r / newR);
@@ -224,7 +260,8 @@
                     [r, newR] = [newR, r - quotient * newR];
                 }
                 
-                return t < 0 ? t + mod : t;
+                if (r > 1) return null;
+                return this.mod(t, p);
             }
 
             getRandomInt(min, max) {
@@ -240,6 +277,7 @@
 
                 const coefficients = new Array(256);
                 let invertibleCount = 0;
+                const verificationResults = [];
 
                 for (let byteValue = 0; byteValue < 256; byteValue++) {
                     const coeffs = new Array(n);
@@ -251,13 +289,15 @@
 
                     // Ensure the last coefficient is invertible
                     let attempts = 0;
-                    while (this.modInverse(coeffs[n - 1], p) === null && attempts < 100) {
+                    while (this.modInverse(coeffs[n - 1], p) === null && attempts < 1000) {
                         coeffs[n - 1] = this.getRandomInt(1, p - 1);
                         attempts++;
                     }
 
                     if (this.modInverse(coeffs[n - 1], p) !== null) {
                         invertibleCount++;
+                    } else {
+                        verificationResults.push(`Byte ${byteValue}: FAIL - No inverse for ${coeffs[n - 1]} mod ${p}`);
                     }
 
                     coefficients[byteValue] = coeffs;
@@ -271,13 +311,38 @@
                 return this.key;
             }
 
+            displayKeyCoefficients() {
+                if (!this.key) return;
+                
+                const { coefficients, n } = this.key;
+                let html = '';
+                
+                for (let byteValue = 0; byteValue < 256; byteValue++) {
+                    const coeffs = coefficients[byteValue];
+                    html += `<div class="coefficient-row">
+                        <span class="byte-value">${byteValue}:</span>
+                        <span class="coefficients">`;
+                    
+                    for (let i = 0; i < n; i++) {
+                        const isInvertible = i === n - 1 ? this.modInverse(coeffs[i], this.key.p) !== null : true;
+                        const style = isInvertible ? '' : 'background-color: #ff6b6b;';
+                        html += `<span class="coeff" style="${style}">a${i+1}=${coeffs[i]}</span>`;
+                    }
+                    
+                    html += `</span></div>`;
+                }
+                
+                document.getElementById('keyCoefficients').innerHTML = html;
+            }
+
             encrypt(text) {
                 if (!this.key) throw new Error('Key not generated');
                 
                 const encoder = new TextEncoder();
                 const inputBytes = Array.from(encoder.encode(text));
                 const { p, n, coefficients } = this.key;
-                const outputNumbers = [];
+                const outputBlocks = [];
+                this.clearVerification();
 
                 for (const byte of inputBytes) {
                     const a = coefficients[byte];
@@ -288,46 +353,52 @@
                         x[i] = this.getRandomInt(0, p - 1);
                     }
 
-                    // Calculate the last variable to satisfy the equation
+                    // Calculate the last variable
                     let sum = 0;
                     for (let i = 0; i < n - 1; i++) {
-                        sum = (sum + a[i] * x[i]) % p;
+                        sum = this.mod(sum + a[i] * x[i], p);
                     }
 
-                    const remainder = (byte - sum + p) % p;
+                    const remainder = this.mod(byte - sum, p);
                     const inv = this.modInverse(a[n - 1], p);
                     
                     if (inv === null) {
                         throw new Error(`No modular inverse for coefficient ${a[n - 1]} mod ${p}`);
                     }
 
-                    x[n - 1] = (remainder * inv) % p;
+                    x[n - 1] = this.mod(remainder * inv, p);
 
                     // Verify the solution
                     let verification = 0;
                     for (let i = 0; i < n; i++) {
-                        verification = (verification + a[i] * x[i]) % p;
+                        verification = this.mod(verification + a[i] * x[i], p);
                     }
 
-                    if (verification !== byte) {
+                    const correct = verification === byte;
+                    this.logVerification(`Byte ${byte}: ${correct ? '✓' : '✗'} [${x.join(', ')}]`);
+                    
+                    if (!correct) {
                         throw new Error(`Encryption verification failed for byte ${byte}`);
                     }
 
-                    outputNumbers.push(x);
+                    outputBlocks.push(x);
                 }
 
-                return outputNumbers;
+                return outputBlocks;
             }
 
-            decrypt(numberBlocks) {
+            decrypt(blocks) {
                 if (!this.key) throw new Error('Key not generated');
                 
                 const { p, n, coefficients } = this.key;
                 const outputBytes = [];
+                this.clearVerification();
 
-                for (const block of numberBlocks) {
+                for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
+                    const block = blocks[blockIndex];
+                    
                     if (block.length !== n) {
-                        throw new Error(`Block size ${block.length} doesn't match n=${n}`);
+                        throw new Error(`Block ${blockIndex} size ${block.length} doesn't match n=${n}`);
                     }
 
                     let found = false;
@@ -336,18 +407,19 @@
                         let sum = 0;
 
                         for (let j = 0; j < n; j++) {
-                            sum = (sum + a[j] * block[j]) % p;
+                            sum = this.mod(sum + a[j] * block[j], p);
                         }
 
                         if (sum === byteValue) {
                             outputBytes.push(byteValue);
                             found = true;
+                            this.logVerification(`Block ${blockIndex}: → Byte ${byteValue} ✓`);
                             break;
                         }
                     }
 
                     if (!found) {
-                        throw new Error('Cannot decrypt block');
+                        throw new Error(`Cannot decrypt block ${blockIndex}: [${block.join(', ')}]`);
                     }
                 }
 
@@ -355,21 +427,17 @@
                 return decoder.decode(new Uint8Array(outputBytes));
             }
 
-            numbersToText(numberBlocks) {
-                return numberBlocks.map(block => 
-                    `[${block.join(', ')}]`
-                ).join(' ');
+            blocksToText(blocks) {
+                return blocks.map(block => `[${block.join(', ')}]`).join(' ');
             }
 
-            textToNumbers(text) {
+            textToBlocks(text) {
                 const blocks = [];
-                const blockRegex = /\[(\d+(?:,\s*\d+)*)\]/g;
+                const blockRegex = /\[(\d+(?:\s*,\s*\d+)*)\]/g;
                 let match;
                 
                 while ((match = blockRegex.exec(text)) !== null) {
-                    const numbers = match[1].split(',').map(num => 
-                        parseInt(num.trim(), 10)
-                    );
+                    const numbers = match[1].split(',').map(num => parseInt(num.trim(), 10));
                     blocks.push(numbers);
                 }
                 
@@ -378,7 +446,7 @@
         }
 
         // Initialize cipher
-        const cipher = new HomophonicCipher();
+        const cipher = new ProfessionalHomophonicCipher();
 
         // DOM elements
         const elements = {
@@ -386,15 +454,14 @@
             variables: document.getElementById('variables'),
             generateKey: document.getElementById('generateKey'),
             keyInfo: document.getElementById('keyInfo'),
+            keyCoefficients: document.getElementById('keyCoefficients'),
             plaintext: document.getElementById('plaintext'),
             encryptBtn: document.getElementById('encryptBtn'),
             ciphertextOutput: document.getElementById('ciphertextOutput'),
             ciphertext: document.getElementById('ciphertext'),
             decryptBtn: document.getElementById('decryptBtn'),
             decryptedOutput: document.getElementById('decryptedOutput'),
-            inputSize: document.getElementById('inputSize'),
-            outputSize: document.getElementById('outputSize'),
-            expansionRatio: document.getElementById('expansionRatio')
+            verificationInfo: document.getElementById('verificationInfo')
         };
 
         // Event handlers
@@ -404,9 +471,10 @@
                 const n = parseInt(elements.variables.value);
                 
                 const key = cipher.generateKey(p, n);
-                elements.keyInfo.textContent = `Key: p=${p}, n=${n}, all coefficients invertible`;
+                elements.keyInfo.textContent = `Key: p=${p}, n=${n}, all 256 coefficients verified`;
+                cipher.displayKeyCoefficients();
                 
-                cipher.showStatus('Key generated successfully');
+                cipher.showStatus('Key generated successfully with full coefficient visibility');
             } catch (error) {
                 cipher.showStatus(`Key generation error: ${error.message}`, 'error');
             }
@@ -420,21 +488,13 @@
                     return;
                 }
 
-                const numberBlocks = cipher.encrypt(text);
-                const outputText = cipher.numbersToText(numberBlocks);
+                const blocks = cipher.encrypt(text);
+                const outputText = cipher.blocksToText(blocks);
                 
                 elements.ciphertextOutput.textContent = outputText;
                 elements.ciphertext.value = outputText;
                 
-                // Update stats
-                const inputSize = new TextEncoder().encode(text).length;
-                const outputSize = numberBlocks.length * numberBlocks[0].length * 2; // Approximate
-                
-                elements.inputSize.textContent = `${inputSize} bytes`;
-                elements.outputSize.textContent = `${Math.ceil(outputText.length / 2)} bytes`;
-                elements.expansionRatio.textContent = `${(outputText.length / 2 / inputSize).toFixed(2)}x`;
-                
-                cipher.showStatus('Encryption successful');
+                cipher.showStatus('Encryption successful with mathematical verification');
             } catch (error) {
                 cipher.showStatus(`Encryption error: ${error.message}`, 'error');
             }
@@ -448,8 +508,8 @@
                     return;
                 }
 
-                const numberBlocks = cipher.textToNumbers(text);
-                const decryptedText = cipher.decrypt(numberBlocks);
+                const blocks = cipher.textToBlocks(text);
+                const decryptedText = cipher.decrypt(blocks);
                 
                 elements.decryptedOutput.textContent = decryptedText;
                 cipher.showStatus('Decryption successful');

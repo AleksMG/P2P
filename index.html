@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Byte-Based Homophonic Cipher with Galois Field</title>
+    <title>Professional Homophonic Cipher</title>
     <style>
+        * { box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             max-width: 1200px;
@@ -14,9 +15,7 @@
             color: #e0e0e0;
             line-height: 1.6;
         }
-        h1, h2, h3 {
-            color: #4caf50;
-        }
+        h1, h2, h3 { color: #4caf50; }
         .header {
             text-align: center;
             margin-bottom: 30px;
@@ -24,20 +23,14 @@
             background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
             border-radius: 10px;
         }
-        .container {
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
+        .container { display: flex; flex-direction: column; gap: 25px; }
         .panel {
             background-color: #2d2d2d;
             border-radius: 10px;
             padding: 25px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
         }
-        .input-group {
-            margin-bottom: 20px;
-        }
+        .input-group { margin-bottom: 20px; }
         label {
             display: block;
             margin-bottom: 8px;
@@ -52,7 +45,6 @@
             font-size: 16px;
             background-color: #333;
             color: #fff;
-            box-sizing: border-box;
         }
         textarea {
             min-height: 120px;
@@ -82,29 +74,15 @@
             white-space: pre-wrap;
             word-break: break-all;
         }
-        .key-display {
-            font-family: monospace;
-            background-color: #333;
-            padding: 15px;
-            border-radius: 6px;
-            overflow-x: auto;
-            font-size: 14px;
-            line-height: 1.4;
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
         }
-        .explanation {
-            margin-top: 20px;
-            padding: 20px;
-            background: linear-gradient(135deg, #2c3e50 0%, #1a2530 100%);
-            border-left: 5px solid #3498db;
-            border-radius: 6px;
-        }
-        .flex-row {
-            display: flex;
-            gap: 20px;
-        }
-        .flex-row > div {
-            flex: 1;
-        }
+        .error { background-color: #ff6b6b; color: #fff; }
+        .success { background-color: #4caf50; color: #fff; }
         .stats {
             display: flex;
             justify-content: space-around;
@@ -113,110 +91,23 @@
             padding: 15px;
             border-radius: 6px;
         }
-        .stat-item {
-            text-align: center;
-            padding: 10px;
-        }
+        .stat-item { text-align: center; padding: 10px; }
         .stat-value {
             font-size: 20px;
             font-weight: bold;
             color: #4caf50;
         }
-        .principle-visualization {
-            margin: 25px 0;
-            padding: 20px;
-            background-color: #2c3e50;
-            border-radius: 8px;
-        }
-        .visualization-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 15px 0;
-        }
-        .byte-block {
-            width: 70px;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid #4caf50;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 18px;
-            background-color: #34495e;
-        }
-        .arrow {
-            font-size: 30px;
-            padding: 0 20px;
-            color: #4caf50;
-        }
-        .omo-block {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .omo-byte {
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #e67e22;
-            border-radius: 6px;
-            font-size: 14px;
-            background-color: #34495e;
-        }
-        .highlight {
-            background-color: #e67e22;
-            color: white;
-            padding: 3px 6px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        .theory {
-            background-color: #2c3e50;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-        .theory-block {
-            margin-bottom: 25px;
-        }
-        .status {
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
-            text-align: center;
-            font-weight: bold;
-        }
-        .status.error {
-            background-color: #ff6b6b;
-            color: #fff;
-        }
-        .status.success {
-            background-color: #4caf50;
-            color: #fff;
-        }
+        .flex-row { display: flex; gap: 20px; }
+        .flex-row > div { flex: 1; }
         @media (max-width: 768px) {
-            .flex-row {
-                flex-direction: column;
-            }
-            .visualization-container {
-                flex-direction: column;
-                gap: 15px;
-            }
-            .arrow {
-                transform: rotate(90deg);
-                padding: 10px 0;
-            }
+            .flex-row { flex-direction: column; }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Byte-Based Homophonic Cipher with Galois Field</h1>
-        <p>Implementation with proper parameter selection and reversibility</p>
+        <h1>Professional Homophonic Cipher</h1>
+        <p>Advanced implementation with automatic format detection</p>
     </div>
     
     <div class="container">
@@ -226,88 +117,34 @@
                 <div class="input-group">
                     <label for="prime">Prime Number (p ≥ 257):</label>
                     <select id="prime">
-                        <option value="257">257 (minimum)</option>
+                        <option value="257">257</option>
                         <option value="251" selected>251 (optimal)</option>
                         <option value="509">509</option>
-                        <option value="1021">1021</option>
-                        <option value="65521">65521 (16-bit)</option>
+                        <option value="65521">65521</option>
                     </select>
                 </div>
                 <div class="input-group">
-                    <label for="variables">Number of Variables (n):</label>
+                    <label for="variables">Variables (n):</label>
                     <input type="number" id="variables" value="4" min="2" max="8">
                 </div>
             </div>
-            <div class="input-group">
-                <label for="encoding">Text Encoding:</label>
-                <select id="encoding">
-                    <option value="utf8">UTF-8</option>
-                    <option value="latin1">Latin-1</option>
-                    <option value="base64">Base64</option>
-                    <option value="hex">Hex</option>
-                </select>
-            </div>
             <button id="generateKey">Generate New Key</button>
-            
             <div class="input-group">
-                <label>Current Key (secret coefficients):</label>
-                <div class="key-display" id="keyDisplay">Key not generated</div>
-            </div>
-        </div>
-        
-        <div class="panel">
-            <h2>Cipher Principle</h2>
-            <div class="principle-visualization">
-                <div class="visualization-container">
-                    <div class="byte-block" id="originalByte">A</div>
-                    <div class="arrow">→</div>
-                    <div class="omo-block" id="omoVisualization">
-                        <div class="omo-byte">12</div>
-                        <div class="omo-byte">87</div>
-                        <div class="omo-byte">201</div>
-                        <div class="omo-byte">45</div>
-                    </div>
-                    <div class="arrow">→</div>
-                    <div class="byte-block" id="decryptedByte">A</div>
-                </div>
-                <div style="text-align: center; margin-top: 15px;">
-                    <button id="demoBtn">Demonstrate Principle</button>
-                </div>
-            </div>
-            
-            <div class="theory">
-                <h3>Theoretical Foundations</h3>
-                <div class="theory-block">
-                    <p>Each byte <span class="highlight">b</span> corresponds to an equation in Galois field GF(p):</p>
-                    <p>a₁x₁ + a₂x₂ + ... + aₙxₙ ≡ b (mod p)</p>
-                    <p>where <span class="highlight">p</span> is a prime number > 255, <span class="highlight">a₁...aₙ</span> are coefficients (part of the key).</p>
-                </div>
-                <div class="theory-block">
-                    <p>To ensure reversibility, the last coefficient <span class="highlight">aₙ</span> must be invertible modulo p, i.e., gcd(aₙ, p) = 1.</p>
-                    <p>Number of homophones per byte: <span class="highlight">p^(n-1)</span></p>
-                    <p>For p=251, n=4: 251³ = 15,813,251 homophones per byte!</p>
-                </div>
+                <label>Key Fingerprint:</label>
+                <div class="output" id="keyDisplay">Key not generated</div>
             </div>
         </div>
         
         <div class="panel">
             <h2>Encryption</h2>
             <div class="input-group">
-                <label for="inputType">Input Type:</label>
-                <select id="inputType">
-                    <option value="text">Text</option>
-                    <option value="hex">Hex</option>
-                    <option value="base64">Base64</option>
-                </select>
-            </div>
-            <div class="input-group">
-                <label for="plaintext">Input Data:</label>
+                <label for="plaintext">Input Data (text/hex/base64):</label>
                 <textarea id="plaintext" placeholder="Enter data to encrypt">Hello World! Привет мир!</textarea>
             </div>
             <button id="encryptBtn">Encrypt</button>
             
             <div class="input-group">
-                <label>Encryption Result (homophones in hex):</label>
+                <label>Encrypted Result (hex, no spaces):</label>
                 <div class="output" id="ciphertextOutput"></div>
             </div>
         </div>
@@ -315,16 +152,16 @@
         <div class="panel">
             <h2>Decryption</h2>
             <div class="input-group">
-                <label for="ciphertext">Ciphertext (homophones in hex):</label>
+                <label for="ciphertext">Ciphertext (hex, no spaces):</label>
                 <textarea id="ciphertext" placeholder="Enter ciphertext to decrypt"></textarea>
             </div>
             <button id="decryptBtn">Decrypt</button>
             
             <div class="input-group">
-                <label>Decryption Result:</label>
+                <label>Decrypted Result:</label>
                 <div class="output" id="decryptedOutput"></div>
             </div>
-            <div id="decryptionStatus"></div>
+            <div id="status"></div>
         </div>
         
         <div class="stats">
@@ -337,28 +174,18 @@
                 <div class="stat-value" id="outputSize">0 bytes</div>
             </div>
             <div class="stat-item">
-                <div>Expansion Ratio</div>
+                <div>Expansion</div>
                 <div class="stat-value" id="expansionRatio">1.0x</div>
             </div>
-        </div>
-        
-        <div class="explanation">
-            <h3>Why the cipher works correctly:</h3>
-            <p>1. Prime number <span class="highlight">p > 255</span> ensures all bytes can be represented</p>
-            <p>2. Invertible last coefficient <span class="highlight">aₙ</span> enables decryption</p>
-            <p>3. Homophonic nature prevents frequency analysis</p>
-            <p>4. Equation in Galois field guarantees correct transformations</p>
         </div>
     </div>
 
     <script>
-        // DOM Elements
+        // DOM elements
         const primeSelect = document.getElementById('prime');
         const variablesInput = document.getElementById('variables');
-        const encodingSelect = document.getElementById('encoding');
         const generateKeyBtn = document.getElementById('generateKey');
         const keyDisplay = document.getElementById('keyDisplay');
-        const inputTypeSelect = document.getElementById('inputType');
         const plaintextInput = document.getElementById('plaintext');
         const encryptBtn = document.getElementById('encryptBtn');
         const ciphertextOutput = document.getElementById('ciphertextOutput');
@@ -368,366 +195,216 @@
         const inputSizeEl = document.getElementById('inputSize');
         const outputSizeEl = document.getElementById('outputSize');
         const expansionRatioEl = document.getElementById('expansionRatio');
-        const originalByteEl = document.getElementById('originalByte');
-        const omoVisualizationEl = document.getElementById('omoVisualization');
-        const decryptedByteEl = document.getElementById('decryptedByte');
-        const demoBtn = document.getElementById('demoBtn');
-        const decryptionStatusEl = document.getElementById('decryptionStatus');
+        const statusEl = document.getElementById('status');
         
-        // Current key
         let currentKey = null;
         
-        // Generate random number in range [min, max]
+        // Utility functions
         function getRandomInt(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
         
-        // Euclidean algorithm for GCD
         function gcd(a, b) {
-            if (b === 0) return a;
-            return gcd(b, a % b);
+            return b === 0 ? a : gcd(b, a % b);
         }
         
-        // Extended Euclidean algorithm for modular inverse
         function modInverse(a, mod) {
             if (gcd(a, mod) !== 1) return null;
-            
-            let t = 0, newT = 1;
-            let r = mod, newR = a;
+            let [t, newT] = [0, 1];
+            let [r, newR] = [mod, a];
             
             while (newR !== 0) {
                 const quotient = Math.floor(r / newR);
                 [t, newT] = [newT, t - quotient * newT];
                 [r, newR] = [newR, r - quotient * newR];
             }
-            
-            if (r > 1) return null;
-            if (t < 0) t += mod;
-            
-            return t;
+            return t < 0 ? t + mod : t;
         }
         
-        // Convert string to byte array
-        function stringToBytes(str, encoding = 'utf8') {
-            if (encoding === 'hex') {
-                const hex = str.replace(/[^0-9a-fA-F]/g, '');
+        function showStatus(message, type) {
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            setTimeout(() => statusEl.textContent = '', 5000);
+        }
+        
+        // Detect input format and convert to bytes
+        function inputToBytes(input) {
+            input = input.trim();
+            
+            // Hex detection (only hex characters, even length)
+            if (/^[0-9a-fA-F]+$/.test(input) && input.length % 2 === 0) {
                 const bytes = [];
-                for (let i = 0; i < hex.length; i += 2) {
-                    bytes.push(parseInt(hex.substr(i, 2), 16));
+                for (let i = 0; i < input.length; i += 2) {
+                    bytes.push(parseInt(input.substr(i, 2), 16));
                 }
                 return bytes;
-            } else if (encoding === 'base64') {
-                const binary = atob(str);
-                const bytes = new Uint8Array(binary.length);
-                for (let i = 0; i < binary.length; i++) {
-                    bytes[i] = binary.charCodeAt(i);
-                }
-                return Array.from(bytes);
-            } else if (encoding === 'latin1') {
-                const bytes = new Uint8Array(str.length);
-                for (let i = 0; i < str.length; i++) {
-                    bytes[i] = str.charCodeAt(i) & 0xFF;
-                }
-                return Array.from(bytes);
-            } else { // UTF-8 by default
-                const encoder = new TextEncoder();
-                return Array.from(encoder.encode(str));
             }
+            
+            // Base64 detection
+            if (/^[A-Za-z0-9+/]*={0,2}$/.test(input) && input.length % 4 === 0) {
+                try {
+                    const binary = atob(input);
+                    return Array.from(binary, c => c.charCodeAt(0));
+                } catch (e) {
+                    // Not valid base64
+                }
+            }
+            
+            // Default to text (UTF-8)
+            const encoder = new TextEncoder();
+            return Array.from(encoder.encode(input));
         }
         
-        // Convert byte array to string
-        function bytesToString(bytes, encoding = 'utf8') {
-            if (encoding === 'hex') {
-                return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(' ');
-            } else if (encoding === 'base64') {
-                const binary = String.fromCharCode(...bytes);
-                return btoa(binary);
-            } else if (encoding === 'latin1') {
-                return String.fromCharCode(...bytes);
-            } else { // UTF-8 by default
-                const decoder = new TextDecoder('utf-8');
-                return decoder.decode(new Uint8Array(bytes));
-            }
+        // Convert bytes to output format
+        function bytesToHex(bytes) {
+            return bytes.map(b => b.toString(16).padStart(2, '0')).join('');
         }
         
-        // Generate new key
+        function bytesToText(bytes) {
+            const decoder = new TextDecoder('utf-8');
+            return decoder.decode(new Uint8Array(bytes));
+        }
+        
+        // Key generation
         function generateKey() {
             const p = parseInt(primeSelect.value);
             const n = parseInt(variablesInput.value);
             
             if (p <= 255) {
-                showStatus('Prime number must be greater than 255', 'error');
+                showStatus('Prime must be > 255', 'error');
                 return;
             }
             
-            // Generate coefficients for each possible byte (0-255)
             const coefficients = [];
-            
             for (let byteValue = 0; byteValue < 256; byteValue++) {
                 const coeffs = [];
-                
-                // Generate n-1 random coefficients
                 for (let j = 0; j < n - 1; j++) {
                     coeffs.push(getRandomInt(1, p - 1));
                 }
                 
-                // Ensure the last coefficient is invertible modulo p
-                let lastCoefficient;
+                let lastCoeff;
                 do {
-                    lastCoefficient = getRandomInt(1, p - 1);
-                } while (modInverse(lastCoefficient, p) === null);
+                    lastCoeff = getRandomInt(1, p - 1);
+                } while (modInverse(lastCoeff, p) === null);
                 
-                coeffs.push(lastCoefficient);
+                coeffs.push(lastCoeff);
                 coefficients[byteValue] = coeffs;
             }
             
             currentKey = { p, n, coefficients };
-            updateKeyDisplay();
-            showStatus('New key generated successfully', 'success');
+            keyDisplay.textContent = `p=${p}, n=${n}, fingerprint: ${bytesToHex(coefficients[0]).substring(0, 16)}...`;
+            showStatus('New key generated', 'success');
         }
         
-        // Update key display
-        function updateKeyDisplay() {
-            if (!currentKey) {
-                keyDisplay.textContent = 'Key not generated';
-                return;
-            }
-            
-            let keyText = `p = ${currentKey.p}, n = ${currentKey.n}\n`;
-            keyText += `Coefficients for bytes 0, 1, 2, ..., 255:\n`;
-            
-            // Show only first 5 bytes for brevity
-            for (let i = 0; i < 5; i++) {
-                keyText += `Byte ${i}: ${currentKey.coefficients[i].join(', ')}\n`;
-            }
-            keyText += `...\n`;
-            
-            keyDisplay.textContent = keyText;
-        }
-        
-        // Show status message
-        function showStatus(message, type) {
-            decryptionStatusEl.textContent = message;
-            decryptionStatusEl.className = `status ${type}`;
-            
-            // Auto hide after 5 seconds
-            setTimeout(() => {
-                decryptionStatusEl.textContent = '';
-                decryptionStatusEl.className = '';
-            }, 5000);
-        }
-        
-        // Encrypt bytes
+        // Encryption
         function encrypt() {
             if (!currentKey) {
-                showStatus('Generate a key first!', 'error');
+                showStatus('Generate key first', 'error');
                 return;
             }
             
-            const inputType = inputTypeSelect.value;
-            let inputData = plaintextInput.value;
+            const input = plaintextInput.value;
+            if (!input.trim()) {
+                showStatus('Input is empty', 'error');
+                return;
+            }
             
-            // Convert input data to bytes
-            let inputBytes;
             try {
-                if (inputType === 'hex') {
-                    inputBytes = stringToBytes(inputData, 'hex');
-                } else if (inputType === 'base64') {
-                    inputBytes = stringToBytes(inputData, 'base64');
-                } else {
-                    inputBytes = stringToBytes(inputData, 'utf8');
+                const inputBytes = inputToBytes(input);
+                const { p, n, coefficients } = currentKey;
+                const outputBytes = [];
+                
+                for (const byte of inputBytes) {
+                    const a = coefficients[byte];
+                    const values = [];
+                    
+                    for (let i = 0; i < n - 1; i++) {
+                        values.push(getRandomInt(0, p - 1));
+                    }
+                    
+                    let sum = values.reduce((s, val, i) => (s + a[i] * val) % p, 0);
+                    const remainder = (byte - sum + p) % p;
+                    const inv = modInverse(a[n-1], p);
+                    
+                    if (inv === null) {
+                        throw new Error(`No inverse for coefficient ${a[n-1]} mod ${p}`);
+                    }
+                    
+                    values.push((remainder * inv) % p);
+                    outputBytes.push(...values);
                 }
-            } catch (e) {
-                showStatus(`Input conversion error: ${e.message}`, 'error');
-                return;
+                
+                const inputSize = inputBytes.length;
+                const outputSize = outputBytes.length;
+                
+                inputSizeEl.textContent = `${inputSize} bytes`;
+                outputSizeEl.textContent = `${outputSize} bytes`;
+                expansionRatioEl.textContent = `${(outputSize / inputSize).toFixed(2)}x`;
+                
+                ciphertextOutput.textContent = bytesToHex(outputBytes);
+                ciphertextInput.value = bytesToHex(outputBytes);
+                
+                showStatus('Encryption successful', 'success');
+            } catch (error) {
+                showStatus(`Encryption error: ${error.message}`, 'error');
             }
-            
-            if (inputBytes.length === 0) {
-                showStatus('Input data is empty', 'error');
-                return;
-            }
-            
-            const { p, n, coefficients } = currentKey;
-            const outputBytes = [];
-            
-            // Encrypt each byte
-            for (const byte of inputBytes) {
-                // Get coefficients for current byte
-                const a = coefficients[byte];
-                
-                // Generate random values for first n-1 variables
-                const values = [];
-                for (let i = 0; i < n - 1; i++) {
-                    values.push(getRandomInt(0, p - 1));
-                }
-                
-                // Calculate value of the last variable from equation:
-                // a₁x₁ + a₂x₂ + ... + aₙxₙ ≡ byte (mod p)
-                let sum = 0;
-                for (let i = 0; i < n - 1; i++) {
-                    sum = (sum + a[i] * values[i]) % p;
-                }
-                
-                // Solve equation: aₙxₙ ≡ (byte - sum) mod p
-                const remainder = (byte - sum + p) % p;
-                const inv = modInverse(a[n-1], p);
-                
-                if (inv === null) {
-                    showStatus(`No inverse for coefficient ${a[n-1]} modulo ${p}`, 'error');
-                    return;
-                }
-                
-                const lastValue = (remainder * inv) % p;
-                values.push(lastValue);
-                
-                // Add values to output array
-                outputBytes.push(...values);
-            }
-            
-            // Update statistics
-            const inputSize = inputBytes.length;
-            const outputSize = outputBytes.length;
-            const expansionRatio = (outputSize / inputSize).toFixed(2);
-            
-            inputSizeEl.textContent = `${inputSize} bytes`;
-            outputSizeEl.textContent = `${outputSize} bytes`;
-            expansionRatioEl.textContent = `${expansionRatio}x`;
-            
-            // Display result
-            const encoding = encodingSelect.value;
-            ciphertextOutput.textContent = bytesToString(outputBytes, encoding);
-            ciphertextInput.value = bytesToString(outputBytes, encoding);
-            
-            showStatus('Encryption completed successfully', 'success');
         }
         
-        // Decrypt bytes
+        // Decryption
         function decrypt() {
             if (!currentKey) {
-                showStatus('Generate a key first!', 'error');
+                showStatus('Generate key first', 'error');
                 return;
             }
             
-            const ciphertext = ciphertextInput.value;
-            const { p, n, coefficients } = currentKey;
-            
-            // Convert ciphertext to bytes
-            let cipherBytes;
-            try {
-                cipherBytes = stringToBytes(ciphertext, encodingSelect.value);
-            } catch (e) {
-                showStatus(`Ciphertext conversion error: ${e.message}`, 'error');
-                return;
-            }
-            
-            if (cipherBytes.length === 0) {
+            const ciphertext = ciphertextInput.value.trim();
+            if (!ciphertext) {
                 showStatus('Ciphertext is empty', 'error');
                 return;
             }
             
-            if (cipherBytes.length % n !== 0) {
-                showStatus(`Ciphertext length (${cipherBytes.length} bytes) is not divisible by ${n}`, 'error');
-                return;
-            }
-            
-            const outputBytes = [];
-            
-            // Decrypt each block of n bytes
-            for (let i = 0; i < cipherBytes.length; i += n) {
-                const values = cipherBytes.slice(i, i + n);
-                
-                // Check which byte satisfies the equation
-                let found = false;
-                
-                for (let byteValue = 0; byteValue < 256; byteValue++) {
-                    const a = coefficients[byteValue];
-                    let sum = 0;
-                    
-                    for (let j = 0; j < n; j++) {
-                        sum = (sum + a[j] * values[j]) % p;
-                    }
-                    
-                    if (sum === byteValue) {
-                        outputBytes.push(byteValue);
-                        found = true;
-                        break;
-                    }
-                }
-                
-                if (!found) {
-                    showStatus(`Cannot decrypt block: ${values.join(', ')}`, 'error');
-                    return;
-                }
-            }
-            
-            // Display result
-            const inputType = inputTypeSelect.value;
             try {
-                if (inputType === 'hex') {
-                    decryptedOutput.textContent = bytesToString(outputBytes, 'hex');
-                } else if (inputType === 'base64') {
-                    decryptedOutput.textContent = bytesToString(outputBytes, 'base64');
-                } else {
-                    decryptedOutput.textContent = bytesToString(outputBytes, 'utf8');
+                const cipherBytes = inputToBytes(ciphertext);
+                const { p, n, coefficients } = currentKey;
+                
+                if (cipherBytes.length % n !== 0) {
+                    throw new Error(`Ciphertext length ${cipherBytes.length} not divisible by ${n}`);
                 }
-                showStatus('Decryption completed successfully', 'success');
-            } catch (e) {
-                decryptedOutput.textContent = `Decoded bytes: ${bytesToString(outputBytes, 'hex')}`;
-                showStatus('Decryption completed (output as hex due to encoding issues)', 'success');
+                
+                const outputBytes = [];
+                for (let i = 0; i < cipherBytes.length; i += n) {
+                    const values = cipherBytes.slice(i, i + n);
+                    let found = false;
+                    
+                    for (let byteValue = 0; byteValue < 256; byteValue++) {
+                        const a = coefficients[byteValue];
+                        const sum = values.reduce((s, val, j) => (s + a[j] * val) % p, 0);
+                        
+                        if (sum === byteValue) {
+                            outputBytes.push(byteValue);
+                            found = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!found) {
+                        throw new Error(`Cannot decrypt block at position ${i}`);
+                    }
+                }
+                
+                decryptedOutput.textContent = bytesToText(outputBytes);
+                showStatus('Decryption successful', 'success');
+            } catch (error) {
+                showStatus(`Decryption error: ${error.message}`, 'error');
             }
-        }
-        
-        // Demonstrate encryption principle
-        function demonstratePrinciple() {
-            if (!currentKey) {
-                showStatus('Generate a key first!', 'error');
-                return;
-            }
-            
-            const byte = 'A'.charCodeAt(0);
-            const { p, n, coefficients } = currentKey;
-            const a = coefficients[byte];
-            
-            // Generate random values for first n-1 variables
-            const values = [];
-            for (let i = 0; i < n - 1; i++) {
-                values.push(getRandomInt(0, p - 1));
-            }
-            
-            // Calculate value of the last variable
-            let sum = 0;
-            for (let i = 0; i < n - 1; i++) {
-                sum = (sum + a[i] * values[i]) % p;
-            }
-            
-            const remainder = (byte - sum + p) % p;
-            const inv = modInverse(a[n-1], p);
-            const lastValue = (remainder * inv) % p;
-            values.push(lastValue);
-            
-            // Update visualization
-            originalByteEl.textContent = 'A';
-            omoVisualizationEl.innerHTML = '';
-            
-            for (let i = 0; i < n; i++) {
-                const byteEl = document.createElement('div');
-                byteEl.className = 'omo-byte';
-                byteEl.textContent = values[i].toString(16).padStart(2, '0');
-                omoVisualizationEl.appendChild(byteEl);
-            }
-            
-            decryptedByteEl.textContent = 'A';
-            
-            showStatus('Encryption principle demonstrated', 'success');
         }
         
         // Event listeners
         generateKeyBtn.addEventListener('click', generateKey);
         encryptBtn.addEventListener('click', encrypt);
         decryptBtn.addEventListener('click', decrypt);
-        demoBtn.addEventListener('click', demonstratePrinciple);
         
-        // Generate key on load
+        // Initialize
         window.addEventListener('load', generateKey);
     </script>
 </body>

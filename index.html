@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Professional Byte Homophonic Cipher</title>
     <style>
+        /* Стили остаются без изменений */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -537,32 +538,58 @@
                 }
 
                 this.logVerification(`Decryption completed: ${outputBytes.length} bytes recovered`);
-                const decoder = new TextDecoder('utf-8');
-                return decoder.decode(new Uint8Array(outputBytes));
+                
+                // Исправление: правильное преобразование байтов в текст
+                try {
+                    const decoder = new TextDecoder('utf-8', { fatal: true });
+                    return decoder.decode(new Uint8Array(outputBytes));
+                } catch (e) {
+                    this.logVerification(`UTF-8 decoding error: ${e.message}`);
+                    // Альтернативный метод для некорректных UTF-8 данных
+                    return String.fromCharCode.apply(null, outputBytes);
+                }
             }
 
             blocksToText(blocks) {
-                return blocks.map(block => `[${block.join(', ')}]`).join(' ');
+                // Исправление: более надежный формат для сериализации блоков
+                return blocks.map(block => block.join(',')).join(';');
             }
 
             textToBlocks(text) {
-                const blocks = [];
-                const blockRegex = /\[(\d+(?:\s*,\s*\d+)*)\]/g;
-                let match;
-                
-                while ((match = blockRegex.exec(text)) !== null) {
-                    const numbers = match[1].split(',').map(num => parseInt(num.trim(), 10));
-                    if (numbers.some(isNaN)) {
-                        throw new Error('Invalid number in ciphertext');
+                // Исправление: правильный парсинг блоков из текста
+                try {
+                    if (!text.trim()) {
+                        throw new Error('Empty ciphertext');
                     }
-                    blocks.push(numbers);
+                    
+                    const blocks = [];
+                    const blockStrings = text.split(';');
+                    
+                    for (let i = 0; i < blockStrings.length; i++) {
+                        const numbers = blockStrings[i].split(',').map(num => {
+                            const parsed = parseInt(num.trim(), 10);
+                            if (isNaN(parsed)) {
+                                throw new Error(`Invalid number: ${num}`);
+                            }
+                            return parsed;
+                        });
+                        
+                        if (numbers.length !== parseInt(document.getElementById('variables').value)) {
+                            throw new Error(`Block ${i} has incorrect number of values: ${numbers.length}`);
+                        }
+                        
+                        blocks.push(numbers);
+                    }
+                    
+                    if (blocks.length === 0) {
+                        throw new Error('No valid blocks found in ciphertext');
+                    }
+                    
+                    return blocks;
+                } catch (error) {
+                    this.logVerification(`Error parsing ciphertext: ${error.message}`);
+                    throw new Error(`Invalid ciphertext format: ${error.message}`);
                 }
-                
-                if (blocks.length === 0) {
-                    throw new Error('No valid blocks found in ciphertext');
-                }
-                
-                return blocks;
             }
         }
 
@@ -615,13 +642,13 @@
                 const inputSize = new TextEncoder().encode(text).length;
                 const blocks = cipher.encrypt(text);
                 const outputText = cipher.blocksToText(blocks);
-                const outputSize = outputText.length / 2; // Approximate byte count
+                const outputSize = outputText.length;
                 
                 elements.ciphertextOutput.textContent = outputText;
                 elements.ciphertext.value = outputText;
                 elements.inputSize.textContent = `${inputSize} bytes`;
-                elements.outputSize.textContent = `${Math.ceil(outputSize)} bytes`;
-                elements.expansionRatio.textContent = `${(outputSize / inputSize).toFixed(2)}x`;
+                elements.outputSize.textContent = `${outputSize} characters`;
+                elements.expansionRatio.textContent = `${(outputSize / Math.max(1, inputSize)).toFixed(2)}x`;
                 
                 cipher.showStatus('Encryption completed with mathematical verification');
             } catch (error) {

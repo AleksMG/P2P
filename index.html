@@ -1,551 +1,522 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Volterra Cryptographic System</title>
+    <title>Омофонический шифр с квадратом 26x26</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Courier New', monospace;
-        }
-        
         body {
-            background: #0a0a0a;
-            color: #00ff00;
-            min-height: 100vh;
-            padding: 20px;
-            overflow-x: hidden;
-        }
-        
-        .container {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             max-width: 1200px;
             margin: 0 auto;
-            background: rgba(10, 15, 20, 0.95);
-            border: 1px solid #00ff00;
-            border-radius: 2px;
             padding: 20px;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
         }
-        
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            border-bottom: 1px solid #00ff00;
-        }
-        
         h1 {
-            font-size: 2.2em;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px #00ff00;
-            letter-spacing: 2px;
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #3498db;
         }
-        
-        .equation {
-            font-family: 'Cambria Math', serif;
-            font-size: 1.2em;
-            margin: 15px 0;
-            color: #00ffff;
-        }
-        
-        .grid {
+        .container {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
             margin-bottom: 30px;
         }
-        
-        @media (max-width: 768px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
         .panel {
-            background: rgba(15, 25, 35, 0.9);
-            border: 1px solid #00ff00;
-            border-radius: 2px;
-            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e0e0e0;
         }
-        
-        h2 {
-            color: #00ff00;
-            margin-bottom: 15px;
-            font-size: 1.3em;
-            border-bottom: 1px solid #00ff00;
-            padding-bottom: 5px;
+        .full-width {
+            grid-column: span 2;
         }
-        
         textarea {
             width: 100%;
-            height: 120px;
-            background: #001122;
-            color: #00ff00;
-            border: 1px solid #00ff00;
-            border-radius: 2px;
-            padding: 10px;
-            font-family: 'Courier New', monospace;
+            min-height: 120px;
+            margin-bottom: 15px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
             resize: vertical;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
             margin-bottom: 15px;
-            font-size: 0.9em;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box;
         }
-        
-        textarea:focus {
-            outline: none;
-            border-color: #00ffff;
-            box-shadow: 0 0 8px rgba(0, 255, 255, 0.3);
-        }
-        
-        .input-group {
-            margin-bottom: 15px;
-        }
-        
         label {
             display: block;
-            margin-bottom: 5px;
-            color: #00ffff;
-            font-size: 0.9em;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
         }
-        
-        input[type="password"] {
-            width: 100%;
-            padding: 8px;
-            background: #001122;
-            color: #00ff00;
-            border: 1px solid #00ff00;
-            border-radius: 2px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-        }
-        
         button {
-            background: linear-gradient(135deg, #00ff00 0%, #008800 100%);
-            color: #001122;
+            background-color: #3498db;
+            color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 2px;
+            padding: 12px 20px;
+            border-radius: 6px;
             cursor: pointer;
-            font-family: 'Courier New', monospace;
             font-weight: bold;
-            margin: 4px;
-            transition: all 0.2s ease;
-            font-size: 0.9em;
+            font-size: 16px;
+            transition: all 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
         }
-        
         button:hover {
-            background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%);
-            transform: translateY(-1px);
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        
-        button:active {
-            transform: translateY(0);
+        button.secondary {
+            background-color: #7f8c8d;
         }
-        
-        .button-group {
+        button.secondary:hover {
+            background-color: #636e72;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+            border: 1px solid #eee;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+            min-height: 60px;
+        }
+        .output-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 5px;
+            text-align: center;
+            font-family: monospace;
+        }
+        th {
+            background-color: #2c3e50;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .instructions {
+            background-color: #e8f4fc;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 5px solid #3498db;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .bigram-cell {
+            font-weight: bold;
+            background-color: #e8f4fc;
+        }
+        .control-panel {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin: 15px 0;
+            gap: 10px;
+            margin-bottom: 15px;
         }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 12px;
-            margin: 20px 0;
-        }
-        
-        .stat-item {
-            background: rgba(20, 35, 45, 0.8);
-            padding: 8px;
-            border-radius: 2px;
-            border: 1px solid #00ff00;
-            font-size: 0.85em;
-        }
-        
-        .log {
-            background: #001122;
-            border: 1px solid #00ff00;
-            border-radius: 2px;
-            padding: 12px;
-            height: 180px;
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 0.8em;
-            margin-top: 20px;
-        }
-        
-        .log-entry {
-            margin-bottom: 4px;
-            padding: 4px;
-            border-left: 2px solid #00ff00;
-        }
-        
-        .success { color: #00ff00; }
-        .error { color: #ff4444; }
-        .warning { color: #ffff00; }
-        .info { color: #00ffff; }
-        
-        .progress-bar {
-            width: 100%;
-            height: 16px;
-            background: #001122;
-            border: 1px solid #00ff00;
-            border-radius: 2px;
-            margin: 10px 0;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #00ff00 0%, #00ffff 100%);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-        
-        .status-indicator {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-        
-        .status-ready { background: #00ff00; }
-        .status-processing { background: #ffff00; }
-        .status-error { background: #ff4444; }
-        
-        footer {
-            text-align: center;
-            margin-top: 30px;
-            padding: 20px;
-            border-top: 1px solid #00ff00;
-            color: #00ffff;
-            font-size: 0.8em;
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .full-width {
+                grid-column: span 1;
+            }
         }
     </style>
 </head>
 <body>
+    <h1>Омофонический шифр с квадратом 26x26</h1>
+    
     <div class="container">
-        <header>
-            <h1>VOLTERRA CRYPTOSYSTEM</h1>
-            <div class="equation">
-                u(x) = f(x) + λ ∫ K(x, s, u(s)) ds
-            </div>
-            <p>Professional p-adic bytewise encryption in GF(2⁸)</p>
-        </header>
-
-        <div class="grid">
-            <div class="panel">
-                <h2>INPUT</h2>
-                <div class="input-group">
-                    <label for="keyInput">ENCRYPTION KEY (32 bytes):</label>
-                    <input type="password" id="keyInput" value="volterra-secret-key-256-bit" placeholder="Enter encryption key">
-                </div>
-                
-                <div class="input-group">
-                    <label for="messageInput">MESSAGE:</label>
-                    <textarea id="messageInput" placeholder="Enter text to encrypt">Hello</textarea>
-                </div>
-
-                <div class="button-group">
-                    <button onclick="generateKey()">GENERATE KEY</button>
-                    <button onclick="encryptMessage()">ENCRYPT</button>
-                    <button onclick="decryptMessage()">DECRYPT</button>
-                    <button onclick="clearAll()">CLEAR ALL</button>
-                </div>
-            </div>
-
-            <div class="panel">
-                <h2>OUTPUT</h2>
-                <div class="input-group">
-                    <label for="outputText">RESULT:</label>
-                    <textarea id="outputText" readonly placeholder="Result will appear here"></textarea>
-                </div>
-                
-                <div class="stats">
-                    <div class="stat-item">
-                        <span class="status-indicator status-ready"></span>
-                        Status: <span id="statusText">Ready</span>
-                    </div>
-                    <div class="stat-item">
-                        Input bytes: <span id="inputBytes">0</span>
-                    </div>
-                    <div class="stat-item">
-                        Output bytes: <span id="outputBytes">0</span>
-                    </div>
-                </div>
-
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressBar"></div>
-                </div>
-            </div>
-        </div>
-
         <div class="panel">
-            <h2>SYSTEM LOG</h2>
-            <div class="log" id="systemLog"></div>
+            <h2>Шифрование</h2>
+            <label for="inputText">Исходный текст (только английские буквы):</label>
+            <textarea id="inputText" placeholder="Введите текст для шифрования..."></textarea>
+            
+            <label for="encryptionKey">Ключ шифрования:</label>
+            <input type="text" id="encryptionKey" placeholder="Введите ключ...">
+            
+            <button onclick="encrypt()">Зашифровать</button>
+            
+            <div class="output-title">Результат шифрования:</div>
+            <div class="output" id="encryptedOutput">Зашифрованный текст появится здесь...</div>
         </div>
-
-        <footer>
-            <p>Volterra Integral Equation Encryption System | Professional Implementation | Byte-by-Byte Processing</p>
-            <p>u(x) = f(x) + λ ∫ K(x, s, u(s)) ds</p>
-        </footer>
+        
+        <div class="panel">
+            <h2>Расшифровка</h2>
+            <label for="encryptedText">Зашифрованный текст:</label>
+            <textarea id="encryptedText" placeholder="Введите текст для расшифровки..."></textarea>
+            
+            <label for="decryptionKey">Ключ расшифровки:</label>
+            <input type="text" id="decryptionKey" placeholder="Введите ключ...">
+            
+            <button onclick="decrypt()">Расшифровать</button>
+            
+            <div class="output-title">Результат расшифровки:</div>
+            <div class="output" id="decryptedOutput">Расшифрованный текст появится здесь...</div>
+        </div>
+        
+        <div class="panel full-width">
+            <h2>Таблица омофонов</h2>
+            <div class="control-panel">
+                <button onclick="generateTable()">Сгенерировать таблицу</button>
+                <button onclick="renderTable()" class="secondary">Обновить отображение</button>
+                <button onclick="clearAll()" class="secondary">Очистить всё</button>
+            </div>
+            
+            <div id="tableStatus"></div>
+            
+            <div class="table-container">
+                <table id="omophoneTable">
+                    <thead>
+                        <tr>
+                            <th>Биграмма</th>
+                            <!-- Заголовки столбцов будут добавлены через JavaScript -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Данные таблицы будут добавлены через JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="instructions full-width">
+            <h3>Как это работает:</h3>
+            <p>Этот инструмент реализует омофонический шифр для английского алфавита с использованием квадрата 26x26. Каждая ячейка в квадрате соответствует биграмме (паре букв) и содержит несколько омофонов из набора Base64.</p>
+            <p><strong>Всего существует 676 возможных биграмм (26x26) и 4096 уникальных омофонов (64x64)</strong>, что позволяет распределить по 6 омофонов на большинство ячеек, а на 40 ячеек - по 7.</p>
+            <p><strong>Для использования:</strong></p>
+            <ol>
+                <li>Введите ключ (любую фразу)</li>
+                <li>Нажмите "Сгенерировать таблицу"</li>
+                <li>Введите текст для шифрования/расшифровки</li>
+                <li>Нажмите соответствующую кнопку</li>
+            </ol>
+            <p>Один и тот же ключ необходим как для шифрования, так и для расшифровки.</p>
+        </div>
     </div>
 
     <script>
-        class VolterraCipher {
-            constructor(key) {
-                this.key = this.deriveKeyMaterial(key);
-                this.initializeGF();
-                this.deriveParameters();
+        // Константы и глобальные переменные
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+        let omophoneTable = {};
+        let reverseLookupMap = {};
+        
+        // Простой детерминированный ГПСЧ на основе ключа
+        function createSeededRandom(seed) {
+            if (!seed) seed = Math.random().toString(36).substring(2);
+            let state = 0;
+            
+            for (let i = 0; i < seed.length; i++) {
+                state = (state << 5) - state + seed.charCodeAt(i);
+                state |= 0;
             }
-
-            deriveKeyMaterial(key) {
-                const encoder = new TextEncoder();
-                let keyData = encoder.encode(key);
-                let hash = new Uint8Array(32);
-                
-                for (let i = 0; i < keyData.length; i++) {
-                    hash[i % 32] = (hash[i % 32] ^ keyData[i] * 13) & 0xFF;
-                    hash[(i + 7) % 32] = (hash[(i + 7) % 32] + keyData[i] * 17) & 0xFF;
-                    hash[(i + 19) % 32] = (hash[(i + 19) % 32] ^ (keyData[i] << 3)) & 0xFF;
-                }
-                return hash;
+            
+            return function() {
+                state = (state * 1664525 + 1013904223) | 0;
+                return (state >>> 0) / 4294967296;
+            };
+        }
+        
+        // Детерминированное перемешивание Фишера-Йейтса с использованием seed
+        function shuffleArrayWithSeed(array, seed) {
+            if (!seed) return array;
+            
+            const random = createSeededRandom(seed);
+            const result = [...array];
+            
+            for (let i = result.length - 1; i > 0; i--) {
+                const j = Math.floor(random() * (i + 1));
+                [result[i], result[j]] = [result[j], result[i]];
             }
-
-            initializeGF() {
-                this.gf = new Array(256);
-                this.gfLog = new Array(256);
-                this.gfExp = new Array(512);
-                
-                let x = 1;
-                for (let i = 0; i < 256; i++) {
-                    this.gfExp[i] = x;
-                    this.gfLog[x] = i;
-                    x = (x << 1) ^ ((x & 0x80) ? 0x11D : 0);
-                }
-                
-                for (let i = 255; i < 512; i++) {
-                    this.gfExp[i] = this.gfExp[i - 255];
-                }
-
-                this.add = (a, b) => a ^ b;
-                this.mul = (a, b) => {
-                    if (a === 0 || b === 0) return 0;
-                    return this.gfExp[(this.gfLog[a] + this.gfLog[b]) % 255];
-                };
-            }
-
-            deriveParameters() {
-                this.lambda = this.key[0] || 1;
-                
-                this.kernelParams = new Array(8);
-                for (let i = 0; i < 8; i++) {
-                    this.kernelParams[i] = this.key[i + 3] / 255.0;
-                }
-
-                this.generateSBox();
-            }
-
-            generateSBox() {
-                let sbox = new Array(256);
-                for (let i = 0; i < 256; i++) sbox[i] = i;
-                
-                let j = 0;
-                for (let i = 0; i < 256; i++) {
-                    j = (j + sbox[i] + this.key[i % 32]) % 256;
-                    [sbox[i], sbox[j]] = [sbox[j], sbox[i]];
-                }
-                
-                this.sbox = sbox;
-                this.invSbox = new Array(256);
-                for (let i = 0; i < 256; i++) {
-                    this.invSbox[this.sbox[i]] = i;
+            
+            return result;
+        }
+        
+        // Инициализация таблицы омофонов
+        function initializeTable() {
+            const key = document.getElementById('encryptionKey').value || 
+                       document.getElementById('decryptionKey').value ||
+                       'default-key';
+            
+            // Создаем все возможные омофоны (4096 комбинаций)
+            const allOmophones = [];
+            for (let i = 0; i < base64Chars.length; i++) {
+                for (let j = 0; j < base64Chars.length; j++) {
+                    allOmophones.push(base64Chars[i] + base64Chars[j]);
                 }
             }
-
-            nonlinearTransform(x) {
-                let y = this.sbox[x];
-                y = this.mul(y, this.sbox[(x + this.key[0]) % 256]);
-                y = this.add(y, this.sbox[(x + this.key[1]) % 256]);
-                return y;
-            }
-
-            inverseNonlinearTransform(x) {
-                let y = this.invSbox[x];
-                y = this.mul(y, this.invSbox[(x + this.key[0]) % 256]);
-                y = this.add(y, this.invSbox[(x + this.key[1]) % 256]);
-                return y;
-            }
-
-            kernel(x, s, u) {
-                const term1 = Math.sin(this.kernelParams[0] * x * Math.PI * 2);
-                const term2 = Math.cos(this.kernelParams[1] * s * Math.PI * 2);
-                const term3 = Math.tanh(this.kernelParams[2] * u * 3);
-                
-                const term4 = Math.exp(-this.kernelParams[3] * Math.pow(x - s, 2));
-                const term5 = Math.atan(this.kernelParams[4] * (u - 128) * 0.1);
-                
-                let result = this.kernelParams[5] * term1 * term2;
-                result += this.kernelParams[6] * term3 * term4;
-                result += this.kernelParams[7] * term5;
-                
-                result = (result * 64 + 128) % 256;
-                return Math.floor(result) & 0xFF;
-            }
-
-            computeIntegral(x, u) {
-                let total = 0;
-                for (let s = 0; s < 256; s++) {
-                    const kernelVal = this.kernel(x, s, u);
-                    total = this.add(total, kernelVal);
+            
+            // Перемешиваем омофоны детерминированно на основе ключа
+            const shuffledOmophones = shuffleArrayWithSeed(allOmophones, key);
+            
+            // Создаем все возможные биграммы
+            const bigrams = [];
+            for (let i = 0; i < alphabet.length; i++) {
+                for (let j = 0; j < alphabet.length; j++) {
+                    bigrams.push(alphabet[i] + alphabet[j]);
                 }
-                return total % 256;
             }
-
-            encryptByte(plainByte) {
-                const transformed = this.nonlinearTransform(plainByte);
-                const integral = this.computeIntegral(plainByte, transformed);
-                const encrypted = this.add(transformed, this.mul(this.lambda, integral));
-                return this.nonlinearTransform(encrypted);
+            
+            // Перемешиваем биграммы детерминированно на основе ключа
+            const shuffledBigrams = shuffleArrayWithSeed(bigrams, key + '-bigrams');
+            
+            // Распределяем омофоны по биграммам
+            omophoneTable = {};
+            let omophoneIndex = 0;
+            
+            for (let i = 0; i < shuffledBigrams.length; i++) {
+                const bigram = shuffledBigrams[i];
+                // Первые 40 биграмм получают по 7 омофонов, остальные по 6
+                const count = i < 40 ? 7 : 6;
+                
+                omophoneTable[bigram] = [];
+                for (let j = 0; j < count; j++) {
+                    if (omophoneIndex < shuffledOmophones.length) {
+                        omophoneTable[bigram].push(shuffledOmophones[omophoneIndex]);
+                        omophoneIndex++;
+                    }
+                }
             }
-
-            decryptByte(cipherByte) {
-                const inverted = this.inverseNonlinearTransform(cipherByte);
-                const integral = this.computeIntegral(inverted, cipherByte);
-                const decrypted = this.add(inverted, this.mul(this.lambda, integral));
-                return this.inverseNonlinearTransform(decrypted);
+            
+            // Создаем обратное отображение для быстрой расшифровки
+            reverseLookupMap = {};
+            for (const bigram in omophoneTable) {
+                for (const omophone of omophoneTable[bigram]) {
+                    reverseLookupMap[omophone] = bigram;
+                }
+            }
+            
+            showStatus('Таблица омофонов успешно сгенерирована!', 'success');
+            return true;
+        }
+        
+        // Генерация и отображение таблицы
+        function generateTable() {
+            if (initializeTable()) {
+                renderTable();
             }
         }
-
-        function logMessage(message, type = 'info') {
-            const log = document.getElementById('systemLog');
-            const entry = document.createElement('div');
-            entry.className = `log-entry ${type}`;
-            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-            log.appendChild(entry);
-            log.scrollTop = log.scrollHeight;
-        }
-
-        function updateProgress(percent) {
-            const progressBar = document.getElementById('progressBar');
-            progressBar.style.width = `${percent}%`;
-            document.getElementById('statusText').textContent = `Processing: ${percent}%`;
-        }
-
-        function generateKey() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=';
-            let key = '';
-            for (let i = 0; i < 32; i++) {
-                key += chars.charAt(Math.floor(Math.random() * chars.length));
+        
+        // Отображение таблицы в интерфейсе
+        function renderTable() {
+            if (Object.keys(omophoneTable).length === 0) {
+                showStatus('Сначала сгенерируйте таблицу омофонов', 'error');
+                return;
             }
-            document.getElementById('keyInput').value = key;
-            logMessage('Generated new 256-bit encryption key', 'success');
-        }
-
-        function encryptMessage() {
-            try {
-                const key = document.getElementById('keyInput').value;
-                const message = document.getElementById('messageInput').value;
-                
-                if (!key || key.length < 16) {
-                    throw new Error('Encryption key must be at least 16 characters');
-                }
-
-                logMessage('Starting encryption process...', 'info');
-                
-                const encoder = new TextEncoder();
-                const messageBytes = encoder.encode(message);
-                document.getElementById('inputBytes').textContent = messageBytes.length;
-                
-                const cipher = new VolterraCipher(key);
-                
-                let encryptedBytes = new Uint8Array(messageBytes.length);
-                
-                for (let i = 0; i < messageBytes.length; i++) {
-                    encryptedBytes[i] = cipher.encryptByte(messageBytes[i]);
-                    updateProgress(Math.floor((i + 1) / messageBytes.length * 100));
-                }
-                
-                const hexString = Array.from(encryptedBytes).map(b => b.toString(16).padStart(2, '0')).join('');
-                document.getElementById('outputText').value = hexString;
-                document.getElementById('outputBytes').textContent = encryptedBytes.length;
-                
-                updateProgress(100);
-                document.getElementById('statusText').textContent = 'Encryption completed';
-                logMessage(`Encryption completed. Output: ${encryptedBytes.length} bytes`, 'success');
-                
-            } catch (error) {
-                logMessage(`Encryption error: ${error.message}`, 'error');
-                document.getElementById('statusText').textContent = 'Error: ' + error.message;
+            
+            const table = document.getElementById('omophoneTable');
+            const thead = table.querySelector('thead tr');
+            const tbody = table.querySelector('tbody');
+            
+            // Очищаем заголовок
+            thead.innerHTML = '<th class="bigram-cell">Биграмма</th>';
+            
+            // Добавляем заголовки столбцов (буквы)
+            for (let i = 0; i < alphabet.length; i++) {
+                const th = document.createElement('th');
+                th.textContent = alphabet[i];
+                thead.appendChild(th);
             }
-        }
-
-        function decryptMessage() {
-            try {
-                const key = document.getElementById('keyInput').value;
-                const hexString = document.getElementById('outputText').value.replace(/\s/g, '');
+            
+            // Очищаем тело таблицы
+            tbody.innerHTML = '';
+            
+            // Заполняем таблицу данными в алфавитном порядке
+            for (let i = 0; i < alphabet.length; i++) {
+                const row = document.createElement('tr');
+                const headerCell = document.createElement('th');
+                headerCell.textContent = alphabet[i];
+                headerCell.className = 'bigram-cell';
+                row.appendChild(headerCell);
                 
-                if (!hexString) {
-                    throw new Error('No encrypted data to decrypt');
+                for (let j = 0; j < alphabet.length; j++) {
+                    const cell = document.createElement('td');
+                    const bigram = alphabet[i] + alphabet[j];
+                    const omophones = omophoneTable[bigram] || [];
+                    
+                    cell.textContent = omophones.join(' ');
+                    cell.title = `${bigram}: ${omophones.join(', ')}`;
+                    row.appendChild(cell);
                 }
                 
-                if (hexString.length % 2 !== 0) {
-                    throw new Error('Invalid hex string length');
-                }
-                
-                logMessage('Starting decryption process...', 'info');
-                
-                const encryptedBytes = [];
-                for (let i = 0; i < hexString.length; i += 2) {
-                    encryptedBytes.push(parseInt(hexString.substr(i, 2), 16));
-                }
-                
-                document.getElementById('inputBytes').textContent = encryptedBytes.length;
-                
-                const cipher = new VolterraCipher(key);
-                
-                let decryptedBytes = new Uint8Array(encryptedBytes.length);
-                
-                for (let i = 0; i < encryptedBytes.length; i++) {
-                    decryptedBytes[i] = cipher.decryptByte(encryptedBytes[i]);
-                    updateProgress(Math.floor((i + 1) / encryptedBytes.length * 100));
-                }
-                
-                const decoder = new TextDecoder();
-                const decryptedText = decoder.decode(decryptedBytes);
-                document.getElementById('outputText').value = decryptedText;
-                document.getElementById('outputBytes').textContent = decryptedText.length;
-                
-                updateProgress(100);
-                document.getElementById('statusText').textContent = 'Decryption completed';
-                logMessage('Decryption completed successfully', 'success');
-                
-            } catch (error) {
-                logMessage(`Decryption error: ${error.message}`, 'error');
-                document.getElementById('statusText').textContent = 'Error: ' + error.message;
+                tbody.appendChild(row);
             }
+            
+            showStatus('Таблица успешно отображена', 'success');
         }
-
+        
+        // Функция шифрования
+        function encrypt() {
+            const inputText = document.getElementById('inputText').value.toUpperCase().replace(/[^A-Z]/g, '');
+            
+            if (!inputText) {
+                showStatus('Пожалуйста, введите текст для шифрования', 'error');
+                return;
+            }
+            
+            if (Object.keys(omophoneTable).length === 0) {
+                showStatus('Сначала сгенерируйте таблицу омофонов', 'error');
+                return;
+            }
+            
+            // Добавляем padding, если необходимо (для создания пар символов)
+            let processedText = inputText;
+            if (processedText.length % 2 !== 0) {
+                processedText += 'X'; // Добавляем символ для выравнивания
+            }
+            
+            let result = '';
+            const random = createSeededRandom(document.getElementById('encryptionKey').value);
+            
+            // Шифруем по два символа
+            for (let i = 0; i < processedText.length; i += 2) {
+                const bigram = processedText.substr(i, 2);
+                
+                if (omophoneTable[bigram] && omophoneTable[bigram].length > 0) {
+                    // Случайным образом выбираем омофон из доступных для этой биграммы
+                    const randomIndex = Math.floor(random() * omophoneTable[bigram].length);
+                    result += omophoneTable[bigram][randomIndex];
+                } else {
+                    result += '??'; // Если биграмма не найдена (маловероятно)
+                }
+            }
+            
+            document.getElementById('encryptedOutput').textContent = result;
+            document.getElementById('encryptedText').value = result;
+            showStatus('Текст успешно зашифрован', 'success');
+        }
+        
+        // Функция расшифровки
+        function decrypt() {
+            const encryptedText = document.getElementById('encryptedText').value;
+            
+            if (!encryptedText) {
+                showStatus('Пожалуйста, введите текст для расшифровки', 'error');
+                return;
+            }
+            
+            // Проверяем, что длина зашифрованного текста четная
+            if (encryptedText.length % 2 !== 0) {
+                showStatus('Некорректная длина зашифрованного текста', 'error');
+                return;
+            }
+            
+            if (Object.keys(reverseLookupMap).length === 0) {
+                showStatus('Сначала сгенерируйте таблицу омофонов', 'error');
+                return;
+            }
+            
+            let result = '';
+            
+            // Расшифровываем по два символа
+            for (let i = 0; i < encryptedText.length; i += 2) {
+                const omophone = encryptedText.substr(i, 2);
+                
+                if (reverseLookupMap[omophone]) {
+                    result += reverseLookupMap[omophone];
+                } else {
+                    result += '??'; // Если омофон не найден
+                }
+            }
+            
+            document.getElementById('decryptedOutput').textContent = result;
+            showStatus('Текст успешно расшифрован', 'success');
+        }
+        
+        // Показать статус
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('tableStatus');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            
+            // Автоматически скрыть сообщение через 5 секунд
+            setTimeout(() => {
+                statusDiv.textContent = '';
+                statusDiv.className = 'status';
+            }, 5000);
+        }
+        
+        // Очистить все поля
         function clearAll() {
-            document.getElementById('messageInput').value = '';
-            document.getElementById('outputText').value = '';
-            document.getElementById('inputBytes').textContent = '0';
-            document.getElementById('outputBytes').textContent = '0';
-            document.getElementById('statusText').textContent = 'Ready';
-            document.getElementById('progressBar').style.width = '0%';
-            document.getElementById('systemLog').innerHTML = '';
-            logMessage('System cleared', 'info');
+            document.getElementById('inputText').value = '';
+            document.getElementById('encryptedText').value = '';
+            document.getElementById('encryptionKey').value = '';
+            document.getElementById('decryptionKey').value = '';
+            document.getElementById('encryptedOutput').textContent = 'Зашифрованный текст появится здесь...';
+            document.getElementById('decryptedOutput').textContent = 'Расшифрованный текст появится здесь...';
+            
+            const statusDiv = document.getElementById('tableStatus');
+            statusDiv.textContent = '';
+            statusDiv.className = 'status';
+            
+            showStatus('Все поля очищены', 'success');
         }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            logMessage('Volterra Cryptographic System initialized', 'success');
-            logMessage('Ready for encryption/decryption operations', 'info');
-        });
+        
+        // Инициализация при загрузке
+        window.onload = function() {
+            // Автоматически генерируем таблицу при загрузке с ключом по умолчанию
+            document.getElementById('encryptionKey').value = 'мой-секретный-ключ';
+            document.getElementById('decryptionKey').value = 'мой-секретный-ключ';
+            generateTable();
+        };
     </script>
 </body>
 </html>

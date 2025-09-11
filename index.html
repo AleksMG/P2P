@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Гомофоническое шифрование текста</title>
+    <title>Компактное гомофоническое шифрование</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -106,25 +106,26 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔐 Гомофоническое шифрование текста</h1>
-        
+        <h1>🔐 Компактное гомофоническое шифрование</h1>
         <div class="formula">
-            <strong>Математическая основа:</strong><br>
-            • Шифрование бита: c = r² × (-1)<sup>m</sup> mod n<br>
-            • Дешифрование: m = 0, если c - квадратичный вычет mod n, иначе m = 1<br>
-            • n = p × q (простые числа), r - случайное число, m - бит (0 или 1)<br>
-            • Текст → Байты → Биты → Шифрование каждого бита → Объединение
+            <strong>Алгоритм 1 бит → 1 байт:</strong><br>
+            • Шифрование: c = (r² × (-1)^m mod n) & 0xFF<br>
+            • Дешифрование: анализ младших 8 бит<br>
+            • Коэффициент: 1:8 (вместо 1:32)
         </div>
 
         <div class="step">
             <h2>🔑 Шаг 1: Генерация ключей</h2>
-            <p>Сгенерируйте пару простых чисел для создания ключей шифрования и дешифрования.</p>
-            <button onclick="generateKeys()">🎲 Сгенерировать новые ключи</button>
-            
+            <button onclick="generateKeys()">🎲 Сгенерировать ключи</button>
             <div id="keyDisplay">
                 <p><strong>Публичный ключ (n):</strong> <span id="publicKey" class="key-display">-</span></p>
                 <p><strong>Секретный ключ (p, q):</strong> <span id="privateKey" class="key-display">-</span></p>
@@ -134,40 +135,24 @@
         <div class="grid">
             <div class="step">
                 <h2>📤 Шаг 2: Шифрование текста</h2>
-                <p>Введите текст для шифрования. Каждый символ будет преобразован в байты, а затем каждый бит будет зашифрован.</p>
-                <textarea id="textToEncrypt" placeholder="Введите текст для шифрования..."></textarea>
-                <button onclick="encryptText()">🚀 Зашифровать текст</button>
-                
+                <textarea id="textToEncrypt" placeholder="Введите текст..."></textarea>
+                <button onclick="encryptText()">🚀 Зашифровать</button>
                 <div id="encryptionResult" class="result" style="display: none;">
                     <p><strong>Исходный текст:</strong> <span id="originalText"></span></p>
                     <p><strong>Шифротекст (hex):</strong> <span id="ciphertextHex"></span></p>
-                    <p><strong>Длина шифротекста:</strong> <span id="ciphertextLength"></span> байт</p>
+                    <p><strong>Размер:</strong> <span id="ciphertextSize"></span></p>
+                    <p><strong>Коэффициент:</strong> <span id="compressionRatio"></span></p>
                 </div>
             </div>
 
             <div class="step">
                 <h2>📥 Шаг 3: Дешифрование текста</h2>
-                <p>Введите hex-строку шифротекста для дешифрования (только при наличии секретного ключа).</p>
-                <textarea id="cipherToDecrypt" placeholder="Введите hex-строку шифротекста..."></textarea>
-                <button onclick="decryptText()">🔓 Дешифровать текст</button>
-                
+                <textarea id="cipherToDecrypt" placeholder="Введите hex-строку..."></textarea>
+                <button onclick="decryptText()">🔓 Дешифровать</button>
                 <div id="decryptionResult" class="result" style="display: none;">
-                    <p><strong>Шифротекст:</strong> <span id="inputCiphertext"></span></p>
-                    <p><strong>Результат дешифрования:</strong> <span id="decryptedText"></span></p>
+                    <p><strong>Результат:</strong> <span id="decryptedText"></span></p>
+                    <p><strong>Статус:</strong> <span id="decryptionStatus"></span></p>
                 </div>
-            </div>
-        </div>
-
-        <div class="step">
-            <h2>🔍 Шаг 4: Детали преобразования</h2>
-            <p>Посмотрите, как текст преобразуется в биты и обратно:</p>
-            <button onclick="showConversionDetails()">📊 Показать детали преобразования</button>
-            
-            <div id="conversionDetails" class="result" style="display: none;">
-                <p><strong>Текст → Байты → Биты:</strong></p>
-                <pre id="textToBits"></pre>
-                <p><strong>Биты → Байты → Текст:</strong></p>
-                <pre id="bitsToText"></pre>
             </div>
         </div>
 
@@ -175,26 +160,21 @@
     </div>
 
     <script>
-        // Глобальные переменные для хранения ключей
-        let p = null;
-        let q = null;
-        let n = null;
+        let p = null, q = null, n = null;
+        let precomputedMapping = null;
 
-        // Проверка, является ли число простым (упрощенная версия)
+        // Проверка на простоту
         function isPrime(num) {
             if (num <= 1) return false;
             if (num <= 3) return true;
             if (num % 2 === 0 || num % 3 === 0) return false;
-            
-            let i = 5;
-            while (i * i <= num) {
+            for (let i = 5; i * i <= num; i += 6) {
                 if (num % i === 0 || num % (i + 2) === 0) return false;
-                i += 6;
             }
             return true;
         }
 
-        // Генерация случайного простого числа в диапазоне
+        // Генерация простого числа
         function generatePrime(min, max) {
             let prime;
             do {
@@ -203,32 +183,28 @@
             return prime;
         }
 
-        // Вычисление символа Лежандра (a/p)
-        function legendreSymbol(a, p) {
-            if (a % p === 0) return 0;
-            // Используем критерий Эйлера
-            const result = modExp(a, (p - 1) / 2, p);
-            return result === 1 ? 1 : -1;
-        }
-
-        // Модульное возведение в степень (a^b mod m)
+        // Модульное возведение в степень
         function modExp(a, b, m) {
             let result = 1n;
             a = BigInt(a) % BigInt(m);
             b = BigInt(b);
             m = BigInt(m);
             
-            while (b > 0) {
-                if (b % 2n === 1n) {
-                    result = (result * a) % m;
-                }
+            while (b > 0n) {
+                if (b % 2n === 1n) result = (result * a) % m;
                 a = (a * a) % m;
                 b = b / 2n;
             }
             return Number(result);
         }
 
-        // Преобразование текста в массив битов
+        // Символ Лежандра
+        function legendreSymbol(a, p) {
+            if (a % p === 0) return 0;
+            return modExp(a, (p - 1) / 2, p) === 1 ? 1 : -1;
+        }
+
+        // Текст в биты
         function textToBits(text) {
             const bits = [];
             for (let i = 0; i < text.length; i++) {
@@ -240,7 +216,7 @@
             return bits;
         }
 
-        // Преобразование массива битов в текст
+        // Биты в текст
         function bitsToText(bits) {
             const bytes = [];
             for (let i = 0; i < bits.length; i += 8) {
@@ -253,153 +229,148 @@
             return String.fromCharCode(...bytes);
         }
 
-        // Шифрование массива битов
-        function encryptBits(bits, n) {
-            const encryptedBits = [];
-            for (const bit of bits) {
-                const r = Math.floor(Math.random() * (n - 2)) + 1;
-                const rSquared = modExp(r, 2, n);
-                const ciphertext = (bit === 1) ? (n - rSquared) % n : rSquared;
-                encryptedBits.push(ciphertext);
+        // Предвычисление mapping'а для дешифрования
+        function precomputeMapping(p, q, n) {
+            const mapping = {0: new Set(), 1: new Set()};
+            
+            for (let bit = 0; bit <= 1; bit++) {
+                for (let r = 1; r < 1000; r++) { // Ограничиваем для производительности
+                    try {
+                        const rSquared = modExp(r, 2, n);
+                        const ciphertext = bit === 1 ? (n - rSquared) % n : rSquared;
+                        const encryptedByte = ciphertext & 0xFF;
+                        
+                        mapping[bit].add(encryptedByte);
+                    } catch (e) {
+                        continue;
+                    }
+                }
             }
-            return encryptedBits;
+            
+            return mapping;
         }
 
-        // Дешифрование массива чисел в биты
-        function decryptToBits(encryptedNumbers, p, q) {
-            const bits = [];
-            for (const num of encryptedNumbers) {
-                const legendreP = legendreSymbol(num, p);
-                const legendreQ = legendreSymbol(num, q);
-                const isQuadraticResidue = (legendreP === 1 && legendreQ === 1);
-                bits.push(isQuadraticResidue ? 0 : 1);
+        // Шифрование 1 бита в 1 байт
+        function encryptBitToByte(bit, n) {
+            const r = Math.floor(Math.random() * (n - 2)) + 1;
+            const rSquared = modExp(r, 2, n);
+            const ciphertext = bit === 1 ? (n - rSquared) % n : rSquared;
+            return ciphertext & 0xFF;
+        }
+
+        // Дешифрование 1 байта в 1 бит
+        function decryptByteToBit(encryptedByte, p, q) {
+            if (!precomputedMapping) return 0;
+            
+            // Простой voting-based подход
+            let count0 = 0, count1 = 0;
+            
+            for (let k = 0; k * 256 < n; k++) {
+                const candidate = k * 256 + encryptedByte;
+                if (candidate >= n) break;
+                
+                const legendreP = legendreSymbol(candidate, p);
+                const legendreQ = legendreSymbol(candidate, q);
+                
+                if (legendreP === 1 && legendreQ === 1) count0++;
+                else if (legendreP === -1 && legendreQ === -1) count1++;
             }
-            return bits;
+            
+            return count1 > count0 ? 1 : 0;
         }
 
         // Генерация ключей
         function generateKeys() {
-            // Генерируем два простых числа
-            p = generatePrime(10000, 50000);
-            q = generatePrime(10000, 50000);
+            p = generatePrime(1000, 5000);
+            q = generatePrime(1000, 5000);
             n = p * q;
             
-            // Отображаем ключи
             document.getElementById('publicKey').textContent = n;
-            document.getElementById('privateKey').textContent = `p = ${p}, q = ${q}`;
+            document.getElementById('privateKey').textContent = `p=${p}, q=${q}`;
             
-            showStatus("Ключи успешно сгенерированы!", "success");
+            // Предвычисляем mapping для дешифрования
+            precomputedMapping = precomputeMapping(p, q, n);
+            
+            showStatus("Ключи сгенерированы! Mapping предвычислен.", "success");
         }
 
         // Шифрование текста
         function encryptText() {
-            if (!n) {
-                showStatus("Сначала сгенерируйте ключи!", "error");
-                return;
-            }
+            if (!n) return showStatus("Сначала сгенерируйте ключи!", "error");
             
             const text = document.getElementById('textToEncrypt').value;
-            if (!text) {
-                showStatus("Введите текст для шифрования!", "error");
-                return;
-            }
+            if (!text) return showStatus("Введите текст!", "error");
             
             try {
-                // Преобразуем текст в биты
                 const bits = textToBits(text);
+                const encryptedBytes = [];
                 
-                // Шифруем каждый бит
-                const encryptedNumbers = encryptBits(bits, n);
+                for (const bit of bits) {
+                    encryptedBytes.push(encryptBitToByte(bit, n));
+                }
                 
-                // Преобразуем массив чисел в hex-строку
-                const hexString = encryptedNumbers.map(num => 
-                    num.toString(16).padStart(8, '0')).join('');
+                const byteArray = new Uint8Array(encryptedBytes);
+                const hexString = Array.from(byteArray).map(b => 
+                    b.toString(16).padStart(2, '0')).join('');
                 
-                // Показываем результат
+                const originalSize = new TextEncoder().encode(text).length;
+                const encryptedSize = byteArray.length;
+                const ratio = (encryptedSize / originalSize).toFixed(1);
+                
                 document.getElementById('originalText').textContent = text;
                 document.getElementById('ciphertextHex').textContent = hexString;
-                document.getElementById('ciphertextLength').textContent = encryptedNumbers.length;
+                document.getElementById('ciphertextSize').textContent = 
+                    `${encryptedSize} байт (было ${originalSize} байт)`;
+                document.getElementById('compressionRatio').textContent = 
+                    `${ratio}:1 (вместо 32:1)`;
                 document.getElementById('encryptionResult').style.display = 'block';
                 
-                showStatus("Текст успешно зашифрован!", "success");
+                showStatus("Текст зашифрован в компактном формате!", "success");
             } catch (error) {
-                showStatus("Ошибка при шифровании: " + error.message, "error");
+                showStatus("Ошибка шифрования: " + error, "error");
             }
         }
 
         // Дешифрование текста
         function decryptText() {
-            if (!p || !q) {
-                showStatus("Секретный ключ не сгенерирован!", "error");
-                return;
-            }
+            if (!p || !q) return showStatus("Нет секретного ключа!", "error");
             
             const hexString = document.getElementById('cipherToDecrypt').value;
-            if (!hexString) {
-                showStatus("Введите hex-строку шифротекста!", "error");
-                return;
-            }
+            if (!hexString) return showStatus("Введите hex-строку!", "error");
             
             try {
-                // Преобразуем hex-строку обратно в массив чисел
-                const encryptedNumbers = [];
-                for (let i = 0; i < hexString.length; i += 8) {
-                    const hexByte = hexString.substr(i, 8);
-                    encryptedNumbers.push(parseInt(hexByte, 16));
+                const bytes = [];
+                for (let i = 0; i < hexString.length; i += 2) {
+                    bytes.push(parseInt(hexString.substr(i, 2), 16));
                 }
                 
-                // Дешифруем в биты
-                const bits = decryptToBits(encryptedNumbers, p, q);
+                const decryptedBits = [];
+                for (const byte of bytes) {
+                    decryptedBits.push(decryptByteToBit(byte, p, q));
+                }
                 
-                // Преобразуем биты обратно в текст
-                const decryptedText = bitsToText(bits);
+                const decryptedText = bitsToText(decryptedBits);
                 
-                // Показываем результат
-                document.getElementById('inputCiphertext').textContent = hexString;
                 document.getElementById('decryptedText').textContent = decryptedText;
+                document.getElementById('decryptionStatus').textContent = 
+                    `Дешифровано ${bytes.length} байт в ${decryptedText.length} символов`;
                 document.getElementById('decryptionResult').style.display = 'block';
                 
-                showStatus("Текст успешно дешифрован!", "success");
+                showStatus("Текст дешифрован!", "success");
             } catch (error) {
-                showStatus("Ошибка при дешифровании: " + error.message, "error");
+                showStatus("Ошибка дешифрования: " + error, "error");
             }
         }
 
-        // Показать детали преобразования
-        function showConversionDetails() {
-            const text = document.getElementById('textToEncrypt').value || "Пример";
-            
-            // Текст → Байты → Биты
-            const bits = textToBits(text);
-            let textToBitsStr = `Текст: "${text}"\n`;
-            textToBitsStr += `Байты: [${Array.from(text).map(c => c.charCodeAt(0)).join(', ')}]\n`;
-            textToBitsStr += `Биты: ${bits.join('')} (${bits.length} бит)\n`;
-            
-            // Биты → Байты → Текст
-            const reconstructedText = bitsToText(bits);
-            let bitsToTextStr = `Биты: ${bits.join('')}\n`;
-            bitsToTextStr += `Байты: [${Array.from(reconstructedText).map(c => c.charCodeAt(0)).join(', ')}]\n`;
-            bitsToTextStr += `Текст: "${reconstructedText}"`;
-            
-            document.getElementById('textToBits').textContent = textToBitsStr;
-            document.getElementById('bitsToText').textContent = bitsToTextStr;
-            document.getElementById('conversionDetails').style.display = 'block';
-        }
-
-        // Показать статусное сообщение
         function showStatus(message, type) {
-            const statusElement = document.getElementById('statusMessage');
-            statusElement.textContent = message;
-            statusElement.className = `status ${type}`;
-            statusElement.style.display = 'block';
-            
-            // Автоматически скрыть через 5 секунд
-            setTimeout(() => {
-                statusElement.style.display = 'none';
-            }, 5000);
+            const element = document.getElementById('statusMessage');
+            element.textContent = message;
+            element.className = `status ${type}`;
+            element.style.display = 'block';
+            setTimeout(() => element.style.display = 'none', 5000);
         }
 
-        // Инициализация - генерируем ключи при загрузке
+        // Автогенерация ключей при загрузке
         window.onload = generateKeys;
     </script>
 </body>

@@ -3,582 +3,673 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>P-Adic Cipher Professional</title>
+    <title>Volterra Encryption Professional</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            color: #fff;
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+            color: #00ff00;
             min-height: 100vh;
             padding: 20px;
         }
-
+        
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            background: rgba(0, 20, 40, 0.95);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
             padding: 20px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.2);
         }
-
-        .header {
+        
+        header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
+            padding: 20px;
+            border-bottom: 1px solid #00ff00;
         }
-
-        .header h1 {
+        
+        h1 {
             font-size: 2.5em;
             margin-bottom: 10px;
-            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px #00ff00;
         }
-
-        .header p {
-            color: #ccc;
-            font-size: 1.1em;
+        
+        .equation {
+            font-family: 'Cambria Math', serif;
+            font-size: 1.4em;
+            margin: 15px 0;
+            color: #00ffff;
         }
-
-        .dashboard {
+        
+        .grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 30px;
+            gap: 20px;
             margin-bottom: 30px;
         }
-
-        .panel {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
         }
-
-        .panel h2 {
-            margin-bottom: 20px;
-            color: #4ecdc4;
+        
+        .panel {
+            background: rgba(0, 30, 60, 0.8);
+            border: 1px solid #00ff00;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        h2 {
+            color: #00ff00;
+            margin-bottom: 15px;
             font-size: 1.5em;
         }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #ff6b6b;
-            font-weight: 500;
-        }
-
-        textarea, input[type="text"], input[type="number"] {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            background: rgba(0, 0, 0, 0.3);
-            color: #fff;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            resize: vertical;
-        }
-
+        
         textarea {
-            min-height: 120px;
+            width: 100%;
+            height: 150px;
+            background: #001122;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            margin-bottom: 15px;
         }
-
-        .btn {
-            padding: 12px 25px;
+        
+        textarea:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #00ffff;
+        }
+        
+        input[type="number"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            background: #001122;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #00ff00 0%, #00cc00 100%);
+            color: #001122;
             border: none;
-            border-radius: 8px;
-            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
-            color: white;
-            font-weight: bold;
+            padding: 12px 25px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: transform 0.2s;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s ease;
         }
-
-        .btn:hover {
+        
+        button:hover {
+            background: linear-gradient(135deg, #00ffff 0%, #00ccff 100%);
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.4);
         }
-
-        .btn:active {
+        
+        button:active {
             transform: translateY(0);
         }
-
-        .results {
-            margin-top: 30px;
+        
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
         }
-
-        .result-item {
-            background: rgba(0, 0, 0, 0.3);
+        
+        .byte-visualization {
+            background: rgba(0, 20, 40, 0.9);
+            border: 1px solid #00ff00;
+            border-radius: 5px;
             padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border-left: 4px solid #4ecdc4;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
         }
-
-        .result-item h3 {
-            color: #ff6b6b;
-            margin-bottom: 10px;
+        
+        .byte-grid {
+            display: grid;
+            grid-template-columns: repeat(16, 1fr);
+            gap: 2px;
         }
-
-        .hex-display {
-            font-family: 'Courier New', monospace;
-            word-break: break-all;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 12px;
-        }
-
-        .status {
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
+        
+        .byte-cell {
+            padding: 5px;
             text-align: center;
-            font-weight: bold;
+            background: rgba(0, 40, 80, 0.7);
+            border: 1px solid #00ff00;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
-
-        .success {
-            background: rgba(76, 175, 80, 0.3);
-            color: #4caf50;
+        
+        .byte-cell:hover {
+            background: rgba(0, 80, 160, 0.9);
+            transform: scale(1.1);
         }
-
-        .error {
-            background: rgba(244, 67, 54, 0.3);
-            color: #f44336;
-        }
-
-        .key-info {
+        
+        .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-item {
+            background: rgba(0, 30, 60, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #00ff00;
+        }
+        
+        .log {
+            background: #001122;
+            border: 1px solid #00ff00;
+            border-radius: 5px;
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
             margin-top: 20px;
         }
-
-        .key-item {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .key-item .label {
-            color: #4ecdc4;
-            font-size: 0.9em;
+        
+        .log-entry {
             margin-bottom: 5px;
+            padding: 5px;
+            border-left: 3px solid #00ff00;
         }
-
-        .key-item .value {
-            color: #ff6b6b;
-            font-weight: bold;
-            font-family: 'Courier New', monospace;
+        
+        .success { color: #00ff00; }
+        .error { color: #ff4444; }
+        .warning { color: #ffff00; }
+        .info { color: #00ffff; }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #001122;
+            border: 1px solid #00ff00;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
         }
-
-        @media (max-width: 768px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-            }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff00 0%, #00ffff 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .status-ready { background: #00ff00; }
+        .status-processing { background: #ffff00; }
+        .status-error { background: #ff4444; }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            border-top: 1px solid #00ff00;
+            color: #00ffff;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>P-Adic Cipher Professional</h1>
-            <p>Браузерная реализация p-адического шифрования на GF(2⁸)</p>
-        </div>
+        <header>
+            <h1>VOLTERRA ENCRYPTION SYSTEM</h1>
+            <div class="equation">
+                u(x) = f(x) + λ ∫ K(x, s, u(s)) ds
+            </div>
+            <p>Professional p-adic inspired encryption in GF(2⁸)</p>
+        </header>
 
-        <div class="dashboard">
+        <div class="grid">
             <div class="panel">
-                <h2>🔑 Управление ключами</h2>
+                <h2>INPUT</h2>
                 <div class="input-group">
-                    <label for="keyInput">Ключ (32 байта в hex):</label>
-                    <input type="text" id="keyInput" placeholder="a1b2c3d4e5f6...">
+                    <label for="keyInput">ENCRYPTION KEY (32 bytes):</label>
+                    <input type="password" id="keyInput" value="volterra-secret-key-256-bit" placeholder="Enter encryption key">
                 </div>
-                <button class="btn" onclick="generateKey()">Сгенерировать ключ</button>
-                <button class="btn" onclick="showKeyInfo()">Информация о ключе</button>
+                
+                <div class="input-group">
+                    <label for="messageInput">MESSAGE:</label>
+                    <textarea id="messageInput" placeholder="Enter text to encrypt">Hello, Volterra encryption! This is a professional implementation working byte-by-byte. Привет! 🌍</textarea>
+                </div>
+                
+                <div class="input-group">
+                    <label for="blockSize">BLOCK SIZE (power of 2):</label>
+                    <input type="number" id="blockSize" value="256" min="16" max="1024" step="16">
+                </div>
+                
+                <div class="input-group">
+                    <label for="maxIterations">MAX ITERATIONS:</label>
+                    <input type="number" id="maxIterations" value="100" min="10" max="1000">
+                </div>
 
-                <div class="key-info" id="keyInfo" style="display: none;">
-                    <div class="key-item">
-                        <div class="label">Длина ключа</div>
-                        <div class="value" id="keyLength">-</div>
-                    </div>
-                    <div class="key-item">
-                        <div class="label">Размер блока</div>
-                        <div class="value" id="blockSize">-</div>
-                    </div>
-                    <div class="key-item">
-                        <div class="label">Коэффициенты ядра</div>
-                        <div class="value" id="kernelCoeffs">-</div>
-                    </div>
+                <div class="button-group">
+                    <button onclick="generateKey()">GENERATE KEY</button>
+                    <button onclick="encryptMessage()" style="background:linear-gradient(135deg, #00ff00 0%, #009900 100%)">ENCRYPT</button>
+                    <button onclick="decryptMessage()" style="background:linear-gradient(135deg, #00ffff 0%, #0099ff 100%)">DECRYPT</button>
+                    <button onclick="clearAll()" style="background:linear-gradient(135deg, #ff4444 0%, #cc0000 100%)">CLEAR ALL</button>
                 </div>
             </div>
 
             <div class="panel">
-                <h2>🔒 Шифрование / Дешифрование</h2>
+                <h2>OUTPUT</h2>
                 <div class="input-group">
-                    <label for="inputText">Исходный текст:</label>
-                    <textarea id="inputText" placeholder="Введите текст для шифрования..."></textarea>
+                    <label for="outputText">RESULT:</label>
+                    <textarea id="outputText" readonly placeholder="Result will appear here"></textarea>
                 </div>
-                <div class="input-group">
-                    <label for="ivInput">IV (16 байт в hex):</label>
-                    <input type="text" id="ivInput" placeholder="Опционально...">
+                
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="status-indicator status-ready"></span>
+                        Status: <span id="statusText">Ready</span>
+                    </div>
+                    <div class="stat-item">
+                        Input bytes: <span id="inputBytes">0</span>
+                    </div>
+                    <div class="stat-item">
+                        Output bytes: <span id="outputBytes">0</span>
+                    </div>
+                    <div class="stat-item">
+                        Iterations: <span id="iterations">0</span>
+                    </div>
                 </div>
-                <button class="btn" onclick="encryptData()">Зашифровать</button>
-                <button class="btn" onclick="decryptData()">Расшифровать</button>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="panel">
+                <h2>INPUT BYTES</h2>
+                <div class="byte-visualization">
+                    <div class="byte-grid" id="inputBytesGrid"></div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>OUTPUT BYTES</h2>
+                <div class="byte-visualization">
+                    <div class="byte-grid" id="outputBytesGrid"></div>
+                </div>
             </div>
         </div>
 
         <div class="panel">
-            <h2>📊 Результаты</h2>
-            <div class="results">
-                <div class="result-item">
-                    <h3>Зашифрованные данные (hex):</h3>
-                    <div class="hex-display" id="encryptedResult">-</div>
-                </div>
-                <div class="result-item">
-                    <h3>Расшифрованные данные:</h3>
-                    <div class="hex-display" id="decryptedResult">-</div>
-                </div>
-                <div class="result-item">
-                    <h3>Статус:</h3>
-                    <div id="status" class="status">Готов к работе</div>
-                </div>
-            </div>
+            <h2>SYSTEM LOG</h2>
+            <div class="log" id="systemLog"></div>
         </div>
+
+        <footer>
+            <p>Volterra Integral Equation Encryption System | Professional Implementation | Byte-by-Byte Processing</p>
+            <p>u(x) = f(x) + λ ∫ K(x, s, u(s)) ds</p>
+        </footer>
     </div>
 
     <script>
-        class PAdicCipher {
-            constructor(key = null, blockSize = 256) {
+        class VolterraCipher {
+            constructor(key, blockSize = 256) {
                 this.blockSize = blockSize;
-                this.lambdaVal = 1 / blockSize;
-                
-                if (key) {
-                    this.key = key;
-                } else {
-                    this.key = this.generateRandomBytes(32);
-                }
-                
-                this._deriveKernelCoefficients();
+                this.key = key;
+                this.initializeGF();
+                this.deriveParameters();
             }
 
-            generateRandomBytes(length) {
-                const array = new Uint8Array(length);
-                crypto.getRandomValues(array);
-                return Array.from(array);
-            }
-
-            async _deriveKernelCoefficients() {
-                const derived = await this._hkdf(this.key, 
-                    this._stringToBytes('p-adic-cipher-salt'),
-                    this._stringToBytes('kernel-coefficients-derivation'),
-                    64
-                );
-                
-                this.kernelCoeffs = [];
-                for (let i = 0; i < 7; i++) {
-                    const mixed = this._mixBytes(derived.slice(i * 8, (i + 1) * 8), i);
-                    const val = this._bytesToNumber(mixed) & 0xFF;
-                    this.kernelCoeffs.push(val);
-                }
-            }
-
-            async _hkdf(ikm, salt, info, length) {
-                const key = await crypto.subtle.importKey(
-                    'raw',
-                    new Uint8Array(ikm),
-                    { name: 'HMAC', hash: 'SHA-256' },
-                    false,
-                    ['sign']
-                );
-
-                const prk = await crypto.subtle.sign(
-                    'HMAC',
-                    key,
-                    new Uint8Array(salt)
-                );
-
-                const result = [];
-                let t = new ArrayBuffer(0);
-                
-                for (let i = 1; result.length < length; i++) {
-                    const input = new Uint8Array([
-                        ...new Uint8Array(t),
-                        ...new Uint8Array(info),
-                        i
-                    ]);
-                    
-                    t = await crypto.subtle.sign(
-                        'HMAC',
-                        key,
-                        input
-                    );
-                    
-                    result.push(...new Uint8Array(t));
+            initializeGF() {
+                // Create GF(2^8) with irreducible polynomial x^8 + x^4 + x^3 + x + 1
+                this.gf = [];
+                for (let i = 0; i < 256; i++) {
+                    this.gf[i] = i;
                 }
                 
-                return result.slice(0, length);
+                // Simple GF arithmetic implementation
+                this.add = (a, b) => a ^ b;
+                this.mul = (a, b) => {
+                    let result = 0;
+                    for (let i = 0; i < 8; i++) {
+                        if (b & 1) result ^= a;
+                        const carry = a & 0x80;
+                        a = (a << 1) & 0xFF;
+                        if (carry) a ^= 0x1B; // x^8 + x^4 + x^3 + x + 1
+                        b >>= 1;
+                    }
+                    return result;
+                };
             }
 
-            _mixBytes(data, seed) {
-                const result = [...data];
-                for (let i = 0; i < result.length; i++) {
-                    result[i] = (result[i] + seed + i * 17) % 256;
-                    result[i] = result[i] ^ ((result[i] << 3) | (result[i] >> 5)) & 0xFF;
+            deriveParameters() {
+                // Derive parameters from key using deterministic mixing
+                let seed = 0;
+                for (let i = 0; i < this.key.length; i++) {
+                    seed = (seed << 5) - seed + this.key.charCodeAt(i);
+                    seed &= 0xFFFFFFFF;
                 }
+                
+                // Simple PRNG for deterministic parameter generation
+                const rand = () => {
+                    seed = (seed * 1664525 + 1013904223) & 0xFFFFFFFF;
+                    return (seed >>> 16) & 0xFF;
+                };
+
+                this.coeffs = Array(7).fill(0).map(() => rand());
+                this.alpha = rand();
+                this.beta = rand();
+                this.gamma = rand();
+                this.lambda = Math.max(1, Math.floor(256 / this.blockSize));
+            }
+
+            kernel(x, s, u) {
+                const [a, b, c, d, e, f, g] = this.coeffs;
+                
+                const term1 = this.mul(a, this.mul(x, s));
+                const term2 = this.mul(b, this.mul(s, u));
+                const term3 = this.mul(c, this.mul(x, u));
+                const term4 = this.mul(d, this.mul(this.mul(x, s), u));
+                
+                const x2 = this.mul(x, x);
+                const s2 = this.mul(s, s);
+                const u2 = this.mul(u, u);
+                
+                const term5 = this.mul(e, this.add(x2, this.mul(this.alpha, s2)));
+                const term6 = this.mul(f, this.add(s2, this.mul(this.beta, u2)));
+                const term7 = this.mul(g, this.add(u2, this.mul(this.gamma, x2)));
+                
+                let result = term1;
+                result = this.add(result, term2);
+                result = this.add(result, term3);
+                result = this.add(result, term4);
+                result = this.add(result, term5);
+                result = this.add(result, term6);
+                result = this.add(result, term7);
+                
                 return result;
             }
 
-            _nonlinearKernel(x, s, u) {
-                const [a, b, c, d, e, f, g] = this.kernelCoeffs;
-                
-                const term1 = a * x * s;
-                const term2 = b * s * u;
-                const term3 = c * x * u;
-                const term4 = d * x * x;
-                const term5 = e * s * s;
-                const term6 = f * u * u;
-                const term7 = g * x * s * u;
-                
-                const term8 = (a + b) * (x + 1) * (s + 1);
-                const term9 = (c + d) * (u + 1) * (x + 1);
-                const term10 = (e + f) * (s + 1) * (u + 1);
-                
-                return (term1 + term2 + term3 + term4 + term5 + 
-                        term6 + term7 + term8 + term9 + term10) % 256;
-            }
-
-            _precomputeKernelMatrix(uVector) {
-                const matrix = Array(this.blockSize).fill().map(() => 
-                    Array(this.blockSize).fill(0)
-                );
-                
-                for (let x = 0; x < this.blockSize; x++) {
-                    for (let s = 0; s < this.blockSize; s++) {
-                        matrix[x][s] = this._nonlinearKernel(x, s, uVector[s]);
-                    }
+            computeIntegral(x, uVector) {
+                let total = 0;
+                for (let s = 0; s < this.blockSize; s++) {
+                    const kernelVal = this.kernel(x, s, uVector[s]);
+                    total = this.add(total, kernelVal);
                 }
-                
-                return matrix;
+                return total;
             }
 
-            async _blockEncrypt(plaintext, maxIter = 50, tol = 1e-6) {
-                let uPrev = [...plaintext];
-                let uNext = Array(this.blockSize).fill(0);
-                
-                for (let iter = 0; iter < maxIter; iter++) {
-                    const kernelMatrix = this._precomputeKernelMatrix(uPrev);
-                    
-                    for (let x = 0; x < this.blockSize; x++) {
-                        let sum = 0;
-                        for (let s = 0; s < this.blockSize; s++) {
-                            sum += kernelMatrix[x][s];
-                        }
-                        uNext[x] = (plaintext[x] + this.lambdaVal * sum) % 256;
-                    }
-                    
+            encryptBlock(plaintext, onProgress) {
+                if (plaintext.length !== this.blockSize) {
+                    throw new Error(`Block size must be ${this.blockSize}`);
+                }
+
+                let uCurrent = [...plaintext];
+                let uNext = new Array(this.blockSize);
+                let converged = false;
+
+                for (let iter = 0; iter < document.getElementById('maxIterations').value; iter++) {
                     let maxDiff = 0;
-                    for (let i = 0; i < this.blockSize; i++) {
-                        maxDiff = Math.max(maxDiff, Math.abs(uNext[i] - uPrev[i]));
+
+                    for (let x = 0; x < this.blockSize; x++) {
+                        const integral = this.computeIntegral(x, uCurrent);
+                        uNext[x] = this.add(plaintext[x], this.mul(this.lambda, integral));
+                        
+                        const diff = Math.abs(uNext[x] - uCurrent[x]);
+                        maxDiff = Math.max(maxDiff, diff);
                     }
-                    
-                    if (maxDiff <= tol) break;
-                    uPrev = [...uNext];
+
+                    if (onProgress) {
+                        onProgress(iter + 1, maxDiff);
+                    }
+
+                    if (maxDiff <= 1) {
+                        converged = true;
+                        break;
+                    }
+
+                    uCurrent = [...uNext];
                 }
-                
+
                 return uNext;
             }
 
-            _blockDecrypt(ciphertext) {
-                const kernelMatrix = this._precomputeKernelMatrix(ciphertext);
-                const plaintext = Array(this.blockSize).fill(0);
+            decryptBlock(ciphertext) {
+                const plaintext = new Array(this.blockSize);
                 
                 for (let x = 0; x < this.blockSize; x++) {
-                    let sum = 0;
-                    for (let s = 0; s < this.blockSize; s++) {
-                        sum += kernelMatrix[x][s];
-                    }
-                    plaintext[x] = (ciphertext[x] - this.lambdaVal * sum + 256) % 256;
+                    const integral = this.computeIntegral(x, ciphertext);
+                    plaintext[x] = this.add(ciphertext[x], this.mul(this.lambda, integral));
                 }
                 
                 return plaintext;
             }
-
-            _padData(data) {
-                const padLen = this.blockSize - (data.length % this.blockSize);
-                const padding = Array(padLen).fill(padLen);
-                return [...data, ...padding];
-            }
-
-            _unpadData(data) {
-                const padLen = data[data.length - 1];
-                return data.slice(0, data.length - padLen);
-            }
-
-            async encrypt(plaintext, iv = null) {
-                if (!iv) {
-                    iv = this.generateRandomBytes(16);
-                }
-                
-                const padded = this._padData(Array.from(plaintext));
-                const blocks = [];
-                
-                for (let i = 0; i < padded.length; i += this.blockSize) {
-                    blocks.push(padded.slice(i, i + this.blockSize));
-                }
-                
-                const encryptedBlocks = [];
-                let prevBlock = iv.slice(0, this.blockSize);
-                
-                for (const block of blocks) {
-                    const xored = block.map((val, i) => val ^ prevBlock[i]);
-                    const encrypted = await this._blockEncrypt(xored);
-                    encryptedBlocks.push(encrypted);
-                    prevBlock = encrypted;
-                }
-                
-                return {
-                    ciphertext: encryptedBlocks.flat(),
-                    iv: iv
-                };
-            }
-
-            async decrypt(ciphertext, iv) {
-                const blocks = [];
-                for (let i = 0; i < ciphertext.length; i += this.blockSize) {
-                    blocks.push(ciphertext.slice(i, i + this.blockSize));
-                }
-                
-                const decryptedBlocks = [];
-                let prevBlock = iv.slice(0, this.blockSize);
-                
-                for (const block of blocks) {
-                    const decrypted = this._blockDecrypt(block);
-                    const xored = decrypted.map((val, i) => val ^ prevBlock[i]);
-                    decryptedBlocks.push(xored);
-                    prevBlock = block;
-                }
-                
-                const unpadded = this._unpadData(decryptedBlocks.flat());
-                return unpadded;
-            }
-
-            _stringToBytes(str) {
-                return Array.from(new TextEncoder().encode(str));
-            }
-
-            _bytesToString(bytes) {
-                return new TextDecoder().decode(new Uint8Array(bytes));
-            }
-
-            _bytesToNumber(bytes) {
-                return bytes.reduce((acc, byte) => (acc << 8) + byte, 0);
-            }
-
-            getKeyInfo() {
-                return {
-                    keyLength: this.key.length,
-                    blockSize: this.blockSize,
-                    kernelCoefficients: this.kernelCoeffs,
-                    lambdaValue: this.lambdaVal
-                };
-            }
         }
 
-        let cipher = new PAdicCipher();
-
-        async function generateKey() {
-            cipher = new PAdicCipher();
-            const keyHex = cipher.key.map(b => b.toString(16).padStart(2, '0')).join('');
-            document.getElementById('keyInput').value = keyHex;
-            showStatus('✅ Новый ключ сгенерирован', 'success');
+        // UI Functions
+        function logMessage(message, type = 'info') {
+            const log = document.getElementById('systemLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
         }
 
-        function showKeyInfo() {
-            const info = cipher.getKeyInfo();
-            document.getElementById('keyLength').textContent = info.keyLength + ' байт';
-            document.getElementById('blockSize').textContent = info.blockSize;
-            document.getElementById('kernelCoeffs').textContent = info.kernelCoefficients.join(', ');
-            document.getElementById('keyInfo').style.display = 'grid';
+        function updateProgress(percent, iteration, maxDiff) {
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = `${percent}%`;
+            
+            document.getElementById('statusText').textContent = 
+                `Processing: ${percent}% (Iteration ${iteration}, Δ=${maxDiff})`;
         }
 
-        async function encryptData() {
+        function visualizeBytes(bytes, elementId, title) {
+            const grid = document.getElementById(elementId);
+            grid.innerHTML = '';
+            
+            bytes.forEach((byte, index) => {
+                const cell = document.createElement('div');
+                cell.className = 'byte-cell';
+                cell.title = `Position ${index}: 0x${byte.toString(16).padStart(2, '0')} (${byte})`;
+                cell.textContent = byte.toString(16).padStart(2, '0');
+                grid.appendChild(cell);
+            });
+        }
+
+        function generateKey() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+            let key = '';
+            for (let i = 0; i < 32; i++) {
+                key += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('keyInput').value = key;
+            logMessage('Generated new encryption key', 'success');
+        }
+
+        function encryptMessage() {
             try {
-                const inputText = document.getElementById('inputText').value;
-                const ivInput = document.getElementById('ivInput').value;
+                const key = document.getElementById('keyInput').value;
+                const message = document.getElementById('messageInput').value;
+                const blockSize = parseInt(document.getElementById('blockSize').value);
                 
-                if (!inputText) {
-                    showStatus('❌ Введите текст для шифрования', 'error');
-                    return;
+                if (!key || key.length < 16) {
+                    throw new Error('Encryption key must be at least 16 characters');
                 }
 
-                const bytes = new TextEncoder().encode(inputText);
-                let iv = null;
+                logMessage('Starting encryption process...', 'info');
                 
-                if (ivInput) {
-                    iv = ivInput.match(/.{1,2}/g).map(byte => parseInt(byte, 16));
+                // Convert message to bytes
+                const encoder = new TextEncoder();
+                const messageBytes = encoder.encode(message);
+                document.getElementById('inputBytes').textContent = messageBytes.length;
+                
+                visualizeBytes(Array.from(messageBytes), 'inputBytesGrid', 'Input');
+                
+                // Initialize cipher
+                const cipher = new VolterraCipher(key, blockSize);
+                
+                // Process in blocks
+                let encryptedBytes = [];
+                const totalBlocks = Math.ceil(messageBytes.length / blockSize);
+                
+                for (let blockIndex = 0; blockIndex < totalBlocks; blockIndex++) {
+                    const start = blockIndex * blockSize;
+                    const end = Math.min(start + blockSize, messageBytes.length);
+                    const block = Array.from(messageBytes.slice(start, end));
+                    
+                    // Pad block if necessary
+                    while (block.length < blockSize) {
+                        block.push(0);
+                    }
+                    
+                    const encryptedBlock = cipher.encryptBlock(block, (iteration, maxDiff) => {
+                        const percent = Math.min(100, Math.floor((blockIndex / totalBlocks) * 100 + 
+                            (iteration / document.getElementById('maxIterations').value) * (100 / totalBlocks)));
+                        updateProgress(percent, iteration, maxDiff);
+                    });
+                    
+                    encryptedBytes = encryptedBytes.concat(encryptedBlock);
+                    
+                    logMessage(`Encrypted block ${blockIndex + 1}/${totalBlocks}`, 'success');
                 }
-
-                const result = await cipher.encrypt(bytes, iv);
-                const hexResult = result.ciphertext.map(b => b.toString(16).padStart(2, '0')).join('');
                 
-                document.getElementById('encryptedResult').textContent = hexResult;
-                document.getElementById('decryptedResult').textContent = '-';
+                // Convert to hex string for display
+                const hexString = encryptedBytes.map(b => b.toString(16).padStart(2, '0')).join('');
+                document.getElementById('outputText').value = hexString;
+                document.getElementById('outputBytes').textContent = encryptedBytes.length;
                 
-                showStatus('✅ Данные успешно зашифрованы', 'success');
+                visualizeBytes(encryptedBytes, 'outputBytesGrid', 'Output');
+                
+                updateProgress(100, 0, 0);
+                document.getElementById('statusText').textContent = 'Encryption completed';
+                logMessage('Encryption completed successfully', 'success');
+                
             } catch (error) {
-                showStatus('❌ Ошибка шифрования: ' + error.message, 'error');
+                logMessage(`Encryption error: ${error.message}`, 'error');
+                document.getElementById('statusText').textContent = 'Error: ' + error.message;
             }
         }
 
-        async function decryptData() {
+        function decryptMessage() {
             try {
-                const encryptedHex = document.getElementById('encryptedResult').textContent;
-                const ivInput = document.getElementById('ivInput').value;
+                const key = document.getElementById('keyInput').value;
+                const hexString = document.getElementById('outputText').value.replace(/\s/g, '');
+                const blockSize = parseInt(document.getElementById('blockSize').value);
                 
-                if (encryptedHex === '-') {
-                    showStatus('❌ Нет данных для дешифрования', 'error');
-                    return;
+                if (!hexString) {
+                    throw new Error('No encrypted data to decrypt');
                 }
-
-                const encryptedBytes = encryptedHex.match(/.{1,2}/g).map(byte => parseInt(byte, 16));
-                let iv = null;
                 
-                if (ivInput) {
-                    iv = ivInput.match(/.{1,2}/g).map(byte => parseInt(byte, 16));
-                } else {
-                    showStatus('❌ Требуется IV для дешифрования', 'error');
-                    return;
+                if (hexString.length % 2 !== 0) {
+                    throw new Error('Invalid hex string length');
                 }
-
-                const decrypted = await cipher.decrypt(encryptedBytes, iv);
-                const text = new TextDecoder().decode(new Uint8Array(decrypted));
                 
-                document.getElementById('decryptedResult').textContent = text;
-                showStatus('✅ Данные успешно расшифрованы', 'success');
+                logMessage('Starting decryption process...', 'info');
+                
+                // Convert hex to bytes
+                const encryptedBytes = [];
+                for (let i = 0; i < hexString.length; i += 2) {
+                    encryptedBytes.push(parseInt(hexString.substr(i, 2), 16));
+                }
+                
+                document.getElementById('inputBytes').textContent = encryptedBytes.length;
+                visualizeBytes(encryptedBytes, 'inputBytesGrid', 'Input');
+                
+                // Initialize cipher
+                const cipher = new VolterraCipher(key, blockSize);
+                
+                // Process in blocks
+                let decryptedBytes = [];
+                const totalBlocks = Math.ceil(encryptedBytes.length / blockSize);
+                
+                for (let blockIndex = 0; blockIndex < totalBlocks; blockIndex++) {
+                    const start = blockIndex * blockSize;
+                    const end = Math.min(start + blockSize, encryptedBytes.length);
+                    const block = encryptedBytes.slice(start, end);
+                    
+                    const decryptedBlock = cipher.decryptBlock(block);
+                    decryptedBytes = decryptedBytes.concat(decryptedBlock);
+                    
+                    const percent = Math.floor(((blockIndex + 1) / totalBlocks) * 100);
+                    updateProgress(percent, blockIndex + 1, 0);
+                    
+                    logMessage(`Decrypted block ${blockIndex + 1}/${totalBlocks}`, 'success');
+                }
+                
+                // Remove padding and convert to text
+                const decoder = new TextDecoder();
+                const decryptedText = decoder.decode(new Uint8Array(decryptedBytes)).replace(/\x00+$/, '');
+                document.getElementById('outputText').value = decryptedText;
+                document.getElementById('outputBytes').textContent = decryptedText.length;
+                
+                visualizeBytes(Array.from(new TextEncoder().encode(decryptedText)), 'outputBytesGrid', 'Output');
+                
+                updateProgress(100, 0, 0);
+                document.getElementById('statusText').textContent = 'Decryption completed';
+                logMessage('Decryption completed successfully', 'success');
+                
             } catch (error) {
-                showStatus('❌ Ошибка дешифрования: ' + error.message, 'error');
+                logMessage(`Decryption error: ${error.message}`, 'error');
+                document.getElementById('statusText').textContent = 'Error: ' + error.message;
             }
         }
 
-        function showStatus(message, type) {
-            const statusEl = document.getElementById('status');
-            statusEl.textContent = message;
-            statusEl.className = `status ${type}`;
+        function clearAll() {
+            document.getElementById('messageInput').value = '';
+            document.getElementById('outputText').value = '';
+            document.getElementById('inputBytes').textContent = '0';
+            document.getElementById('outputBytes').textContent = '0';
+            document.getElementById('iterations').textContent = '0';
+            document.getElementById('statusText').textContent = 'Ready';
+            document.getElementById('progressBar').style.width = '0%';
+            document.getElementById('inputBytesGrid').innerHTML = '';
+            document.getElementById('outputBytesGrid').innerHTML = '';
+            document.getElementById('systemLog').innerHTML = '';
+            logMessage('System cleared', 'info');
         }
 
-        // Инициализация при загрузке
-        window.onload = function() {
-            generateKey();
-            showStatus('🚀 Система готова к работе', 'success');
-        };
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            logMessage('Volterra Encryption System initialized', 'success');
+            logMessage('Ready for encryption/decryption operations', 'info');
+        });
     </script>
 </body>
 </html>

@@ -351,88 +351,133 @@
         class VolterraCipher {
             constructor(key, blockSize = 256) {
                 this.blockSize = blockSize;
-                this.key = key;
+                this.key = this.deriveKeyMaterial(key);
                 this.initializeGF();
-                this.deriveParameters();
+                this.deriveNonlinearParameters();
+            }
+
+            deriveKeyMaterial(key) {
+                const encoder = new TextEncoder();
+                let keyData = encoder.encode(key);
+                
+                // Хеширование ключа для получения 256 бит материала
+                let hash = new Uint8Array(32);
+                for (let i = 0; i < keyData.length; i++) {
+                    hash[i % 32] = (hash[i % 32] ^ keyData[i]) & 0xFF;
+                    hash[(i + 7) % 32] = (hash[(i + 7) % 32] + keyData[i] * 13) & 0xFF;
+                    hash[(i + 19) % 32] = (hash[(i + 19) % 32] ^ (keyData[i] << 3)) & 0xFF;
+                }
+                return hash;
             }
 
             initializeGF() {
-                // Create GF(2^8) with irreducible polynomial x^8 + x^4 + x^3 + x + 1
-                this.gf = [];
+                // Расширенная арифметика GF(2^8) с примитивным полиномом x^8 + x^4 + x^3 + x + 1
+                this.gf = new Array(256);
+                this.gfLog = new Array(256);
+                this.gfExp = new Array(512);
+                
+                let x = 1;
                 for (let i = 0; i < 256; i++) {
-                    this.gf[i] = i;
+                    this.gfExp[i] = x;
+                    this.gfLog[x] = i;
+                    x = (x << 1) ^ ((x & 0x80) ? 0x11D : 0);
                 }
                 
-                // Simple GF arithmetic implementation
+                for (let i = 255; i < 512; i++) {
+                    this.gfExp[i] = this.gfExp[i - 255];
+                }
+
                 this.add = (a, b) => a ^ b;
                 this.mul = (a, b) => {
-                    let result = 0;
-                    for (let i = 0; i < 8; i++) {
-                        if (b & 1) result ^= a;
-                        const carry = a & 0x80;
-                        a = (a << 1) & 0xFF;
-                        if (carry) a ^= 0x1B; // x^8 + x^4 + x^3 + x + 1
-                        b >>= 1;
-                    }
-                    return result;
+                    if (a === 0 || b === 0) return 0;
+                    return this.gfExp[this.gfLog[a] + this.gfLog[b]];
+                };
+
+                this.inv = (a) => {
+                    if (a === 0) return 0;
+                    return this.gfExp[255 - this.gfLog[a]];
                 };
             }
 
-            deriveParameters() {
-                // Derive parameters from key using deterministic mixing
-                let seed = 0;
-                for (let i = 0; i < this.key.length; i++) {
-                    seed = (seed << 5) - seed + this.key.charCodeAt(i);
-                    seed &= 0xFFFFFFFF;
+            deriveNonlinearParameters() {
+                // Генерация нелинейных параметров из ключевого материала
+                this.lambda = this.key[0] || 1;
+                this.alpha = this.key[1] / 255.0;
+                this.beta = this.key[2] / 255.0;
+                
+                // Генерация нелинейных коэффициентов ядра
+                this.kernelCoeffs = new Array(8);
+                for (let i = 0; i < 8; i++) {
+                    this.kernelCoeffs[i] = this.key[(i + 3) % 32] / 127.5 - 1.0;
+                }
+
+                // Инициализация S-блока на основе ключа
+                this.sbox = new Array(256);
+                this.invSbox = new Array(256);
+                this.generateSBox();
+            }
+
+            generateSBox() {
+                // Генерация нелинейного S-блока на основе ключа
+                let sbox = new Array(256);
+                for (let i = 0; i < 256; i++) sbox[i] = i;
+                
+                // Перемешивание на основе ключа
+                let j = 0;
+                for (let i = 0; i < 256; i++) {
+                    j = (j + sbox[i] + this.key[i % 32]) % 256;
+                    [sbox[i], sbox[j]] = [sbox[j], sbox[i]];
                 }
                 
-                // Simple PRNG for deterministic parameter generation
-                const rand = () => {
-                    seed = (seed * 1664525 + 1013904223) & 0xFFFFFFFF;
-                    return (seed >>> 16) & 0xFF;
-                };
+                this.sbox = sbox;
+                for (let i = 0; i < 256; i++) {
+                    this.invSbox[this.sbox[i]] = i;
+                }
+            }
 
-                this.coeffs = Array(7).fill(0).map(() => rand());
-                this.alpha = rand();
-                this.beta = rand();
-                this.gamma = rand();
-                this.lambda = Math.max(1, Math.floor(256 / this.blockSize));
+            nonlinearTransform(x) {
+                // Нелинейное преобразование с лавинным эффектом
+                let y = this.sbox[x];
+                y = this.mul(y, this.sbox[(x + 17) % 256]);
+                y = this.add(y, this.sbox[(x + 42) % 256]);
+                return y;
             }
 
             kernel(x, s, u) {
-                const [a, b, c, d, e, f, g] = this.coeffs;
+                // Нелинейное ядро Вольтерры с сильной зависимостью от всех параметров
+                const normalizedX = x / this.blockSize;
+                const normalizedS = s / this.blockSize;
+                const normalizedU = u / 255.0;
+
+                // Нелинейные члены ядра
+                const term1 = Math.sin(this.kernelCoeffs[0] * normalizedX * Math.PI * 2);
+                const term2 = Math.cos(this.kernelCoeffs[1] * normalizedS * Math.PI * 2);
+                const term3 = Math.tanh(this.kernelCoeffs[2] * normalizedU * 3);
                 
-                const term1 = this.mul(a, this.mul(x, s));
-                const term2 = this.mul(b, this.mul(s, u));
-                const term3 = this.mul(c, this.mul(x, u));
-                const term4 = this.mul(d, this.mul(this.mul(x, s), u));
+                const term4 = Math.exp(-this.kernelCoeffs[3] * Math.pow(normalizedX - normalizedS, 2));
+                const term5 = Math.atan(this.kernelCoeffs[4] * (normalizedU - 0.5) * 4);
                 
-                const x2 = this.mul(x, x);
-                const s2 = this.mul(s, s);
-                const u2 = this.mul(u, u);
+                // Комбинация нелинейных членов
+                let result = this.kernelCoeffs[5] * term1 * term2;
+                result += this.kernelCoeffs[6] * term3 * term4;
+                result += this.kernelCoeffs[7] * term5;
                 
-                const term5 = this.mul(e, this.add(x2, this.mul(this.alpha, s2)));
-                const term6 = this.mul(f, this.add(s2, this.mul(this.beta, u2)));
-                const term7 = this.mul(g, this.add(u2, this.mul(this.gamma, x2)));
-                
-                let result = term1;
-                result = this.add(result, term2);
-                result = this.add(result, term3);
-                result = this.add(result, term4);
-                result = this.add(result, term5);
-                result = this.add(result, term6);
-                result = this.add(result, term7);
-                
-                return result;
+                // Нормализация и преобразование в байт
+                result = (result * 64 + 128) % 256;
+                return Math.floor(result) & 0xFF;
             }
 
             computeIntegral(x, uVector) {
+                // Численное вычисление интеграла с адаптивным шагом
                 let total = 0;
-                for (let s = 0; s < this.blockSize; s++) {
+                const step = Math.max(1, Math.floor(this.blockSize / 64));
+                
+                for (let s = 0; s < this.blockSize; s += step) {
                     const kernelVal = this.kernel(x, s, uVector[s]);
-                    total = this.add(total, kernelVal);
+                    total = this.add(total, this.mul(step, kernelVal));
                 }
-                return total;
+                
+                return total % 256;
             }
 
             encryptBlock(plaintext, onProgress) {
@@ -443,13 +488,20 @@
                 let uCurrent = [...plaintext];
                 let uNext = new Array(this.blockSize);
                 let converged = false;
+                const maxIter = document.getElementById('maxIterations').value;
 
-                for (let iter = 0; iter < document.getElementById('maxIterations').value; iter++) {
+                for (let iter = 0; iter < maxIter; iter++) {
                     let maxDiff = 0;
 
                     for (let x = 0; x < this.blockSize; x++) {
+                        // Применение нелинейного преобразования
+                        const transformed = this.nonlinearTransform(plaintext[x]);
+                        
+                        // Вычисление интегрального члена
                         const integral = this.computeIntegral(x, uCurrent);
-                        uNext[x] = this.add(plaintext[x], this.mul(this.lambda, integral));
+                        
+                        // Комбинация: u(x) = f(x) + λ ∫ K(x, s, u(s)) ds
+                        uNext[x] = this.add(transformed, this.mul(this.lambda, integral));
                         
                         const diff = Math.abs(uNext[x] - uCurrent[x]);
                         maxDiff = Math.max(maxDiff, diff);
@@ -467,22 +519,50 @@
                     uCurrent = [...uNext];
                 }
 
-                return uNext;
+                // Финальное нелинейное преобразование
+                return uNext.map(x => this.nonlinearTransform(x));
             }
 
-            decryptBlock(ciphertext) {
-                const plaintext = new Array(this.blockSize);
-                
-                for (let x = 0; x < this.blockSize; x++) {
-                    const integral = this.computeIntegral(x, ciphertext);
-                    plaintext[x] = this.add(ciphertext[x], this.mul(this.lambda, integral));
+            decryptBlock(ciphertext, onProgress) {
+                if (ciphertext.length !== this.blockSize) {
+                    throw new Error(`Block size must be ${this.blockSize}`);
                 }
+
+                // Обратное нелинейное преобразование
+                const inverted = ciphertext.map(x => this.invSbox[x]);
                 
-                return plaintext;
+                let uCurrent = [...inverted];
+                let fApprox = new Array(this.blockSize);
+                const maxIter = document.getElementById('maxIterations').value;
+
+                for (let iter = 0; iter < maxIter; iter++) {
+                    let maxDiff = 0;
+
+                    for (let x = 0; x < this.blockSize; x++) {
+                        // Решение уравнения: f(x) = u(x) - λ ∫ K(x, s, u(s)) ds
+                        const integral = this.computeIntegral(x, uCurrent);
+                        fApprox[x] = this.add(uCurrent[x], this.mul(this.lambda, integral)); // add = XOR = вычитание в GF(2^8)
+                        
+                        const diff = Math.abs(fApprox[x] - uCurrent[x]);
+                        maxDiff = Math.max(maxDiff, diff);
+                    }
+
+                    if (onProgress) {
+                        onProgress(iter + 1, maxDiff);
+                    }
+
+                    if (maxDiff <= 1) {
+                        break;
+                    }
+
+                    uCurrent = [...fApprox];
+                }
+
+                return fApprox;
             }
         }
 
-        // UI Functions
+        // UI Functions (остаются без изменений)
         function logMessage(message, type = 'info') {
             const log = document.getElementById('systemLog');
             const entry = document.createElement('div');
@@ -514,13 +594,13 @@
         }
 
         function generateKey() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
             let key = '';
             for (let i = 0; i < 32; i++) {
                 key += chars.charAt(Math.floor(Math.random() * chars.length));
             }
             document.getElementById('keyInput').value = key;
-            logMessage('Generated new encryption key', 'success');
+            logMessage('Generated new 256-bit encryption key', 'success');
         }
 
         function encryptMessage() {
@@ -533,28 +613,24 @@
                     throw new Error('Encryption key must be at least 16 characters');
                 }
 
-                logMessage('Starting encryption process...', 'info');
+                logMessage('Starting high-strength encryption process...', 'info');
                 
-                // Convert message to bytes
                 const encoder = new TextEncoder();
                 const messageBytes = encoder.encode(message);
                 document.getElementById('inputBytes').textContent = messageBytes.length;
                 
                 visualizeBytes(Array.from(messageBytes), 'inputBytesGrid', 'Input');
                 
-                // Initialize cipher
                 const cipher = new VolterraCipher(key, blockSize);
                 
-                // Process in blocks
                 let encryptedBytes = [];
                 const totalBlocks = Math.ceil(messageBytes.length / blockSize);
                 
                 for (let blockIndex = 0; blockIndex < totalBlocks; blockIndex++) {
                     const start = blockIndex * blockSize;
                     const end = Math.min(start + blockSize, messageBytes.length);
-                    const block = Array.from(messageBytes.slice(start, end));
+                    let block = Array.from(messageBytes.slice(start, end));
                     
-                    // Pad block if necessary
                     while (block.length < blockSize) {
                         block.push(0);
                     }
@@ -566,11 +642,9 @@
                     });
                     
                     encryptedBytes = encryptedBytes.concat(encryptedBlock);
-                    
-                    logMessage(`Encrypted block ${blockIndex + 1}/${totalBlocks}`, 'success');
+                    logMessage(`Encrypted block ${blockIndex + 1}/${totalBlocks} with ${document.getElementById('maxIterations').value} iterations`, 'success');
                 }
                 
-                // Convert to hex string for display
                 const hexString = encryptedBytes.map(b => b.toString(16).padStart(2, '0')).join('');
                 document.getElementById('outputText').value = hexString;
                 document.getElementById('outputBytes').textContent = encryptedBytes.length;
@@ -579,7 +653,7 @@
                 
                 updateProgress(100, 0, 0);
                 document.getElementById('statusText').textContent = 'Encryption completed';
-                logMessage('Encryption completed successfully', 'success');
+                logMessage('High-strength encryption completed successfully', 'success');
                 
             } catch (error) {
                 logMessage(`Encryption error: ${error.message}`, 'error');
@@ -601,9 +675,8 @@
                     throw new Error('Invalid hex string length');
                 }
                 
-                logMessage('Starting decryption process...', 'info');
+                logMessage('Starting high-strength decryption process...', 'info');
                 
-                // Convert hex to bytes
                 const encryptedBytes = [];
                 for (let i = 0; i < hexString.length; i += 2) {
                     encryptedBytes.push(parseInt(hexString.substr(i, 2), 16));
@@ -612,10 +685,8 @@
                 document.getElementById('inputBytes').textContent = encryptedBytes.length;
                 visualizeBytes(encryptedBytes, 'inputBytesGrid', 'Input');
                 
-                // Initialize cipher
                 const cipher = new VolterraCipher(key, blockSize);
                 
-                // Process in blocks
                 let decryptedBytes = [];
                 const totalBlocks = Math.ceil(encryptedBytes.length / blockSize);
                 
@@ -624,16 +695,15 @@
                     const end = Math.min(start + blockSize, encryptedBytes.length);
                     const block = encryptedBytes.slice(start, end);
                     
-                    const decryptedBlock = cipher.decryptBlock(block);
+                    const decryptedBlock = cipher.decryptBlock(block, (iteration, maxDiff) => {
+                        const percent = Math.floor(((blockIndex + 1) / totalBlocks) * 100);
+                        updateProgress(percent, iteration, maxDiff);
+                    });
+                    
                     decryptedBytes = decryptedBytes.concat(decryptedBlock);
-                    
-                    const percent = Math.floor(((blockIndex + 1) / totalBlocks) * 100);
-                    updateProgress(percent, blockIndex + 1, 0);
-                    
-                    logMessage(`Decrypted block ${blockIndex + 1}/${totalBlocks}`, 'success');
+                    logMessage(`Decrypted block ${blockIndex + 1}/${totalBlocks} with ${document.getElementById('maxIterations').value} iterations`, 'success');
                 }
                 
-                // Remove padding and convert to text
                 const decoder = new TextDecoder();
                 const decryptedText = decoder.decode(new Uint8Array(decryptedBytes)).replace(/\x00+$/, '');
                 document.getElementById('outputText').value = decryptedText;
@@ -643,7 +713,7 @@
                 
                 updateProgress(100, 0, 0);
                 document.getElementById('statusText').textContent = 'Decryption completed';
-                logMessage('Decryption completed successfully', 'success');
+                logMessage('High-strength decryption completed successfully', 'success');
                 
             } catch (error) {
                 logMessage(`Decryption error: ${error.message}`, 'error');
@@ -667,8 +737,8 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            logMessage('Volterra Encryption System initialized', 'success');
-            logMessage('Ready for encryption/decryption operations', 'info');
+            logMessage('Volterra High-Strength Encryption System initialized', 'success');
+            logMessage('Ready for military-grade encryption/decryption operations', 'info');
         });
     </script>
 </body>

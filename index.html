@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Профессиональный гомофонный шифр</title>
+    <title>Professional Homophonic Cipher</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -143,6 +143,12 @@
             margin-right: 8px;
         }
 
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
         .output {
             margin-top: 20px;
             padding: 15px;
@@ -228,119 +234,202 @@
             padding: 20px;
             color: var(--text-secondary);
         }
+        
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            margin-right: 10px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--secondary);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .entropy-result {
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--light);
+            border-radius: 6px;
+        }
+        
+        .entropy-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Профессиональный гомофонный шифр с афинным преобразованием</h1>
+            <h1>Professional Homophonic Cipher</h1>
             <p class="description">
-                Криптостойкая реализация с использованием HMAC-SHA512 для генерации S-Box и афинных преобразований.
+                Advanced implementation with CBC mode using affine transformation and entropy testing.
             </p>
         </header>
         
         <div class="panels">
             <div class="panel">
-                <h2 class="panel-title">Шифрование</h2>
+                <h2 class="panel-title">Encryption</h2>
                 <div class="input-group">
-                    <label for="key"><i class="fas fa-key"></i> Ключ шифрования</label>
-                    <input type="text" id="key" placeholder="Введите секретный ключ" value="secure-key-123">
+                    <label for="key"><i class="fas fa-key"></i> Encryption Key</label>
+                    <input type="text" id="key" placeholder="Enter secret key" value="secure-key-123">
                 </div>
                 <div class="input-group">
-                    <label for="a-param">Параметр a (взаимно простой с 26):</label>
+                    <label for="a-param">Parameter a (coprime with 26):</label>
                     <input type="number" id="a-param" value="5" min="1" max="25">
                 </div>
                 <div class="input-group">
-                    <label for="b-param">Параметр b:</label>
+                    <label for="b-param">Parameter b:</label>
                     <input type="number" id="b-param" value="7" min="0" max="25">
                 </div>
+                <div class="toggle-container">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="cbc-mode">
+                        <span class="slider"></span>
+                    </label>
+                    <label for="cbc-mode">Enable CBC Mode</label>
+                </div>
                 <div class="input-group">
-                    <label for="plaintext"><i class="fas fa-font"></i> Исходный текст (A-Z):</label>
+                    <label for="plaintext"><i class="fas fa-font"></i> Plaintext (A-Z only):</label>
                     <textarea id="plaintext">ATTACKATDAWN</textarea>
                 </div>
                 <div class="btn-group">
                     <button class="btn" onclick="encrypt()">
-                        <i class="fas fa-lock"></i> Зашифровать
+                        <i class="fas fa-lock"></i> Encrypt
+                    </button>
+                    <button class="btn" onclick="testEntropy()">
+                        <i class="fas fa-chart-bar"></i> Test Entropy
                     </button>
                     <button class="btn" onclick="clearEncryption()">
-                        <i class="fas fa-trash"></i> Очистить
+                        <i class="fas fa-trash"></i> Clear
                     </button>
                 </div>
                 <div class="output">
-                    <div class="output-title">После афинного преобразования:</div>
-                    <div class="output-content" id="affine-output"></div>
-                </div>
-                <div class="output">
-                    <div class="output-title">Зашифрованный текст:</div>
+                    <div class="output-title">Ciphertext Output</div>
                     <div class="output-content" id="ciphertext-output"></div>
+                </div>
+                <div class="entropy-result" id="entropy-result" style="display: none;">
+                    <div class="output-title">Entropy Test Results</div>
+                    <div class="output-content" id="entropy-value"></div>
                 </div>
             </div>
             
             <div class="panel">
-                <h2 class="panel-title">Дешифрование</h2>
+                <h2 class="panel-title">Decryption</h2>
                 <div class="input-group">
-                    <label for="decrypt-key"><i class="fas fa-key"></i> Ключ дешифрования</label>
-                    <input type="text" id="decrypt-key" placeholder="Введите секретный ключ" value="secure-key-123">
+                    <label for="decrypt-key"><i class="fas fa-key"></i> Decryption Key</label>
+                    <input type="text" id="decrypt-key" placeholder="Enter secret key" value="secure-key-123">
                 </div>
                 <div class="input-group">
-                    <label for="decrypt-a">Параметр a:</label>
+                    <label for="decrypt-a">Parameter a:</label>
                     <input type="number" id="decrypt-a" value="5" min="1" max="25">
                 </div>
                 <div class="input-group">
-                    <label for="decrypt-b">Параметр b:</label>
+                    <label for="decrypt-b">Parameter b:</label>
                     <input type="number" id="decrypt-b" value="7" min="0" max="25">
                 </div>
+                <div class="toggle-container">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="decrypt-cbc-mode">
+                        <span class="slider"></span>
+                    </label>
+                    <label for="decrypt-cbc-mode">CBC Mode Enabled</label>
+                </div>
                 <div class="input-group">
-                    <label for="ciphertext"><i class="fas fa-lock"></i> Зашифрованный текст:</label>
+                    <label for="ciphertext"><i class="fas fa-lock"></i> Ciphertext:</label>
                     <textarea id="ciphertext"></textarea>
                 </div>
                 <div class="btn-group">
                     <button class="btn" onclick="decrypt()">
-                        <i class="fas fa-lock-open"></i> Расшифровать
+                        <i class="fas fa-lock-open"></i> Decrypt
                     </button>
                     <button class="btn" onclick="clearDecryption()">
-                        <i class="fas fa-trash"></i> Очистить
+                        <i class="fas fa-trash"></i> Clear
                     </button>
                 </div>
                 <div class="output">
-                    <div class="output-title">Расшифрованный текст:</div>
+                    <div class="output-title">Decrypted Text</div>
                     <div class="output-content" id="decrypted-output"></div>
                 </div>
             </div>
         </div>
         
         <div class="technical">
-            <h2 class="technical-title">Техническая реализация</h2>
+            <h2 class="technical-title">Technical Implementation</h2>
             <div class="status info">
-                <i class="fas fa-info-circle"></i> Реализация использует HMAC-SHA512 для криптостойкой генерации S-Box на основе ключа.
+                <i class="fas fa-info-circle"></i> This implementation uses HMAC-SHA512 for cryptographically secure S-Box generation.
             </div>
             
-            <h3>Алгоритм работы:</h3>
+            <h3>Algorithm Steps:</h3>
             <div class="algorithm">
-                <div class="algorithm-step">Генерация S-Box с использованием HMAC-SHA512 на основе ключа</div>
-                <div class="algorithm-step">Применение афинного преобразования: y = (a * x + b) mod 26</div>
-                <div class="algorithm-step">Разбиение текста на биграммы (2 символа)</div>
-                <div class="algorithm-step">Шифрование каждой биграммы случайным homophone из S-Box</div>
-                <div class="algorithm-step">Обратное преобразование при дешифровании</div>
+                <div class="algorithm-step">S-Box generation using HMAC-SHA512 based on the key</div>
+                <div class="algorithm-step">Affine transformation: y = (a * x + b) mod 26</div>
+                <div class="algorithm-step">Text splitting into bigrams (2 characters)</div>
+                <div class="algorithm-step">CBC mode with affine transformation for block chaining</div>
+                <div class="algorithm-step">Each bigram encrypted with a random homophone from S-Box</div>
+                <div class="algorithm-step">Entropy testing for cryptographic strength analysis</div>
             </div>
         </div>
         
         <footer>
-            <p>Профессиональная реализация гомофонного шифра | 2023</p>
+            <p>Professional Homophonic Cipher Implementation | 2023</p>
         </footer>
     </div>
 
     <script>
-        // Константы
+        // Constants
         const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         const BASE64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
         
-        // Глобальные переменные
+        // Global variables
         let sBox = null;
         let reverseSBox = null;
         let currentKey = null;
         
-        // HMAC-SHA512 с использованием Web Crypto API
+        // HMAC-SHA512 using Web Crypto API
         async function hmacSha512(key, data) {
             const encoder = new TextEncoder();
             const keyData = encoder.encode(key);
@@ -354,7 +443,7 @@
             return Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
         
-        // Криптостойкий PRNG на основе HMAC-DRBG
+        // Cryptographically secure PRNG based on HMAC-DRBG
         async function createSeededRandomGenerator(key) {
             let state = await hmacSha512(key, 'initial-state');
             let counter = 0;
@@ -373,7 +462,7 @@
             };
         }
         
-        // Перемешивание Fisher-Yates с криптостойким ГПСЧ
+        // Fisher-Yates shuffle with cryptographically secure random generator
         async function cryptoShuffle(array, key, salt) {
             const random = await createSeededRandomGenerator(key + salt);
             const result = [...array];
@@ -386,13 +475,13 @@
             return result;
         }
         
-        // Создание S-Box на основе ключа
+        // Create the S-box mapping based on the key
         async function createSBox(key) {
             if (!key) {
-                throw new Error('Ключ шифрования обязателен');
+                throw new Error('Encryption key is required');
             }
             
-            // Генерация всех возможных homophones
+            // Generate all possible homophones
             const allHomophones = [];
             for (let i = 0; i < BASE64_CHARS.length; i++) {
                 for (let j = 0; j < BASE64_CHARS.length; j++) {
@@ -400,7 +489,7 @@
                 }
             }
             
-            // Генерация всех возможных биграмм
+            // Generate all possible bigrams
             const allBigrams = [];
             for (let i = 0; i < ALPHABET.length; i++) {
                 for (let j = 0; j < ALPHABET.length; j++) {
@@ -408,11 +497,11 @@
                 }
             }
             
-            // Криптостойкое перемешивание
+            // Shuffle both arrays using cryptographically secure method
             const shuffledHomophones = await cryptoShuffle(allHomophones, key, 'homophones-salt');
             const shuffledBigrams = await cryptoShuffle(allBigrams, key, 'bigrams-salt');
             
-            // Создание S-Box
+            // Create S-box by assigning homophones to bigrams
             const sBox = {};
             let homophoneIndex = 0;
             
@@ -427,7 +516,7 @@
             return sBox;
         }
         
-        // Создание обратного S-Box
+        // Create reverse S-box for decryption
         function createReverseSBox(sBox) {
             const reverse = {};
             for (const [bigram, homophones] of Object.entries(sBox)) {
@@ -438,8 +527,8 @@
             return reverse;
         }
         
-        // Афинное преобразование
-        function affineEncrypt(char, a, b) {
+        // Affine transformation
+        function affineTransform(char, a, b) {
             const x = ALPHABET.indexOf(char);
             if (x === -1) return char;
             
@@ -447,12 +536,12 @@
             return ALPHABET[y];
         }
         
-        // Обратное афинное преобразование
-        function affineDecrypt(char, a, b) {
+        // Inverse affine transformation
+        function inverseAffineTransform(char, a, b) {
             const y = ALPHABET.indexOf(char);
             if (y === -1) return char;
             
-            // Нахождение обратного элемента a⁻¹ mod 26
+            // Find modular inverse of a mod 26
             let aInv = 0;
             for (let i = 0; i < 26; i++) {
                 if ((a * i) % 26 === 1) {
@@ -465,7 +554,7 @@
             return ALPHABET[x];
         }
         
-        // Проверка взаимной простоты a и 26
+        // Check if a is coprime with 26
         function isCoprime(a, m) {
             while (a !== 0 && m !== 0) {
                 if (a > m) {
@@ -477,152 +566,254 @@
             return Math.max(a, m) === 1;
         }
         
-        // Шифрование
+        // Calculate entropy of a string
+        function calculateEntropy(str) {
+            const len = str.length;
+            const frequencies = {};
+            
+            // Calculate character frequencies
+            for (const char of str) {
+                frequencies[char] = (frequencies[char] || 0) + 1;
+            }
+            
+            // Calculate entropy
+            let entropy = 0;
+            for (const char in frequencies) {
+                const freq = frequencies[char] / len;
+                entropy -= freq * Math.log2(freq);
+            }
+            
+            return entropy;
+        }
+        
+        // Test entropy of ciphertext
+        function testEntropy() {
+            const ciphertext = document.getElementById('ciphertext-output').textContent;
+            
+            if (!ciphertext || ciphertext === 'Encrypted text will appear here...') {
+                showStatus('Please encrypt text first', 'error');
+                return;
+            }
+            
+            const entropy = calculateEntropy(ciphertext);
+            const maxEntropy = Math.log2(BASE64_CHARS.length); // Maximum entropy for Base64
+            
+            document.getElementById('entropy-value').textContent = 
+                `Entropy: ${entropy.toFixed(4)} bits/character\n` +
+                `Maximum possible: ${maxEntropy.toFixed(4)} bits/character\n` +
+                `Relative strength: ${(entropy/maxEntropy*100).toFixed(2)}%`;
+                
+            document.getElementById('entropy-result').style.display = 'block';
+            showStatus('Entropy test completed', 'success');
+        }
+        
+        // Encrypt text
         async function encrypt() {
             try {
                 const key = document.getElementById('key').value;
                 const a = parseInt(document.getElementById('a-param').value);
                 const b = parseInt(document.getElementById('b-param').value);
+                const useCBC = document.getElementById('cbc-mode').checked;
                 let plaintext = document.getElementById('plaintext').value.toUpperCase().replace(/[^A-Z]/g, '');
                 
                 if (!plaintext) {
-                    showStatus('Введите текст для шифрования', 'error');
+                    showStatus('Please enter text to encrypt', 'error');
                     return;
                 }
                 
                 if (!key) {
-                    showStatus('Ключ шифрования обязателен', 'error');
+                    showStatus('Encryption key is required', 'error');
                     return;
                 }
                 
-                // Проверка взаимной простоты a и 26
+                // Check if a is coprime with 26
                 if (!isCoprime(a, 26)) {
-                    showStatus('Параметр a должен быть взаимно простым с 26', 'error');
+                    showStatus('Parameter a must be coprime with 26', 'error');
                     return;
                 }
                 
-                // Создание S-Box при необходимости
+                // Create S-box if not already created or key changed
                 if (!sBox || key !== currentKey) {
                     sBox = await createSBox(key);
                     reverseSBox = createReverseSBox(sBox);
                     currentKey = key;
                 }
                 
-                // Применение афинного преобразования
+                // Apply affine transformation to each character
                 let affineText = '';
                 for (const char of plaintext) {
-                    affineText += affineEncrypt(char, a, b);
+                    affineText += affineTransform(char, a, b);
                 }
                 
-                document.getElementById('affine-output').textContent = affineText;
-                
-                // Добавление padding при необходимости
+                // Add padding if needed
                 let processedText = affineText;
                 if (processedText.length % 2 !== 0) {
                     processedText += 'X';
                 }
                 
-                // Шифрование каждой биграммы
+                // Encrypt each bigram
                 let ciphertext = '';
+                let previousBlock = 'AA'; // Initial block for CBC mode
+                
                 for (let i = 0; i < processedText.length; i += 2) {
-                    const bigram = processedText.substr(i, 2);
+                    let bigram = processedText.substr(i, 2);
+                    
+                    // Apply CBC mode with affine transformation if enabled
+                    if (useCBC) {
+                        let transformedBigram = '';
+                        for (let j = 0; j < 2; j++) {
+                            // Affine transformation for CBC: (a * current + previous + b) mod 26
+                            const currentChar = bigram.charAt(j);
+                            const previousChar = previousBlock.charAt(j);
+                            
+                            const currentVal = ALPHABET.indexOf(currentChar);
+                            const previousVal = ALPHABET.indexOf(previousChar);
+                            
+                            const transformedVal = (a * currentVal + previousVal + b) % 26;
+                            transformedBigram += ALPHABET[transformedVal];
+                        }
+                        bigram = transformedBigram;
+                    }
+                    
                     if (sBox[bigram]) {
+                        // Randomly select one of the available homophones
                         const randomIndex = Math.floor(Math.random() * sBox[bigram].length);
-                        ciphertext += sBox[bigram][randomIndex];
+                        const homophone = sBox[bigram][randomIndex];
+                        ciphertext += homophone;
+                        
+                        // Update previous block for next iteration
+                        previousBlock = bigram;
                     }
                 }
                 
                 document.getElementById('ciphertext-output').textContent = ciphertext;
                 document.getElementById('ciphertext').value = ciphertext;
+                document.getElementById('decrypt-cbc-mode').checked = useCBC;
                 
-                showStatus('Текст успешно зашифрован', 'success');
+                showStatus('Text encrypted successfully', 'success');
                 
             } catch (error) {
-                showStatus('Ошибка при шифровании: ' + error.message, 'error');
+                showStatus('Error during encryption: ' + error.message, 'error');
             }
         }
         
-        // Дешифрование
+        // Decrypt text
         async function decrypt() {
             try {
                 const key = document.getElementById('decrypt-key').value;
                 const a = parseInt(document.getElementById('decrypt-a').value);
                 const b = parseInt(document.getElementById('decrypt-b').value);
+                const useCBC = document.getElementById('decrypt-cbc-mode').checked;
                 const ciphertext = document.getElementById('ciphertext').value;
                 
                 if (!ciphertext) {
-                    showStatus('Введите зашифрованный текст', 'error');
+                    showStatus('Please enter ciphertext to decrypt', 'error');
                     return;
                 }
                 
                 if (!key) {
-                    showStatus('Ключ дешифрования обязателен', 'error');
+                    showStatus('Decryption key is required', 'error');
                     return;
                 }
                 
                 if (ciphertext.length % 2 !== 0) {
-                    showStatus('Длина зашифрованного текста должна быть четной', 'error');
+                    showStatus('Ciphertext length must be even', 'error');
                     return;
                 }
                 
-                // Создание S-Box при необходимости
+                // Create S-box if not already created
                 if (!sBox || key !== currentKey) {
                     sBox = await createSBox(key);
                     reverseSBox = createReverseSBox(sBox);
                     currentKey = key;
                 }
                 
-                // Дешифрование homophones
+                // Decrypt each homophone pair
                 let affineText = '';
+                let previousBlock = 'AA'; // Initial block for CBC mode
+                
                 for (let i = 0; i < ciphertext.length; i += 2) {
                     const homophone = ciphertext.substr(i, 2);
+                    
                     if (reverseSBox[homophone]) {
-                        affineText += reverseSBox[homophone];
+                        let bigram = reverseSBox[homophone];
+                        
+                        // Reverse CBC mode with inverse affine transformation if enabled
+                        if (useCBC) {
+                            let originalBigram = '';
+                            
+                            // Find modular inverse of a mod 26
+                            let aInv = 0;
+                            for (let i = 0; i < 26; i++) {
+                                if ((a * i) % 26 === 1) {
+                                    aInv = i;
+                                    break;
+                                }
+                            }
+                            
+                            for (let j = 0; j < 2; j++) {
+                                const currentChar = bigram.charAt(j);
+                                const previousChar = previousBlock.charAt(j);
+                                
+                                const currentVal = ALPHABET.indexOf(currentChar);
+                                const previousVal = ALPHABET.indexOf(previousChar);
+                                
+                                // Inverse affine transformation for CBC: a⁻¹ * (current - previous - b) mod 26
+                                const originalVal = (aInv * (currentVal - previousVal - b + 52)) % 26;
+                                originalBigram += ALPHABET[originalVal];
+                            }
+                            bigram = originalBigram;
+                        }
+                        
+                        affineText += bigram;
+                        
+                        // Update previous block for next iteration
+                        previousBlock = reverseSBox[homophone];
                     } else {
-                        affineText += '??';
+                        affineText += '??'; // Unknown homophone
                     }
                 }
                 
-                // Применение обратного афинного преобразования
+                // Apply inverse affine transformation to each character
                 let plaintext = '';
                 for (const char of affineText) {
-                    plaintext += affineDecrypt(char, a, b);
+                    plaintext += inverseAffineTransform(char, a, b);
                 }
                 
                 document.getElementById('decrypted-output').textContent = plaintext;
                 
-                showStatus('Текст успешно расшифрован', 'success');
+                showStatus('Text decrypted successfully', 'success');
                 
             } catch (error) {
-                showStatus('Ошибка при дешифровании: ' + error.message, 'error');
+                showStatus('Error during decryption: ' + error.message, 'error');
             }
         }
         
-        // Очистка полей шифрования
+        // Clear encryption fields
         function clearEncryption() {
             document.getElementById('plaintext').value = '';
-            document.getElementById('affine-output').textContent = '';
-            document.getElementById('ciphertext-output').textContent = '';
+            document.getElementById('ciphertext-output').textContent = 'Encrypted text will appear here...';
             document.getElementById('ciphertext').value = '';
-            showStatus('Поля шифрования очищены', 'info');
+            document.getElementById('entropy-result').style.display = 'none';
+            showStatus('Encryption fields cleared', 'info');
         }
         
-        // Очистка полей дешифрования
+        // Clear decryption fields
         function clearDecryption() {
             document.getElementById('ciphertext').value = '';
-            document.getElementById('decrypted-output').textContent = '';
-            showStatus('Поля дешифрования очищены', 'info');
+            document.getElementById('decrypted-output').textContent = 'Decrypted text will appear here...';
+            showStatus('Decryption fields cleared', 'info');
         }
         
-        // Показать статус
+        // Show status message
         function showStatus(message, type) {
-            // Удаление существующих статусов
+            // Remove any existing status
             const existingStatus = document.querySelector('.status');
             if (existingStatus) {
                 existingStatus.remove();
             }
             
-            // Создание элемента статуса
+            // Create new status element
             const status = document.createElement('div');
             status.className = `status ${type}`;
             
@@ -632,10 +823,10 @@
             
             status.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
             
-            // Вставка после панелей
+            // Insert after panels
             document.querySelector('.panels').after(status);
             
-            // Автоудаление через 5 секунд
+            // Auto remove after 5 seconds
             setTimeout(() => {
                 if (status.parentNode) {
                     status.remove();

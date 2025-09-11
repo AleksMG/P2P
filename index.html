@@ -3,53 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Афинное преобразование + Гомофонный шифр</title>
+    <title>Профессиональный гомофонный шифр</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            color: #2c3e50;
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --error: #e74c3c;
+            --card-bg: #ffffff;
+            --card-shadow: rgba(0, 0, 0, 0.1);
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
         }
-        h1 {
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
             text-align: center;
             margin-bottom: 30px;
-            color: #2c3e50;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px var(--card-shadow);
         }
-        .container {
+
+        h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .panels {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
+            margin-bottom: 30px;
         }
+
+        @media (max-width: 900px) {
+            .panels {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .panel {
-            background: white;
+            background: var(--card-bg);
             border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            box-shadow: 0 5px 15px var(--card-shadow);
         }
+
+        .panel-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light);
+        }
+
         .input-group {
             margin-bottom: 20px;
         }
+
         label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
+            color: var(--text-primary);
         }
-        input, textarea {
+
+        input, textarea, select {
             width: 100%;
-            padding: 10px;
+            padding: 12px 15px;
             border: 2px solid #ddd;
             border-radius: 6px;
             font-size: 16px;
+            transition: border-color 0.3s;
+            background: var(--card-bg);
+            color: var(--text-primary);
         }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--secondary);
+            outline: none;
+        }
+
         textarea {
-            min-height: 100px;
+            min-height: 120px;
             resize: vertical;
         }
-        button {
-            background: #3498db;
+
+        .btn {
+            background: var(--secondary);
             color: white;
             border: none;
             padding: 12px 20px;
@@ -57,148 +122,277 @@
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
+            transition: background 0.3s, transform 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             margin-right: 10px;
             margin-bottom: 10px;
         }
-        button:hover {
-            background: #2980b9;
+
+        .btn:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
         }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
         .output {
             margin-top: 20px;
             padding: 15px;
-            background: #ecf0f1;
+            background: var(--light);
             border-radius: 6px;
-            border-left: 4px solid #3498db;
+            border-left: 4px solid var(--secondary);
         }
+
         .output-title {
             font-weight: 600;
             margin-bottom: 10px;
+            color: var(--primary);
         }
+
         .output-content {
             font-family: 'Courier New', monospace;
             white-space: pre-wrap;
             word-break: break-all;
             padding: 10px;
-            background: white;
+            background: var(--card-bg);
             border-radius: 4px;
             min-height: 50px;
+            overflow-x: auto;
         }
-        .params {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 20px;
+
+        .status {
+            padding: 12px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-weight: 500;
         }
-        .algorithm {
-            margin-top: 30px;
-            background: white;
+
+        .status.info {
+            background: #d6eaf8;
+            color: #2874a6;
+        }
+
+        .status.success {
+            background: #d5f5e3;
+            color: #196f3d;
+        }
+
+        .status.error {
+            background: #fadbd8;
+            color: #c0392b;
+        }
+
+        .technical {
+            background: var(--card-bg);
             border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            box-shadow: 0 5px 15px var(--card-shadow);
         }
-        .step {
+
+        .technical-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .algorithm {
+            margin-top: 15px;
+        }
+
+        .algorithm-step {
             margin-bottom: 15px;
             padding-left: 20px;
             position: relative;
         }
-        .step:before {
+
+        .algorithm-step:before {
             content: "→";
             position: absolute;
             left: 0;
-            color: #3498db;
+            color: var(--secondary);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: var(--text-secondary);
         }
     </style>
 </head>
 <body>
-    <h1>Афинное преобразование + Гомофонный шифр</h1>
-    
     <div class="container">
-        <div class="panel">
-            <h2>Шифрование</h2>
-            <div class="input-group">
-                <label for="a-param">Параметр a (должен быть взаимно простым с 26):</label>
-                <input type="number" id="a-param" value="5" min="1" max="25">
+        <header>
+            <h1>Профессиональный гомофонный шифр с афинным преобразованием</h1>
+            <p class="description">
+                Криптостойкая реализация с использованием HMAC-SHA512 для генерации S-Box и афинных преобразований.
+            </p>
+        </header>
+        
+        <div class="panels">
+            <div class="panel">
+                <h2 class="panel-title">Шифрование</h2>
+                <div class="input-group">
+                    <label for="key"><i class="fas fa-key"></i> Ключ шифрования</label>
+                    <input type="text" id="key" placeholder="Введите секретный ключ" value="secure-key-123">
+                </div>
+                <div class="input-group">
+                    <label for="a-param">Параметр a (взаимно простой с 26):</label>
+                    <input type="number" id="a-param" value="5" min="1" max="25">
+                </div>
+                <div class="input-group">
+                    <label for="b-param">Параметр b:</label>
+                    <input type="number" id="b-param" value="7" min="0" max="25">
+                </div>
+                <div class="input-group">
+                    <label for="plaintext"><i class="fas fa-font"></i> Исходный текст (A-Z):</label>
+                    <textarea id="plaintext">ATTACKATDAWN</textarea>
+                </div>
+                <div class="btn-group">
+                    <button class="btn" onclick="encrypt()">
+                        <i class="fas fa-lock"></i> Зашифровать
+                    </button>
+                    <button class="btn" onclick="clearEncryption()">
+                        <i class="fas fa-trash"></i> Очистить
+                    </button>
+                </div>
+                <div class="output">
+                    <div class="output-title">После афинного преобразования:</div>
+                    <div class="output-content" id="affine-output"></div>
+                </div>
+                <div class="output">
+                    <div class="output-title">Зашифрованный текст:</div>
+                    <div class="output-content" id="ciphertext-output"></div>
+                </div>
             </div>
-            <div class="input-group">
-                <label for="b-param">Параметр b:</label>
-                <input type="number" id="b-param" value="7" min="0" max="25">
-            </div>
-            <div class="input-group">
-                <label for="plaintext">Исходный текст (только A-Z):</label>
-                <textarea id="plaintext">ATTACKATDAWN</textarea>
-            </div>
-            <button onclick="encrypt()">Зашифровать</button>
-            <div class="output">
-                <div class="output-title">Результат афинного преобразования:</div>
-                <div class="output-content" id="affine-output"></div>
-            </div>
-            <div class="output">
-                <div class="output-title">Зашифрованный текст (гомофоны):</div>
-                <div class="output-content" id="ciphertext-output"></div>
+            
+            <div class="panel">
+                <h2 class="panel-title">Дешифрование</h2>
+                <div class="input-group">
+                    <label for="decrypt-key"><i class="fas fa-key"></i> Ключ дешифрования</label>
+                    <input type="text" id="decrypt-key" placeholder="Введите секретный ключ" value="secure-key-123">
+                </div>
+                <div class="input-group">
+                    <label for="decrypt-a">Параметр a:</label>
+                    <input type="number" id="decrypt-a" value="5" min="1" max="25">
+                </div>
+                <div class="input-group">
+                    <label for="decrypt-b">Параметр b:</label>
+                    <input type="number" id="decrypt-b" value="7" min="0" max="25">
+                </div>
+                <div class="input-group">
+                    <label for="ciphertext"><i class="fas fa-lock"></i> Зашифрованный текст:</label>
+                    <textarea id="ciphertext"></textarea>
+                </div>
+                <div class="btn-group">
+                    <button class="btn" onclick="decrypt()">
+                        <i class="fas fa-lock-open"></i> Расшифровать
+                    </button>
+                    <button class="btn" onclick="clearDecryption()">
+                        <i class="fas fa-trash"></i> Очистить
+                    </button>
+                </div>
+                <div class="output">
+                    <div class="output-title">Расшифрованный текст:</div>
+                    <div class="output-content" id="decrypted-output"></div>
+                </div>
             </div>
         </div>
         
-        <div class="panel">
-            <h2>Дешифрование</h2>
-            <div class="input-group">
-                <label for="ciphertext">Зашифрованный текст:</label>
-                <textarea id="ciphertext"></textarea>
+        <div class="technical">
+            <h2 class="technical-title">Техническая реализация</h2>
+            <div class="status info">
+                <i class="fas fa-info-circle"></i> Реализация использует HMAC-SHA512 для криптостойкой генерации S-Box на основе ключа.
             </div>
-            <button onclick="decrypt()">Расшифровать</button>
-            <div class="output">
-                <div class="output-title">Расшифрованный текст:</div>
-                <div class="output-content" id="decrypted-output"></div>
+            
+            <h3>Алгоритм работы:</h3>
+            <div class="algorithm">
+                <div class="algorithm-step">Генерация S-Box с использованием HMAC-SHA512 на основе ключа</div>
+                <div class="algorithm-step">Применение афинного преобразования: y = (a * x + b) mod 26</div>
+                <div class="algorithm-step">Разбиение текста на биграммы (2 символа)</div>
+                <div class="algorithm-step">Шифрование каждой биграммы случайным homophone из S-Box</div>
+                <div class="algorithm-step">Обратное преобразование при дешифровании</div>
             </div>
         </div>
-    </div>
-    
-    <div class="algorithm">
-        <h2>Алгоритм работы</h2>
-        <div class="step">Для каждого символа x вычисляется y = (a * x + b) mod 26</div>
-        <div class="step">Обратное преобразование: x = a⁻¹ * (y - b) mod 26</div>
-        <div class="step">Преобразованный текст разбивается на биграммы (по 2 символа)</div>
-        <div class="step">Каждая биграмма заменяется на случайный homophone из S-Box</div>
-        <div class="step">При дешифровании homophone преобразуется обратно в биграмму</div>
-        <div class="step">Биграммы объединяются в текст и применяется обратное афинное преобразование</div>
+        
+        <footer>
+            <p>Профессиональная реализация гомофонного шифра | 2023</p>
+        </footer>
     </div>
 
     <script>
+        // Константы
         const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         const BASE64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
         
+        // Глобальные переменные
         let sBox = null;
         let reverseSBox = null;
+        let currentKey = null;
         
-        // Настоящая афинная перестановка
-        function affineEncrypt(char, a, b) {
-            const x = ALPHABET.indexOf(char);
-            if (x === -1) return char;
+        // HMAC-SHA512 с использованием Web Crypto API
+        async function hmacSha512(key, data) {
+            const encoder = new TextEncoder();
+            const keyData = encoder.encode(key);
+            const msgData = encoder.encode(data);
             
-            const y = (a * x + b) % 26;
-            return ALPHABET[y];
+            const cryptoKey = await crypto.subtle.importKey(
+                'raw', keyData, { name: 'HMAC', hash: 'SHA-512' }, false, ['sign']
+            );
+            
+            const signature = await crypto.subtle.sign('HMAC', cryptoKey, msgData);
+            return Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
         
-        // Обратное афинное преобразование
-        function affineDecrypt(char, a, b) {
-            const y = ALPHABET.indexOf(char);
-            if (y === -1) return char;
+        // Криптостойкий PRNG на основе HMAC-DRBG
+        async function createSeededRandomGenerator(key) {
+            let state = await hmacSha512(key, 'initial-state');
+            let counter = 0;
             
-            // Находим обратный элемент a⁻¹ mod 26
-            let aInv = 0;
-            for (let i = 0; i < 26; i++) {
-                if ((a * i) % 26 === 1) {
-                    aInv = i;
-                    break;
-                }
+            return async function() {
+                const data = state + counter.toString(16).padStart(16, '0');
+                const newHash = await hmacSha512(key, data);
+                
+                const randomHex = newHash.substring(0, 16);
+                const randomValue = parseInt(randomHex, 16) / 0x10000000000000000;
+                
+                state = newHash;
+                counter++;
+                
+                return randomValue;
+            };
+        }
+        
+        // Перемешивание Fisher-Yates с криптостойким ГПСЧ
+        async function cryptoShuffle(array, key, salt) {
+            const random = await createSeededRandomGenerator(key + salt);
+            const result = [...array];
+            
+            for (let i = result.length - 1; i > 0; i--) {
+                const j = Math.floor(await random() * (i + 1));
+                [result[i], result[j]] = [result[j], result[i]];
             }
             
-            const x = (aInv * (y - b + 26)) % 26;
-            return ALPHABET[x];
+            return result;
         }
         
-        // Создание S-Box
-        async function createSBox() {
-            // Генерируем все возможные homophones
+        // Создание S-Box на основе ключа
+        async function createSBox(key) {
+            if (!key) {
+                throw new Error('Ключ шифрования обязателен');
+            }
+            
+            // Генерация всех возможных homophones
             const allHomophones = [];
             for (let i = 0; i < BASE64_CHARS.length; i++) {
                 for (let j = 0; j < BASE64_CHARS.length; j++) {
@@ -206,7 +400,7 @@
                 }
             }
             
-            // Генерируем все возможные биграммы
+            // Генерация всех возможных биграмм
             const allBigrams = [];
             for (let i = 0; i < ALPHABET.length; i++) {
                 for (let j = 0; j < ALPHABET.length; j++) {
@@ -214,15 +408,16 @@
                 }
             }
             
-            // Перемешиваем homophones
-            const shuffledHomophones = [...allHomophones].sort(() => Math.random() - 0.5);
+            // Криптостойкое перемешивание
+            const shuffledHomophones = await cryptoShuffle(allHomophones, key, 'homophones-salt');
+            const shuffledBigrams = await cryptoShuffle(allBigrams, key, 'bigrams-salt');
             
-            // Создаем S-Box
+            // Создание S-Box
             const sBox = {};
             let homophoneIndex = 0;
             
-            for (let i = 0; i < allBigrams.length; i++) {
-                const bigram = allBigrams[i];
+            for (let i = 0; i < shuffledBigrams.length; i++) {
+                const bigram = shuffledBigrams[i];
                 const homophonesNeeded = i < 40 ? 7 : 6;
                 
                 sBox[bigram] = shuffledHomophones.slice(homophoneIndex, homophoneIndex + homophonesNeeded);
@@ -243,103 +438,212 @@
             return reverse;
         }
         
-        // Шифрование
-        async function encrypt() {
-            const a = parseInt(document.getElementById('a-param').value);
-            const b = parseInt(document.getElementById('b-param').value);
-            let plaintext = document.getElementById('plaintext').value.toUpperCase().replace(/[^A-Z]/g, '');
+        // Афинное преобразование
+        function affineEncrypt(char, a, b) {
+            const x = ALPHABET.indexOf(char);
+            if (x === -1) return char;
             
-            if (!plaintext) {
-                alert('Введите текст для шифрования');
-                return;
-            }
+            const y = (a * x + b) % 26;
+            return ALPHABET[y];
+        }
+        
+        // Обратное афинное преобразование
+        function affineDecrypt(char, a, b) {
+            const y = ALPHABET.indexOf(char);
+            if (y === -1) return char;
             
-            // Проверяем, что a взаимно просто с 26
-            if (gcd(a, 26) !== 1) {
-                alert('Параметр a должен быть взаимно простым с 26');
-                return;
-            }
-            
-            // Применяем афинное преобразование
-            let affineText = '';
-            for (const char of plaintext) {
-                affineText += affineEncrypt(char, a, b);
-            }
-            
-            document.getElementById('affine-output').textContent = affineText;
-            
-            // Создаем S-Box если нужно
-            if (!sBox) {
-                sBox = await createSBox();
-                reverseSBox = createReverseSBox(sBox);
-            }
-            
-            // Добавляем padding если нужно
-            if (affineText.length % 2 !== 0) {
-                affineText += 'X';
-            }
-            
-            // Применяем гомофонное шифрование
-            let ciphertext = '';
-            for (let i = 0; i < affineText.length; i += 2) {
-                const bigram = affineText.substr(i, 2);
-                if (sBox[bigram]) {
-                    const randomIndex = Math.floor(Math.random() * sBox[bigram].length);
-                    ciphertext += sBox[bigram][randomIndex];
+            // Нахождение обратного элемента a⁻¹ mod 26
+            let aInv = 0;
+            for (let i = 0; i < 26; i++) {
+                if ((a * i) % 26 === 1) {
+                    aInv = i;
+                    break;
                 }
             }
             
-            document.getElementById('ciphertext-output').textContent = ciphertext;
-            document.getElementById('ciphertext').value = ciphertext;
+            const x = (aInv * (y - b + 26)) % 26;
+            return ALPHABET[x];
+        }
+        
+        // Проверка взаимной простоты a и 26
+        function isCoprime(a, m) {
+            while (a !== 0 && m !== 0) {
+                if (a > m) {
+                    a %= m;
+                } else {
+                    m %= a;
+                }
+            }
+            return Math.max(a, m) === 1;
+        }
+        
+        // Шифрование
+        async function encrypt() {
+            try {
+                const key = document.getElementById('key').value;
+                const a = parseInt(document.getElementById('a-param').value);
+                const b = parseInt(document.getElementById('b-param').value);
+                let plaintext = document.getElementById('plaintext').value.toUpperCase().replace(/[^A-Z]/g, '');
+                
+                if (!plaintext) {
+                    showStatus('Введите текст для шифрования', 'error');
+                    return;
+                }
+                
+                if (!key) {
+                    showStatus('Ключ шифрования обязателен', 'error');
+                    return;
+                }
+                
+                // Проверка взаимной простоты a и 26
+                if (!isCoprime(a, 26)) {
+                    showStatus('Параметр a должен быть взаимно простым с 26', 'error');
+                    return;
+                }
+                
+                // Создание S-Box при необходимости
+                if (!sBox || key !== currentKey) {
+                    sBox = await createSBox(key);
+                    reverseSBox = createReverseSBox(sBox);
+                    currentKey = key;
+                }
+                
+                // Применение афинного преобразования
+                let affineText = '';
+                for (const char of plaintext) {
+                    affineText += affineEncrypt(char, a, b);
+                }
+                
+                document.getElementById('affine-output').textContent = affineText;
+                
+                // Добавление padding при необходимости
+                let processedText = affineText;
+                if (processedText.length % 2 !== 0) {
+                    processedText += 'X';
+                }
+                
+                // Шифрование каждой биграммы
+                let ciphertext = '';
+                for (let i = 0; i < processedText.length; i += 2) {
+                    const bigram = processedText.substr(i, 2);
+                    if (sBox[bigram]) {
+                        const randomIndex = Math.floor(Math.random() * sBox[bigram].length);
+                        ciphertext += sBox[bigram][randomIndex];
+                    }
+                }
+                
+                document.getElementById('ciphertext-output').textContent = ciphertext;
+                document.getElementById('ciphertext').value = ciphertext;
+                
+                showStatus('Текст успешно зашифрован', 'success');
+                
+            } catch (error) {
+                showStatus('Ошибка при шифровании: ' + error.message, 'error');
+            }
         }
         
         // Дешифрование
         async function decrypt() {
-            const a = parseInt(document.getElementById('a-param').value);
-            const b = parseInt(document.getElementById('b-param').value);
-            const ciphertext = document.getElementById('ciphertext').value;
-            
-            if (!ciphertext) {
-                alert('Введите зашифрованный текст');
-                return;
-            }
-            
-            if (ciphertext.length % 2 !== 0) {
-                alert('Длина зашифрованного текста должна быть четной');
-                return;
-            }
-            
-            // Создаем S-Box если нужно
-            if (!sBox) {
-                sBox = await createSBox();
-                reverseSBox = createReverseSBox(sBox);
-            }
-            
-            // Дешифруем гомофоны
-            let affineText = '';
-            for (let i = 0; i < ciphertext.length; i += 2) {
-                const homophone = ciphertext.substr(i, 2);
-                if (reverseSBox[homophone]) {
-                    affineText += reverseSBox[homophone];
-                } else {
-                    affineText += '??';
+            try {
+                const key = document.getElementById('decrypt-key').value;
+                const a = parseInt(document.getElementById('decrypt-a').value);
+                const b = parseInt(document.getElementById('decrypt-b').value);
+                const ciphertext = document.getElementById('ciphertext').value;
+                
+                if (!ciphertext) {
+                    showStatus('Введите зашифрованный текст', 'error');
+                    return;
                 }
+                
+                if (!key) {
+                    showStatus('Ключ дешифрования обязателен', 'error');
+                    return;
+                }
+                
+                if (ciphertext.length % 2 !== 0) {
+                    showStatus('Длина зашифрованного текста должна быть четной', 'error');
+                    return;
+                }
+                
+                // Создание S-Box при необходимости
+                if (!sBox || key !== currentKey) {
+                    sBox = await createSBox(key);
+                    reverseSBox = createReverseSBox(sBox);
+                    currentKey = key;
+                }
+                
+                // Дешифрование homophones
+                let affineText = '';
+                for (let i = 0; i < ciphertext.length; i += 2) {
+                    const homophone = ciphertext.substr(i, 2);
+                    if (reverseSBox[homophone]) {
+                        affineText += reverseSBox[homophone];
+                    } else {
+                        affineText += '??';
+                    }
+                }
+                
+                // Применение обратного афинного преобразования
+                let plaintext = '';
+                for (const char of affineText) {
+                    plaintext += affineDecrypt(char, a, b);
+                }
+                
+                document.getElementById('decrypted-output').textContent = plaintext;
+                
+                showStatus('Текст успешно расшифрован', 'success');
+                
+            } catch (error) {
+                showStatus('Ошибка при дешифровании: ' + error.message, 'error');
             }
-            
-            // Применяем обратное афинное преобразование
-            let plaintext = '';
-            for (const char of affineText) {
-                plaintext += affineDecrypt(char, a, b);
-            }
-            
-            document.getElementById('decrypted-output').textContent = plaintext;
         }
         
-        // Нахождение НОД
-        function gcd(a, b) {
-            if (b === 0) return a;
-            return gcd(b, a % b);
+        // Очистка полей шифрования
+        function clearEncryption() {
+            document.getElementById('plaintext').value = '';
+            document.getElementById('affine-output').textContent = '';
+            document.getElementById('ciphertext-output').textContent = '';
+            document.getElementById('ciphertext').value = '';
+            showStatus('Поля шифрования очищены', 'info');
+        }
+        
+        // Очистка полей дешифрования
+        function clearDecryption() {
+            document.getElementById('ciphertext').value = '';
+            document.getElementById('decrypted-output').textContent = '';
+            showStatus('Поля дешифрования очищены', 'info');
+        }
+        
+        // Показать статус
+        function showStatus(message, type) {
+            // Удаление существующих статусов
+            const existingStatus = document.querySelector('.status');
+            if (existingStatus) {
+                existingStatus.remove();
+            }
+            
+            // Создание элемента статуса
+            const status = document.createElement('div');
+            status.className = `status ${type}`;
+            
+            let icon = 'fa-info-circle';
+            if (type === 'success') icon = 'fa-check-circle';
+            if (type === 'error') icon = 'fa-exclamation-circle';
+            
+            status.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+            
+            // Вставка после панелей
+            document.querySelector('.panels').after(status);
+            
+            // Автоудаление через 5 секунд
+            setTimeout(() => {
+                if (status.parentNode) {
+                    status.remove();
+                }
+            }, 5000);
         }
     </script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </body>
 </html>

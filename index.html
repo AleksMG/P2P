@@ -187,12 +187,13 @@
         <div class="panel">
             <h2>Шифрование</h2>
             <label for="inputText">Исходный текст (только английские буквы):</label>
-            <textarea id="inputText" placeholder="Введите текст для шифрования..."></textarea>
+            <textarea id="inputText" placeholder="Введите текст для шифрования...">HELLO</textarea>
             
             <label for="encryptionKey">Ключ шифрования:</label>
-            <input type="text" id="encryptionKey" placeholder="Введите ключ...">
+            <input type="text" id="encryptionKey" placeholder="Введите ключ..." value="мой-секретный-ключ">
             
             <button onclick="encrypt()">Зашифровать</button>
+            <button onclick="encryptMultiple()" class="secondary">Зашифровать 5 раз</button>
             
             <div class="output-title">Результат шифрования:</div>
             <div class="output" id="encryptedOutput">Зашифрованный текст появится здесь...</div>
@@ -204,7 +205,7 @@
             <textarea id="encryptedText" placeholder="Введите текст для расшифровки..."></textarea>
             
             <label for="decryptionKey">Ключ расшифровки:</label>
-            <input type="text" id="decryptionKey" placeholder="Введите ключ...">
+            <input type="text" id="decryptionKey" placeholder="Введите ключ..." value="мой-секретный-ключ">
             
             <button onclick="decrypt()">Расшифровать</button>
             
@@ -241,6 +242,7 @@
             <h3>Как это работает:</h3>
             <p>Этот инструмент реализует омофонический шифр для английского алфавита с использованием квадрата 26x26. Каждая ячейка в квадрате соответствует биграмме (паре букв) и содержит несколько омофонов из набора Base64.</p>
             <p><strong>Всего существует 676 возможных биграмм (26x26) и 4096 уникальных омофонов (64x64)</strong>, что позволяет распределить по 6 омофонов на большинство ячеек, а на 40 ячеек - по 7.</p>
+            <p><strong>Ключевая особенность:</strong> При шифровании для каждой биграммы случайно выбирается один из нескольких омофонов, поэтому один и тот же текст с одним ключом будет давать разный шифротекст!</p>
             <p><strong>Для использования:</strong></p>
             <ol>
                 <li>Введите ключ (любую фразу)</li>
@@ -258,6 +260,7 @@
         const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
         let omophoneTable = {};
         let reverseLookupMap = {};
+        let currentKey = '';
         
         // Простой детерминированный ГПСЧ на основе ключа
         function createSeededRandom(seed) {
@@ -295,6 +298,8 @@
             const key = document.getElementById('encryptionKey').value || 
                        document.getElementById('decryptionKey').value ||
                        'default-key';
+            
+            currentKey = key;
             
             // Создаем все возможные омофоны (4096 комбинаций)
             const allOmophones = [];
@@ -424,15 +429,14 @@
             }
             
             let result = '';
-            const random = createSeededRandom(document.getElementById('encryptionKey').value);
             
             // Шифруем по два символа
             for (let i = 0; i < processedText.length; i += 2) {
                 const bigram = processedText.substr(i, 2);
                 
                 if (omophoneTable[bigram] && omophoneTable[bigram].length > 0) {
-                    // Случайным образом выбираем омофон из доступных для этой биграммы
-                    const randomIndex = Math.floor(random() * omophoneTable[bigram].length);
+                    // СЛУЧАЙНЫМ образом выбираем омофон из доступных для этой биграммы
+                    const randomIndex = Math.floor(Math.random() * omophoneTable[bigram].length);
                     result += omophoneTable[bigram][randomIndex];
                 } else {
                     result += '??'; // Если биграмма не найдена (маловероятно)
@@ -442,6 +446,50 @@
             document.getElementById('encryptedOutput').textContent = result;
             document.getElementById('encryptedText').value = result;
             showStatus('Текст успешно зашифрован', 'success');
+        }
+        
+        // Функция для демонстрации недетерминированности
+        function encryptMultiple() {
+            const inputText = document.getElementById('inputText').value.toUpperCase().replace(/[^A-Z]/g, '');
+            
+            if (!inputText) {
+                showStatus('Пожалуйста, введите текст для шифрования', 'error');
+                return;
+            }
+            
+            if (Object.keys(omophoneTable).length === 0) {
+                showStatus('Сначала сгенерируйте таблицу омофонов', 'error');
+                return;
+            }
+            
+            let results = [];
+            
+            // Шифруем 5 раз один и тот же текст
+            for (let n = 0; n < 5; n++) {
+                let result = '';
+                let processedText = inputText;
+                
+                if (processedText.length % 2 !== 0) {
+                    processedText += 'X';
+                }
+                
+                for (let i = 0; i < processedText.length; i += 2) {
+                    const bigram = processedText.substr(i, 2);
+                    
+                    if (omophoneTable[bigram] && omophoneTable[bigram].length > 0) {
+                        const randomIndex = Math.floor(Math.random() * omophoneTable[bigram].length);
+                        result += omophoneTable[bigram][randomIndex];
+                    } else {
+                        result += '??';
+                    }
+                }
+                
+                results.push(result);
+            }
+            
+            document.getElementById('encryptedOutput').textContent = results.join('\n\n');
+            document.getElementById('encryptedText').value = results[0];
+            showStatus('Текст зашифрован 5 раз. Результаты разные!', 'success');
         }
         
         // Функция расшифровки
@@ -486,12 +534,6 @@
             const statusDiv = document.getElementById('tableStatus');
             statusDiv.textContent = message;
             statusDiv.className = `status ${type}`;
-            
-            // Автоматически скрыть сообщение через 5 секунд
-            setTimeout(() => {
-                statusDiv.textContent = '';
-                statusDiv.className = 'status';
-            }, 5000);
         }
         
         // Очистить все поля
@@ -512,9 +554,6 @@
         
         // Инициализация при загрузке
         window.onload = function() {
-            // Автоматически генерируем таблицу при загрузке с ключом по умолчанию
-            document.getElementById('encryptionKey').value = 'мой-секретный-ключ';
-            document.getElementById('decryptionKey').value = 'мой-секретный-ключ';
             generateTable();
         };
     </script>

@@ -3,414 +3,581 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Гомофоническое шифрование - Полная реализация</title>
+    <title>P-Adic Cipher Professional</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Courier New', monospace;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-            background: #0a0a0a;
-            color: #00ff00;
         }
-        .container {
-            background: #111;
-            padding: 20px;
-            border: 1px solid #333;
-            border-radius: 5px;
-        }
-        h1, h2 {
-            color: #00ff00;
+
+        .header {
             text-align: center;
+            margin-bottom: 40px;
         }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: #ccc;
+            font-size: 1.1em;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .panel h2 {
+            margin-bottom: 20px;
+            color: #4ecdc4;
+            font-size: 1.5em;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ff6b6b;
+            font-weight: 500;
+        }
+
+        textarea, input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        textarea {
+            min-height: 120px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .results {
+            margin-top: 30px;
+        }
+
+        .result-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #4ecdc4;
+        }
+
+        .result-item h3 {
+            color: #ff6b6b;
+            margin-bottom: 10px;
+        }
+
+        .hex-display {
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
         .status {
             padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #333;
-            background: #1a1a1a;
+            border-radius: 5px;
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
         }
+
         .success {
-            border-color: #00ff00;
-            color: #00ff00;
+            background: rgba(76, 175, 80, 0.3);
+            color: #4caf50;
         }
+
         .error {
-            border-color: #ff0000;
-            color: #ff0000;
+            background: rgba(244, 67, 54, 0.3);
+            color: #f44336;
         }
-        textarea, input, button {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0;
-            background: #000;
-            color: #00ff00;
-            border: 1px solid #333;
+
+        .key-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .key-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .key-item .label {
+            color: #4ecdc4;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .key-item .value {
+            color: #ff6b6b;
+            font-weight: bold;
             font-family: 'Courier New', monospace;
         }
-        button {
-            background: #002200;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #004400;
-        }
-        .result {
-            margin-top: 20px;
-            padding: 15px;
-            background: #1a1a1a;
-            border: 1px solid #333;
-        }
-        .key-display {
-            word-break: break-all;
-            font-size: 12px;
-            background: #000;
-            padding: 10px;
-            margin: 5px 0;
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔐 Гомофоническое шифрование - Полная реализация</h1>
-        
-        <div class="status" id="status">Статус: Ожидание генерации ключей...</div>
-
-        <h2>🔑 Генерация ключей (1024-битные простые числа)</h2>
-        <button onclick="generateKeys()">Сгенерировать новые ключи</button>
-        
-        <div id="keyDisplay">
-            <p><strong>Публичный ключ (n):</strong></p>
-            <div class="key-display" id="publicKey">-</div>
-            
-            <p><strong>Секретный ключ (p):</strong></p>
-            <div class="key-display" id="privateKeyP">-</div>
-            
-            <p><strong>Секретный ключ (q):</strong></p>
-            <div class="key-display" id="privateKeyQ">-</div>
+        <div class="header">
+            <h1>P-Adic Cipher Professional</h1>
+            <p>Браузерная реализация p-адического шифрования на GF(2⁸)</p>
         </div>
 
-        <h2>📤 Шифрование текста</h2>
-        <textarea id="textToEncrypt" placeholder="Введите текст для шифрования..." rows="4"></textarea>
-        <button onclick="encryptText()">Зашифровать текст</button>
-        
-        <div id="encryptionResult" class="result" style="display: none;">
-            <p><strong>Шифротекст (hex):</strong></p>
-            <div class="key-display" id="ciphertextHex"></div>
+        <div class="dashboard">
+            <div class="panel">
+                <h2>🔑 Управление ключами</h2>
+                <div class="input-group">
+                    <label for="keyInput">Ключ (32 байта в hex):</label>
+                    <input type="text" id="keyInput" placeholder="a1b2c3d4e5f6...">
+                </div>
+                <button class="btn" onclick="generateKey()">Сгенерировать ключ</button>
+                <button class="btn" onclick="showKeyInfo()">Информация о ключе</button>
+
+                <div class="key-info" id="keyInfo" style="display: none;">
+                    <div class="key-item">
+                        <div class="label">Длина ключа</div>
+                        <div class="value" id="keyLength">-</div>
+                    </div>
+                    <div class="key-item">
+                        <div class="label">Размер блока</div>
+                        <div class="value" id="blockSize">-</div>
+                    </div>
+                    <div class="key-item">
+                        <div class="label">Коэффициенты ядра</div>
+                        <div class="value" id="kernelCoeffs">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>🔒 Шифрование / Дешифрование</h2>
+                <div class="input-group">
+                    <label for="inputText">Исходный текст:</label>
+                    <textarea id="inputText" placeholder="Введите текст для шифрования..."></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="ivInput">IV (16 байт в hex):</label>
+                    <input type="text" id="ivInput" placeholder="Опционально...">
+                </div>
+                <button class="btn" onclick="encryptData()">Зашифровать</button>
+                <button class="btn" onclick="decryptData()">Расшифровать</button>
+            </div>
         </div>
 
-        <h2>📥 Дешифрование текста</h2>
-        <textarea id="cipherToDecrypt" placeholder="Введите hex-строку шифротекста..." rows="4"></textarea>
-        <button onclick="decryptText()">Дешифровать текст</button>
-        
-        <div id="decryptionResult" class="result" style="display: none;">
-            <p><strong>Расшифрованный текст:</strong></p>
-            <div class="key-display" id="decryptedText"></div>
-        </div>
-
-        <h2>📊 Статистика</h2>
-        <div id="stats">
-            <p>Длина ключа: <span id="keyLength">0</span> бит</p>
-            <p>Время генерации: <span id="genTime">0</span> мс</p>
-            <p>Коэффициент расширения: <span id="expansion">1:4</span></p>
+        <div class="panel">
+            <h2>📊 Результаты</h2>
+            <div class="results">
+                <div class="result-item">
+                    <h3>Зашифрованные данные (hex):</h3>
+                    <div class="hex-display" id="encryptedResult">-</div>
+                </div>
+                <div class="result-item">
+                    <h3>Расшифрованные данные:</h3>
+                    <div class="hex-display" id="decryptedResult">-</div>
+                </div>
+                <div class="result-item">
+                    <h3>Статус:</h3>
+                    <div id="status" class="status">Готов к работе</div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        class PrimeGenerator {
-            constructor() {
-                this.SMALL_PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37];
+        class PAdicCipher {
+            constructor(key = null, blockSize = 256) {
+                this.blockSize = blockSize;
+                this.lambdaVal = 1 / blockSize;
+                
+                if (key) {
+                    this.key = key;
+                } else {
+                    this.key = this.generateRandomBytes(32);
+                }
+                
+                this._deriveKernelCoefficients();
             }
 
-            isProbablyPrime(n, k = 20) {
-                if (n <= 1n) return false;
-                if (n <= 3n) return true;
-                if (n % 2n === 0n) return false;
-
-                // Проверка по малым простым числам
-                for (const p of this.SMALL_PRIMES) {
-                    if (n % BigInt(p) === 0n && n !== BigInt(p)) {
-                        return false;
-                    }
-                }
-
-                // Тест Миллера-Рабина
-                let d = n - 1n;
-                let s = 0n;
-                while (d % 2n === 0n) {
-                    d /= 2n;
-                    s++;
-                }
-
-                for (let i = 0; i < k; i++) {
-                    const a = this.getRandomBigInt(2n, n - 2n);
-                    let x = this.modExp(a, d, n);
-
-                    if (x === 1n || x === n - 1n) {
-                        continue;
-                    }
-
-                    let continueLoop = false;
-                    for (let j = 0n; j < s - 1n; j++) {
-                        x = this.modExp(x, 2n, n);
-                        if (x === n - 1n) {
-                            continueLoop = true;
-                            break;
-                        }
-                    }
-
-                    if (!continueLoop) {
-                        return false;
-                    }
-                }
-
-                return true;
+            generateRandomBytes(length) {
+                const array = new Uint8Array(length);
+                crypto.getRandomValues(array);
+                return Array.from(array);
             }
 
-            generatePrime(bits) {
-                const startTime = Date.now();
-                let candidate;
-                let attempts = 0;
+            async _deriveKernelCoefficients() {
+                const derived = await this._hkdf(this.key, 
+                    this._stringToBytes('p-adic-cipher-salt'),
+                    this._stringToBytes('kernel-coefficients-derivation'),
+                    64
+                );
+                
+                this.kernelCoeffs = [];
+                for (let i = 0; i < 7; i++) {
+                    const mixed = this._mixBytes(derived.slice(i * 8, (i + 1) * 8), i);
+                    const val = this._bytesToNumber(mixed) & 0xFF;
+                    this.kernelCoeffs.push(val);
+                }
+            }
 
-                do {
-                    attempts++;
-                    candidate = this.getRandomBigInt(
-                        2n ** BigInt(bits - 1),
-                        2n ** BigInt(bits) - 1n
+            async _hkdf(ikm, salt, info, length) {
+                const key = await crypto.subtle.importKey(
+                    'raw',
+                    new Uint8Array(ikm),
+                    { name: 'HMAC', hash: 'SHA-256' },
+                    false,
+                    ['sign']
+                );
+
+                const prk = await crypto.subtle.sign(
+                    'HMAC',
+                    key,
+                    new Uint8Array(salt)
+                );
+
+                const result = [];
+                let t = new ArrayBuffer(0);
+                
+                for (let i = 1; result.length < length; i++) {
+                    const input = new Uint8Array([
+                        ...new Uint8Array(t),
+                        ...new Uint8Array(info),
+                        i
+                    ]);
+                    
+                    t = await crypto.subtle.sign(
+                        'HMAC',
+                        key,
+                        input
                     );
-
-                    // Делаем нечетным
-                    if (candidate % 2n === 0n) {
-                        candidate += 1n;
-                    }
-
-                    if (attempts % 100 === 0) {
-                        this.updateStatus(`Поиск простого числа... Попытка: ${attempts}`);
-                    }
-
-                } while (!this.isProbablyPrime(candidate, 20));
-
-                const endTime = Date.now();
-                this.updateStatus(`Простое число найдено за ${attempts} попыток, ${endTime - startTime}мс`);
-                
-                return candidate;
-            }
-
-            getRandomBigInt(min, max) {
-                const range = max - min;
-                const bits = range.toString(2).length;
-                let result;
-
-                do {
-                    const randomBytes = new Uint8Array(Math.ceil(bits / 8));
-                    crypto.getRandomValues(randomBytes);
                     
-                    let randomValue = 0n;
-                    for (const byte of randomBytes) {
-                        randomValue = (randomValue << 8n) | BigInt(byte);
-                    }
-
-                    result = min + (randomValue % range);
-                } while (result > max);
-
-                return result;
+                    result.push(...new Uint8Array(t));
+                }
+                
+                return result.slice(0, length);
             }
 
-            modExp(base, exponent, modulus) {
-                if (modulus === 1n) return 0n;
-                let result = 1n;
-                base = base % modulus;
-                
-                while (exponent > 0n) {
-                    if (exponent % 2n === 1n) {
-                        result = (result * base) % modulus;
-                    }
-                    exponent = exponent >> 1n;
-                    base = (base * base) % modulus;
+            _mixBytes(data, seed) {
+                const result = [...data];
+                for (let i = 0; i < result.length; i++) {
+                    result[i] = (result[i] + seed + i * 17) % 256;
+                    result[i] = result[i] ^ ((result[i] << 3) | (result[i] >> 5)) & 0xFF;
                 }
                 return result;
             }
 
-            updateStatus(message) {
-                document.getElementById('status').textContent = 'Статус: ' + message;
-            }
-        }
-
-        class HomophonicCipher {
-            constructor() {
-                this.primeGenerator = new PrimeGenerator();
-                this.p = null;
-                this.q = null;
-                this.n = null;
-            }
-
-            async generateKeys(bits = 256) {
-                const startTime = Date.now();
+            _nonlinearKernel(x, s, u) {
+                const [a, b, c, d, e, f, g] = this.kernelCoeffs;
                 
-                this.updateStatus('Генерация первого простого числа...');
-                this.p = this.primeGenerator.generatePrime(bits);
+                const term1 = a * x * s;
+                const term2 = b * s * u;
+                const term3 = c * x * u;
+                const term4 = d * x * x;
+                const term5 = e * s * s;
+                const term6 = f * u * u;
+                const term7 = g * x * s * u;
                 
-                this.updateStatus('Генерация второго простого числа...');
-                this.q = this.primeGenerator.generatePrime(bits);
+                const term8 = (a + b) * (x + 1) * (s + 1);
+                const term9 = (c + d) * (u + 1) * (x + 1);
+                const term10 = (e + f) * (s + 1) * (u + 1);
                 
-                this.n = this.p * this.q;
-                
-                const endTime = Date.now();
-                this.updateStatus(`Ключи сгенерированы за ${endTime - startTime}мс`);
-                
-                this.displayKeys();
-                return { p: this.p, q: this.q, n: this.n };
+                return (term1 + term2 + term3 + term4 + term5 + 
+                        term6 + term7 + term8 + term9 + term10) % 256;
             }
 
-            encryptByte(byte) {
-                if (!this.n) throw new Error('Ключи не сгенерированы');
+            _precomputeKernelMatrix(uVector) {
+                const matrix = Array(this.blockSize).fill().map(() => 
+                    Array(this.blockSize).fill(0)
+                );
                 
-                const m = BigInt(byte);
-                const r = this.primeGenerator.getRandomBigInt(2n, this.n - 1n);
-                
-                // c = r² * (-1)^m mod n
-                const rSquared = this.primeGenerator.modExp(r, 2n, this.n);
-                const cipher = (m === 1n) ? (this.n - rSquared) % this.n : rSquared;
-                
-                return cipher;
-            }
-
-            decryptNumber(cipher) {
-                if (!this.p || !this.q) throw new Error('Секретный ключ не доступен');
-                
-                const c = BigInt(cipher);
-                
-                // Проверяем, является ли c квадратичным вычетом
-                const legendreP = this.primeGenerator.modExp(c, (this.p - 1n) / 2n, this.p);
-                const legendreQ = this.primeGenerator.modExp(c, (this.q - 1n) / 2n, this.q);
-                
-                return (legendreP === 1n && legendreQ === 1n) ? 0 : 1;
-            }
-
-            async encryptText(text) {
-                const encoder = new TextEncoder();
-                const data = encoder.encode(text);
-                const encrypted = [];
-
-                for (let i = 0; i < data.length; i++) {
-                    const byte = data[i];
-                    for (let bitPos = 7; bitPos >= 0; bitPos--) {
-                        const bit = (byte >> bitPos) & 1;
-                        const cipher = this.encryptByte(bit);
-                        encrypted.push(cipher.toString(16).padStart(64, '0'));
+                for (let x = 0; x < this.blockSize; x++) {
+                    for (let s = 0; s < this.blockSize; s++) {
+                        matrix[x][s] = this._nonlinearKernel(x, s, uVector[s]);
                     }
+                }
+                
+                return matrix;
+            }
+
+            async _blockEncrypt(plaintext, maxIter = 50, tol = 1e-6) {
+                let uPrev = [...plaintext];
+                let uNext = Array(this.blockSize).fill(0);
+                
+                for (let iter = 0; iter < maxIter; iter++) {
+                    const kernelMatrix = this._precomputeKernelMatrix(uPrev);
                     
-                    if (i % 10 === 0) {
-                        this.updateStatus(`Шифрование... ${Math.round((i / data.length) * 100)}%`);
-                        await this.delay(0);
-                    }
-                }
-
-                return encrypted.join('');
-            }
-
-            async decryptText(hexString) {
-                const numbers = [];
-                for (let i = 0; i < hexString.length; i += 64) {
-                    const hexChunk = hexString.substr(i, 64);
-                    numbers.push(BigInt('0x' + hexChunk));
-                }
-
-                const bits = [];
-                for (let i = 0; i < numbers.length; i++) {
-                    bits.push(this.decryptNumber(numbers[i]));
-                    
-                    if (i % 80 === 0) {
-                        this.updateStatus(`Дешифрование... ${Math.round((i / numbers.length) * 100)}%`);
-                        await this.delay(0);
-                    }
-                }
-
-                // Convert bits to bytes
-                const bytes = new Uint8Array(Math.ceil(bits.length / 8));
-                for (let i = 0; i < bits.length; i += 8) {
-                    let byte = 0;
-                    for (let j = 0; j < 8; j++) {
-                        if (i + j < bits.length) {
-                            byte = (byte << 1) | bits[i + j];
+                    for (let x = 0; x < this.blockSize; x++) {
+                        let sum = 0;
+                        for (let s = 0; s < this.blockSize; s++) {
+                            sum += kernelMatrix[x][s];
                         }
+                        uNext[x] = (plaintext[x] + this.lambdaVal * sum) % 256;
                     }
-                    bytes[Math.floor(i / 8)] = byte;
+                    
+                    let maxDiff = 0;
+                    for (let i = 0; i < this.blockSize; i++) {
+                        maxDiff = Math.max(maxDiff, Math.abs(uNext[i] - uPrev[i]));
+                    }
+                    
+                    if (maxDiff <= tol) break;
+                    uPrev = [...uNext];
                 }
-
-                const decoder = new TextDecoder();
-                return decoder.decode(bytes).replace(/\0+$/, '');
+                
+                return uNext;
             }
 
-            displayKeys() {
-                document.getElementById('publicKey').textContent = this.n.toString(16);
-                document.getElementById('privateKeyP').textContent = this.p.toString(16);
-                document.getElementById('privateKeyQ').textContent = this.q.toString(16);
-                document.getElementById('keyLength').textContent = this.n.toString(2).length;
+            _blockDecrypt(ciphertext) {
+                const kernelMatrix = this._precomputeKernelMatrix(ciphertext);
+                const plaintext = Array(this.blockSize).fill(0);
+                
+                for (let x = 0; x < this.blockSize; x++) {
+                    let sum = 0;
+                    for (let s = 0; s < this.blockSize; s++) {
+                        sum += kernelMatrix[x][s];
+                    }
+                    plaintext[x] = (ciphertext[x] - this.lambdaVal * sum + 256) % 256;
+                }
+                
+                return plaintext;
             }
 
-            updateStatus(message) {
-                document.getElementById('status').textContent = 'Статус: ' + message;
+            _padData(data) {
+                const padLen = this.blockSize - (data.length % this.blockSize);
+                const padding = Array(padLen).fill(padLen);
+                return [...data, ...padding];
             }
 
-            delay(ms) {
-                return new Promise(resolve => setTimeout(resolve, ms));
+            _unpadData(data) {
+                const padLen = data[data.length - 1];
+                return data.slice(0, data.length - padLen);
+            }
+
+            async encrypt(plaintext, iv = null) {
+                if (!iv) {
+                    iv = this.generateRandomBytes(16);
+                }
+                
+                const padded = this._padData(Array.from(plaintext));
+                const blocks = [];
+                
+                for (let i = 0; i < padded.length; i += this.blockSize) {
+                    blocks.push(padded.slice(i, i + this.blockSize));
+                }
+                
+                const encryptedBlocks = [];
+                let prevBlock = iv.slice(0, this.blockSize);
+                
+                for (const block of blocks) {
+                    const xored = block.map((val, i) => val ^ prevBlock[i]);
+                    const encrypted = await this._blockEncrypt(xored);
+                    encryptedBlocks.push(encrypted);
+                    prevBlock = encrypted;
+                }
+                
+                return {
+                    ciphertext: encryptedBlocks.flat(),
+                    iv: iv
+                };
+            }
+
+            async decrypt(ciphertext, iv) {
+                const blocks = [];
+                for (let i = 0; i < ciphertext.length; i += this.blockSize) {
+                    blocks.push(ciphertext.slice(i, i + this.blockSize));
+                }
+                
+                const decryptedBlocks = [];
+                let prevBlock = iv.slice(0, this.blockSize);
+                
+                for (const block of blocks) {
+                    const decrypted = this._blockDecrypt(block);
+                    const xored = decrypted.map((val, i) => val ^ prevBlock[i]);
+                    decryptedBlocks.push(xored);
+                    prevBlock = block;
+                }
+                
+                const unpadded = this._unpadData(decryptedBlocks.flat());
+                return unpadded;
+            }
+
+            _stringToBytes(str) {
+                return Array.from(new TextEncoder().encode(str));
+            }
+
+            _bytesToString(bytes) {
+                return new TextDecoder().decode(new Uint8Array(bytes));
+            }
+
+            _bytesToNumber(bytes) {
+                return bytes.reduce((acc, byte) => (acc << 8) + byte, 0);
+            }
+
+            getKeyInfo() {
+                return {
+                    keyLength: this.key.length,
+                    blockSize: this.blockSize,
+                    kernelCoefficients: this.kernelCoeffs,
+                    lambdaValue: this.lambdaVal
+                };
             }
         }
 
-        const cipher = new HomophonicCipher();
+        let cipher = new PAdicCipher();
 
-        async function generateKeys() {
-            try {
-                cipher.updateStatus('Начало генерации ключей...');
-                await cipher.generateKeys(128); // 128-битные для демонстрации
-                cipher.updateStatus('Ключи готовы');
-            } catch (error) {
-                cipher.updateStatus('Ошибка: ' + error.message);
-            }
+        async function generateKey() {
+            cipher = new PAdicCipher();
+            const keyHex = cipher.key.map(b => b.toString(16).padStart(2, '0')).join('');
+            document.getElementById('keyInput').value = keyHex;
+            showStatus('✅ Новый ключ сгенерирован', 'success');
         }
 
-        async function encryptText() {
+        function showKeyInfo() {
+            const info = cipher.getKeyInfo();
+            document.getElementById('keyLength').textContent = info.keyLength + ' байт';
+            document.getElementById('blockSize').textContent = info.blockSize;
+            document.getElementById('kernelCoeffs').textContent = info.kernelCoefficients.join(', ');
+            document.getElementById('keyInfo').style.display = 'grid';
+        }
+
+        async function encryptData() {
             try {
-                const text = document.getElementById('textToEncrypt').value;
-                if (!text) {
-                    alert('Введите текст для шифрования');
+                const inputText = document.getElementById('inputText').value;
+                const ivInput = document.getElementById('ivInput').value;
+                
+                if (!inputText) {
+                    showStatus('❌ Введите текст для шифрования', 'error');
                     return;
                 }
 
-                cipher.updateStatus('Шифрование...');
-                const encrypted = await cipher.encryptText(text);
+                const bytes = new TextEncoder().encode(inputText);
+                let iv = null;
                 
-                document.getElementById('ciphertextHex').textContent = encrypted;
-                document.getElementById('encryptionResult').style.display = 'block';
-                cipher.updateStatus('Шифрование завершено');
+                if (ivInput) {
+                    iv = ivInput.match(/.{1,2}/g).map(byte => parseInt(byte, 16));
+                }
+
+                const result = await cipher.encrypt(bytes, iv);
+                const hexResult = result.ciphertext.map(b => b.toString(16).padStart(2, '0')).join('');
                 
+                document.getElementById('encryptedResult').textContent = hexResult;
+                document.getElementById('decryptedResult').textContent = '-';
+                
+                showStatus('✅ Данные успешно зашифрованы', 'success');
             } catch (error) {
-                cipher.updateStatus('Ошибка шифрования: ' + error.message);
+                showStatus('❌ Ошибка шифрования: ' + error.message, 'error');
             }
         }
 
-        async function decryptText() {
+        async function decryptData() {
             try {
-                const hexString = document.getElementById('cipherToDecrypt').value;
-                if (!hexString) {
-                    alert('Введите hex-строку');
+                const encryptedHex = document.getElementById('encryptedResult').textContent;
+                const ivInput = document.getElementById('ivInput').value;
+                
+                if (encryptedHex === '-') {
+                    showStatus('❌ Нет данных для дешифрования', 'error');
                     return;
                 }
 
-                cipher.updateStatus('Дешифрование...');
-                const decrypted = await cipher.decryptText(hexString);
+                const encryptedBytes = encryptedHex.match(/.{1,2}/g).map(byte => parseInt(byte, 16));
+                let iv = null;
                 
-                document.getElementById('decryptedText').textContent = decrypted;
-                document.getElementById('decryptionResult').style.display = 'block';
-                cipher.updateStatus('Дешифрование завершено');
+                if (ivInput) {
+                    iv = ivInput.match(/.{1,2}/g).map(byte => parseInt(byte, 16));
+                } else {
+                    showStatus('❌ Требуется IV для дешифрования', 'error');
+                    return;
+                }
+
+                const decrypted = await cipher.decrypt(encryptedBytes, iv);
+                const text = new TextDecoder().decode(new Uint8Array(decrypted));
                 
+                document.getElementById('decryptedResult').textContent = text;
+                showStatus('✅ Данные успешно расшифрованы', 'success');
             } catch (error) {
-                cipher.updateStatus('Ошибка дешифрования: ' + error.message);
+                showStatus('❌ Ошибка дешифрования: ' + error.message, 'error');
             }
         }
 
-        // Инициализация
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+        }
+
+        // Инициализация при загрузке
         window.onload = function() {
-            cipher.updateStatus('Система готова. Сгенерируйте ключи.');
+            generateKey();
+            showStatus('🚀 Система готова к работе', 'success');
         };
     </script>
 </body>

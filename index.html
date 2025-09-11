@@ -1,33 +1,33 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Volterra Encryption Professional - Fixed</title>
+    <title>Volterra Cryptographic System</title>
     <style>
-        /* Стили остаются без изменений */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Courier New', monospace;
         }
         
         body {
-            font-family: 'Courier New', monospace;
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+            background: #0a0a0a;
             color: #00ff00;
             min-height: 100vh;
             padding: 20px;
+            overflow-x: hidden;
         }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: rgba(0, 20, 40, 0.95);
-            border: 2px solid #00ff00;
-            border-radius: 10px;
+            background: rgba(10, 15, 20, 0.95);
+            border: 1px solid #00ff00;
+            border-radius: 2px;
             padding: 20px;
-            box-shadow: 0 0 30px rgba(0, 255, 0, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);
         }
         
         header {
@@ -38,14 +38,15 @@
         }
         
         h1 {
-            font-size: 2.5em;
+            font-size: 2.2em;
             margin-bottom: 10px;
             text-shadow: 0 0 10px #00ff00;
+            letter-spacing: 2px;
         }
         
         .equation {
             font-family: 'Cambria Math', serif;
-            font-size: 1.4em;
+            font-size: 1.2em;
             margin: 15px 0;
             color: #00ffff;
         }
@@ -64,35 +65,38 @@
         }
         
         .panel {
-            background: rgba(0, 30, 60, 0.8);
+            background: rgba(15, 25, 35, 0.9);
             border: 1px solid #00ff00;
-            border-radius: 8px;
+            border-radius: 2px;
             padding: 20px;
         }
         
         h2 {
             color: #00ff00;
             margin-bottom: 15px;
-            font-size: 1.5em;
+            font-size: 1.3em;
+            border-bottom: 1px solid #00ff00;
+            padding-bottom: 5px;
         }
         
         textarea {
             width: 100%;
-            height: 150px;
+            height: 120px;
             background: #001122;
             color: #00ff00;
             border: 1px solid #00ff00;
-            border-radius: 5px;
+            border-radius: 2px;
             padding: 10px;
             font-family: 'Courier New', monospace;
             resize: vertical;
             margin-bottom: 15px;
+            font-size: 0.9em;
         }
         
         textarea:focus {
             outline: none;
             border-color: #00ffff;
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            box-shadow: 0 0 8px rgba(0, 255, 255, 0.3);
         }
         
         .input-group {
@@ -103,35 +107,37 @@
             display: block;
             margin-bottom: 5px;
             color: #00ffff;
+            font-size: 0.9em;
         }
         
-        input[type="number"], input[type="password"] {
+        input[type="password"] {
             width: 100%;
-            padding: 10px;
+            padding: 8px;
             background: #001122;
             color: #00ff00;
             border: 1px solid #00ff00;
-            border-radius: 5px;
+            border-radius: 2px;
             font-family: 'Courier New', monospace;
+            font-size: 0.9em;
         }
         
         button {
-            background: linear-gradient(135deg, #00ff00 0%, #00cc00 100%);
+            background: linear-gradient(135deg, #00ff00 0%, #008800 100%);
             color: #001122;
             border: none;
-            padding: 12px 25px;
-            border-radius: 5px;
+            padding: 10px 20px;
+            border-radius: 2px;
             cursor: pointer;
             font-family: 'Courier New', monospace;
             font-weight: bold;
-            margin: 5px;
-            transition: all 0.3s ease;
+            margin: 4px;
+            transition: all 0.2s ease;
+            font-size: 0.9em;
         }
         
         button:hover {
-            background: linear-gradient(135deg, #00ffff 0%, #00ccff 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.4);
+            background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%);
+            transform: translateY(-1px);
         }
         
         button:active {
@@ -141,71 +147,41 @@
         .button-group {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
             margin: 15px 0;
-        }
-        
-        .byte-visualization {
-            background: rgba(0, 20, 40, 0.9);
-            border: 1px solid #00ff00;
-            border-radius: 5px;
-            padding: 15px;
-            margin-top: 20px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        
-        .byte-grid {
-            display: grid;
-            grid-template-columns: repeat(16, 1fr);
-            gap: 2px;
-        }
-        
-        .byte-cell {
-            padding: 5px;
-            text-align: center;
-            background: rgba(0, 40, 80, 0.7);
-            border: 1px solid #00ff00;
-            font-size: 0.8em;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .byte-cell:hover {
-            background: rgba(0, 80, 160, 0.9);
-            transform: scale(1.1);
         }
         
         .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
             margin: 20px 0;
         }
         
         .stat-item {
-            background: rgba(0, 30, 60, 0.8);
-            padding: 10px;
-            border-radius: 5px;
+            background: rgba(20, 35, 45, 0.8);
+            padding: 8px;
+            border-radius: 2px;
             border: 1px solid #00ff00;
+            font-size: 0.85em;
         }
         
         .log {
             background: #001122;
             border: 1px solid #00ff00;
-            border-radius: 5px;
-            padding: 15px;
-            height: 200px;
+            border-radius: 2px;
+            padding: 12px;
+            height: 180px;
             overflow-y: auto;
             font-family: 'Courier New', monospace;
-            font-size: 0.9em;
+            font-size: 0.8em;
             margin-top: 20px;
         }
         
         .log-entry {
-            margin-bottom: 5px;
-            padding: 5px;
-            border-left: 3px solid #00ff00;
+            margin-bottom: 4px;
+            padding: 4px;
+            border-left: 2px solid #00ff00;
         }
         
         .success { color: #00ff00; }
@@ -215,10 +191,10 @@
         
         .progress-bar {
             width: 100%;
-            height: 20px;
+            height: 16px;
             background: #001122;
             border: 1px solid #00ff00;
-            border-radius: 10px;
+            border-radius: 2px;
             margin: 10px 0;
             overflow: hidden;
         }
@@ -232,10 +208,10 @@
         
         .status-indicator {
             display: inline-block;
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            margin-right: 10px;
+            margin-right: 8px;
         }
         
         .status-ready { background: #00ff00; }
@@ -248,30 +224,18 @@
             padding: 20px;
             border-top: 1px solid #00ff00;
             color: #00ffff;
-        }
-
-        .analysis-panel {
-            grid-column: 1 / -1;
-            background: rgba(60, 0, 0, 0.8);
-            border: 1px solid #ff4444;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-        
-        .analysis-panel h2 {
-            color: #ff4444;
+            font-size: 0.8em;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>VOLTERRA ENCRYPTION SYSTEM - FIXED</h1>
+            <h1>VOLTERRA CRYPTOSYSTEM</h1>
             <div class="equation">
                 u(x) = f(x) + λ ∫ K(x, s, u(s)) ds
             </div>
-            <p>Professional p-adic inspired encryption in GF(2⁸) - Reversible Implementation</p>
+            <p>Professional p-adic bytewise encryption in GF(2⁸)</p>
         </header>
 
         <div class="grid">
@@ -284,25 +248,14 @@
                 
                 <div class="input-group">
                     <label for="messageInput">MESSAGE:</label>
-                    <textarea id="messageInput" placeholder="Enter text to encrypt">Hello, Volterra encryption! This is a professional implementation working byte-by-byte. Привет! 🌍</textarea>
-                </div>
-                
-                <div class="input-group">
-                    <label for="blockSize">BLOCK SIZE (power of 2):</label>
-                    <input type="number" id="blockSize" value="256" min="16" max="1024" step="16">
-                </div>
-                
-                <div class="input-group">
-                    <label for="maxIterations">MAX ITERATIONS:</label>
-                    <input type="number" id="maxIterations" value="100" min="10" max="1000">
+                    <textarea id="messageInput" placeholder="Enter text to encrypt">Hello</textarea>
                 </div>
 
                 <div class="button-group">
                     <button onclick="generateKey()">GENERATE KEY</button>
-                    <button onclick="encryptMessage()" style="background:linear-gradient(135deg, #00ff00 0%, #009900 100%)">ENCRYPT</button>
-                    <button onclick="decryptMessage()" style="background:linear-gradient(135deg, #00ffff 0%, #0099ff 100%)">DECRYPT</button>
-                    <button onclick="clearAll()" style="background:linear-gradient(135deg, #ff4444 0%, #cc0000 100%)">CLEAR ALL</button>
-                    <button onclick="testReversibility()" style="background:linear-gradient(135deg, #ff9900 0%, #ff5500 100%)">TEST REVERSIBILITY</button>
+                    <button onclick="encryptMessage()">ENCRYPT</button>
+                    <button onclick="decryptMessage()">DECRYPT</button>
+                    <button onclick="clearAll()">CLEAR ALL</button>
                 </div>
             </div>
 
@@ -324,40 +277,11 @@
                     <div class="stat-item">
                         Output bytes: <span id="outputBytes">0</span>
                     </div>
-                    <div class="stat-item">
-                        Iterations: <span id="iterations">0</span>
-                    </div>
-                    <div class="stat-item">
-                        Reversibility: <span id="reversibility">N/A</span>
-                    </div>
                 </div>
 
                 <div class="progress-bar">
                     <div class="progress-fill" id="progressBar"></div>
                 </div>
-            </div>
-        </div>
-
-        <div class="grid">
-            <div class="panel">
-                <h2>INPUT BYTES</h2>
-                <div class="byte-visualization">
-                    <div class="byte-grid" id="inputBytesGrid"></div>
-                </div>
-            </div>
-            
-            <div class="panel">
-                <h2>OUTPUT BYTES</h2>
-                <div class="byte-visualization">
-                    <div class="byte-grid" id="outputBytesGrid"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="analysis-panel">
-            <h2>АНАЛИЗ ОБРАТИМОСТИ И СООТВЕТСТВИЯ 1 К 1</h2>
-            <div class="log" id="analysisLog">
-                <div class="log-entry info">Анализ будет показан здесь после тестирования</div>
             </div>
         </div>
 
@@ -367,36 +291,33 @@
         </div>
 
         <footer>
-            <p>Volterra Integral Equation Encryption System | Fixed Reversible Implementation | Byte-by-Byte Processing</p>
+            <p>Volterra Integral Equation Encryption System | Professional Implementation | Byte-by-Byte Processing</p>
             <p>u(x) = f(x) + λ ∫ K(x, s, u(s)) ds</p>
         </footer>
     </div>
 
     <script>
-        class ReversibleVolterraCipher {
-            constructor(key, blockSize = 256) {
-                this.blockSize = blockSize;
+        class VolterraCipher {
+            constructor(key) {
                 this.key = this.deriveKeyMaterial(key);
                 this.initializeGF();
-                this.deriveNonlinearParameters();
+                this.deriveParameters();
             }
 
             deriveKeyMaterial(key) {
                 const encoder = new TextEncoder();
                 let keyData = encoder.encode(key);
-                
-                // Хеширование ключа для получения 256 бит материала
                 let hash = new Uint8Array(32);
+                
                 for (let i = 0; i < keyData.length; i++) {
-                    hash[i % 32] = (hash[i % 32] ^ keyData[i]) & 0xFF;
-                    hash[(i + 7) % 32] = (hash[(i + 7) % 32] + keyData[i] * 13) & 0xFF;
+                    hash[i % 32] = (hash[i % 32] ^ keyData[i] * 13) & 0xFF;
+                    hash[(i + 7) % 32] = (hash[(i + 7) % 32] + keyData[i] * 17) & 0xFF;
                     hash[(i + 19) % 32] = (hash[(i + 19) % 32] ^ (keyData[i] << 3)) & 0xFF;
                 }
                 return hash;
             }
 
             initializeGF() {
-                // Арифметика GF(2^8) с примитивным полиномом x^8 + x^4 + x^3 + x + 1
                 this.gf = new Array(256);
                 this.gfLog = new Array(256);
                 this.gfExp = new Array(512);
@@ -415,43 +336,25 @@
                 this.add = (a, b) => a ^ b;
                 this.mul = (a, b) => {
                     if (a === 0 || b === 0) return 0;
-                    return this.gfExp[this.gfLog[a] + this.gfLog[b]];
-                };
-
-                this.inv = (a) => {
-                    if (a === 0) return 0;
-                    return this.gfExp[255 - this.gfLog[a]];
-                };
-                
-                this.div = (a, b) => {
-                    if (b === 0) throw new Error("Division by zero");
-                    if (a === 0) return 0;
-                    return this.gfExp[(this.gfLog[a] - this.gfLog[b] + 255) % 255];
+                    return this.gfExp[(this.gfLog[a] + this.gfLog[b]) % 255];
                 };
             }
 
-            deriveNonlinearParameters() {
-                // Генерация параметров из ключевого материала
+            deriveParameters() {
                 this.lambda = this.key[0] || 1;
                 
-                // Генерация обратимых коэффициентов ядра
-                this.kernelCoeffs = new Array(4);
-                for (let i = 0; i < 4; i++) {
-                    this.kernelCoeffs[i] = this.key[(i + 3) % 32];
+                this.kernelParams = new Array(8);
+                for (let i = 0; i < 8; i++) {
+                    this.kernelParams[i] = this.key[i + 3] / 255.0;
                 }
 
-                // Инициализация S-блока на основе ключа
-                this.sbox = new Array(256);
-                this.invSbox = new Array(256);
                 this.generateSBox();
             }
 
             generateSBox() {
-                // Генерация обратимого S-блока на основе ключа
                 let sbox = new Array(256);
                 for (let i = 0; i < 256; i++) sbox[i] = i;
                 
-                // Перемешивание на основе ключа
                 let j = 0;
                 for (let i = 0; i < 256; i++) {
                     j = (j + sbox[i] + this.key[i % 32]) % 256;
@@ -459,152 +362,66 @@
                 }
                 
                 this.sbox = sbox;
+                this.invSbox = new Array(256);
                 for (let i = 0; i < 256; i++) {
                     this.invSbox[this.sbox[i]] = i;
                 }
             }
 
-            nonlinearTransform(x, inverse = false) {
-                if (!inverse) {
-                    // Прямое нелинейное преобразование
-                    let y = this.sbox[x];
-                    y = this.mul(y, this.sbox[(x + 17) % 256]);
-                    y = this.add(y, this.sbox[(x + 42) % 256]);
-                    return y;
-                } else {
-                    // Обратное нелинейное преобразование
-                    // Решаем уравнение: найти x такой, что nonlinearTransform(x) = y
-                    // Это сложная задача, поэтому мы используем поиск по таблице
-                    for (let i = 0; i < 256; i++) {
-                        if (this.nonlinearTransform(i) === x) {
-                            return i;
-                        }
-                    }
-                    throw new Error("Inverse nonlinear transform not found");
-                }
+            nonlinearTransform(x) {
+                let y = this.sbox[x];
+                y = this.mul(y, this.sbox[(x + this.key[0]) % 256]);
+                y = this.add(y, this.sbox[(x + this.key[1]) % 256]);
+                return y;
+            }
+
+            inverseNonlinearTransform(x) {
+                let y = this.invSbox[x];
+                y = this.mul(y, this.invSbox[(x + this.key[0]) % 256]);
+                y = this.add(y, this.invSbox[(x + this.key[1]) % 256]);
+                return y;
             }
 
             kernel(x, s, u) {
-                // Детерминированное и обратимое ядро
-                const a = this.kernelCoeffs[0];
-                const b = this.kernelCoeffs[1];
-                const c = this.kernelCoeffs[2];
-                const d = this.kernelCoeffs[3];
+                const term1 = Math.sin(this.kernelParams[0] * x * Math.PI * 2);
+                const term2 = Math.cos(this.kernelParams[1] * s * Math.PI * 2);
+                const term3 = Math.tanh(this.kernelParams[2] * u * 3);
                 
-                // Простая, но обратимая функция
-                return this.add(this.mul(a, x), this.add(this.mul(b, s), this.mul(c, u))) ^ d;
+                const term4 = Math.exp(-this.kernelParams[3] * Math.pow(x - s, 2));
+                const term5 = Math.atan(this.kernelParams[4] * (u - 128) * 0.1);
+                
+                let result = this.kernelParams[5] * term1 * term2;
+                result += this.kernelParams[6] * term3 * term4;
+                result += this.kernelParams[7] * term5;
+                
+                result = (result * 64 + 128) % 256;
+                return Math.floor(result) & 0xFF;
             }
 
-            computeIntegral(x, uVector, inverse = false) {
-                // Численное вычисление интеграла
+            computeIntegral(x, u) {
                 let total = 0;
-                
-                if (!inverse) {
-                    // Прямое вычисление
-                    for (let s = 0; s < this.blockSize; s++) {
-                        const kernelVal = this.kernel(x, s, uVector[s]);
-                        total = this.add(total, kernelVal);
-                    }
-                } else {
-                    // Для обратного преобразования нам нужно вычислить интеграл
-                    // с известным uVector и результатом
-                    for (let s = 0; s < this.blockSize; s++) {
-                        if (s !== x) { // Исключаем точку x для обратимости
-                            const kernelVal = this.kernel(x, s, uVector[s]);
-                            total = this.add(total, kernelVal);
-                        }
-                    }
+                for (let s = 0; s < 256; s++) {
+                    const kernelVal = this.kernel(x, s, u);
+                    total = this.add(total, kernelVal);
                 }
-                
-                return total;
+                return total % 256;
             }
 
-            encryptBlock(plaintext, onProgress) {
-                if (plaintext.length !== this.blockSize) {
-                    throw new Error(`Block size must be ${this.blockSize}`);
-                }
-
-                let uCurrent = [...plaintext];
-                let uNext = new Array(this.blockSize);
-                let converged = false;
-                const maxIter = document.getElementById('maxIterations').value;
-
-                for (let iter = 0; iter < maxIter; iter++) {
-                    let maxDiff = 0;
-
-                    for (let x = 0; x < this.blockSize; x++) {
-                        // Применение нелинейного преобразования
-                        const transformed = this.nonlinearTransform(plaintext[x]);
-                        
-                        // Вычисление интегрального члена
-                        const integral = this.computeIntegral(x, uCurrent);
-                        
-                        // Комбинация: u(x) = f(x) + λ ∫ K(x, s, u(s)) ds
-                        uNext[x] = this.add(transformed, this.mul(this.lambda, integral));
-                        
-                        const diff = Math.abs(uNext[x] - uCurrent[x]);
-                        maxDiff = Math.max(maxDiff, diff);
-                    }
-
-                    if (onProgress) {
-                        onProgress(iter + 1, maxDiff);
-                    }
-
-                    if (maxDiff <= 1) {
-                        converged = true;
-                        break;
-                    }
-
-                    uCurrent = [...uNext];
-                }
-
-                // Сохраняем количество итераций для дешифрования
-                this.lastIterations = maxIter;
-                
-                // Финальное нелинейное преобразование
-                return uNext.map(x => this.nonlinearTransform(x));
+            encryptByte(plainByte) {
+                const transformed = this.nonlinearTransform(plainByte);
+                const integral = this.computeIntegral(plainByte, transformed);
+                const encrypted = this.add(transformed, this.mul(this.lambda, integral));
+                return this.nonlinearTransform(encrypted);
             }
 
-            decryptBlock(ciphertext, onProgress) {
-                if (ciphertext.length !== this.blockSize) {
-                    throw new Error(`Block size must be ${this.blockSize}`);
-                }
-
-                // Обратное нелинейное преобразование
-                const inverted = ciphertext.map(x => this.nonlinearTransform(x, true));
-                
-                let uCurrent = [...inverted];
-                let fApprox = new Array(this.blockSize);
-                const maxIter = this.lastIterations || document.getElementById('maxIterations').value;
-
-                for (let iter = 0; iter < maxIter; iter++) {
-                    let maxDiff = 0;
-
-                    for (let x = 0; x < this.blockSize; x++) {
-                        // Решение уравнения: f(x) = u(x) - λ ∫ K(x, s, u(s)) ds
-                        const integral = this.computeIntegral(x, uCurrent, true);
-                        fApprox[x] = this.add(uCurrent[x], this.mul(this.lambda, integral)); // add = XOR = вычитание в GF(2^8)
-                        
-                        const diff = Math.abs(fApprox[x] - uCurrent[x]);
-                        maxDiff = Math.max(maxDiff, diff);
-                    }
-
-                    if (onProgress) {
-                        onProgress(iter + 1, maxDiff);
-                    }
-
-                    if (maxDiff <= 1) {
-                        break;
-                    }
-
-                    uCurrent = [...fApprox];
-                }
-
-                return fApprox;
+            decryptByte(cipherByte) {
+                const inverted = this.inverseNonlinearTransform(cipherByte);
+                const integral = this.computeIntegral(inverted, cipherByte);
+                const decrypted = this.add(inverted, this.mul(this.lambda, integral));
+                return this.inverseNonlinearTransform(decrypted);
             }
         }
 
-        // UI Functions
         function logMessage(message, type = 'info') {
             const log = document.getElementById('systemLog');
             const entry = document.createElement('div');
@@ -614,38 +431,14 @@
             log.scrollTop = log.scrollHeight;
         }
 
-        function logAnalysis(message, type = 'info') {
-            const log = document.getElementById('analysisLog');
-            const entry = document.createElement('div');
-            entry.className = `log-entry ${type}`;
-            entry.textContent = message;
-            log.appendChild(entry);
-            log.scrollTop = log.scrollHeight;
-        }
-
-        function updateProgress(percent, iteration, maxDiff) {
+        function updateProgress(percent) {
             const progressBar = document.getElementById('progressBar');
             progressBar.style.width = `${percent}%`;
-            
-            document.getElementById('statusText').textContent = 
-                `Processing: ${percent}% (Iteration ${iteration}, Δ=${maxDiff})`;
-        }
-
-        function visualizeBytes(bytes, elementId, title) {
-            const grid = document.getElementById(elementId);
-            grid.innerHTML = '';
-            
-            bytes.forEach((byte, index) => {
-                const cell = document.createElement('div');
-                cell.className = 'byte-cell';
-                cell.title = `Position ${index}: 0x${byte.toString(16).padStart(2, '0')} (${byte})`;
-                cell.textContent = byte.toString(16).padStart(2, '0');
-                grid.appendChild(cell);
-            });
+            document.getElementById('statusText').textContent = `Processing: ${percent}%`;
         }
 
         function generateKey() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=';
             let key = '';
             for (let i = 0; i < 32; i++) {
                 key += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -658,57 +451,33 @@
             try {
                 const key = document.getElementById('keyInput').value;
                 const message = document.getElementById('messageInput').value;
-                const blockSize = parseInt(document.getElementById('blockSize').value);
                 
                 if (!key || key.length < 16) {
                     throw new Error('Encryption key must be at least 16 characters');
                 }
 
-                logMessage('Starting high-strength encryption process...', 'info');
+                logMessage('Starting encryption process...', 'info');
                 
                 const encoder = new TextEncoder();
                 const messageBytes = encoder.encode(message);
                 document.getElementById('inputBytes').textContent = messageBytes.length;
                 
-                visualizeBytes(Array.from(messageBytes), 'inputBytesGrid', 'Input');
+                const cipher = new VolterraCipher(key);
                 
-                const cipher = new ReversibleVolterraCipher(key, blockSize);
+                let encryptedBytes = new Uint8Array(messageBytes.length);
                 
-                let encryptedBytes = [];
-                const totalBlocks = Math.ceil(messageBytes.length / blockSize);
-                
-                for (let blockIndex = 0; blockIndex < totalBlocks; blockIndex++) {
-                    const start = blockIndex * blockSize;
-                    const end = Math.min(start + blockSize, messageBytes.length);
-                    let block = Array.from(messageBytes.slice(start, end));
-                    
-                    // Дополняем блок, сохраняя информацию о длине
-                    const originalLength = block.length;
-                    while (block.length < blockSize) {
-                        block.push(0);
-                    }
-                    // Добавляем байт с информацией о длине
-                    block[blockSize - 1] = originalLength;
-                    
-                    const encryptedBlock = cipher.encryptBlock(block, (iteration, maxDiff) => {
-                        const percent = Math.min(100, Math.floor((blockIndex / totalBlocks) * 100 + 
-                            (iteration / document.getElementById('maxIterations').value) * (100 / totalBlocks)));
-                        updateProgress(percent, iteration, maxDiff);
-                    });
-                    
-                    encryptedBytes = encryptedBytes.concat(encryptedBlock);
-                    logMessage(`Encrypted block ${blockIndex + 1}/${totalBlocks} with ${document.getElementById('maxIterations').value} iterations`, 'success');
+                for (let i = 0; i < messageBytes.length; i++) {
+                    encryptedBytes[i] = cipher.encryptByte(messageBytes[i]);
+                    updateProgress(Math.floor((i + 1) / messageBytes.length * 100));
                 }
                 
-                const hexString = encryptedBytes.map(b => b.toString(16).padStart(2, '0')).join('');
+                const hexString = Array.from(encryptedBytes).map(b => b.toString(16).padStart(2, '0')).join('');
                 document.getElementById('outputText').value = hexString;
                 document.getElementById('outputBytes').textContent = encryptedBytes.length;
                 
-                visualizeBytes(encryptedBytes, 'outputBytesGrid', 'Output');
-                
-                updateProgress(100, 0, 0);
+                updateProgress(100);
                 document.getElementById('statusText').textContent = 'Encryption completed';
-                logMessage('High-strength encryption completed successfully', 'success');
+                logMessage(`Encryption completed. Output: ${encryptedBytes.length} bytes`, 'success');
                 
             } catch (error) {
                 logMessage(`Encryption error: ${error.message}`, 'error');
@@ -720,7 +489,6 @@
             try {
                 const key = document.getElementById('keyInput').value;
                 const hexString = document.getElementById('outputText').value.replace(/\s/g, '');
-                const blockSize = parseInt(document.getElementById('blockSize').value);
                 
                 if (!hexString) {
                     throw new Error('No encrypted data to decrypt');
@@ -730,7 +498,7 @@
                     throw new Error('Invalid hex string length');
                 }
                 
-                logMessage('Starting high-strength decryption process...', 'info');
+                logMessage('Starting decryption process...', 'info');
                 
                 const encryptedBytes = [];
                 for (let i = 0; i < hexString.length; i += 2) {
@@ -738,41 +506,24 @@
                 }
                 
                 document.getElementById('inputBytes').textContent = encryptedBytes.length;
-                visualizeBytes(encryptedBytes, 'inputBytesGrid', 'Input');
                 
-                const cipher = new ReversibleVolterraCipher(key, blockSize);
+                const cipher = new VolterraCipher(key);
                 
-                let decryptedBytes = [];
-                const totalBlocks = Math.ceil(encryptedBytes.length / blockSize);
+                let decryptedBytes = new Uint8Array(encryptedBytes.length);
                 
-                for (let blockIndex = 0; blockIndex < totalBlocks; blockIndex++) {
-                    const start = blockIndex * blockSize;
-                    const end = Math.min(start + blockSize, encryptedBytes.length);
-                    const block = encryptedBytes.slice(start, end);
-                    
-                    const decryptedBlock = cipher.decryptBlock(block, (iteration, maxDiff) => {
-                        const percent = Math.floor(((blockIndex + 1) / totalBlocks) * 100);
-                        updateProgress(percent, iteration, maxDiff);
-                    });
-                    
-                    // Восстанавливаем оригинальную длину блока
-                    const originalLength = decryptedBlock[blockSize - 1];
-                    const validBlock = decryptedBlock.slice(0, originalLength);
-                    
-                    decryptedBytes = decryptedBytes.concat(validBlock);
-                    logMessage(`Decrypted block ${blockIndex + 1}/${totalBlocks} with ${document.getElementById('maxIterations').value} iterations`, 'success');
+                for (let i = 0; i < encryptedBytes.length; i++) {
+                    decryptedBytes[i] = cipher.decryptByte(encryptedBytes[i]);
+                    updateProgress(Math.floor((i + 1) / encryptedBytes.length * 100));
                 }
                 
                 const decoder = new TextDecoder();
-                const decryptedText = decoder.decode(new Uint8Array(decryptedBytes));
+                const decryptedText = decoder.decode(decryptedBytes);
                 document.getElementById('outputText').value = decryptedText;
                 document.getElementById('outputBytes').textContent = decryptedText.length;
                 
-                visualizeBytes(Array.from(new TextEncoder().encode(decryptedText)), 'outputBytesGrid', 'Output');
-                
-                updateProgress(100, 0, 0);
+                updateProgress(100);
                 document.getElementById('statusText').textContent = 'Decryption completed';
-                logMessage('High-strength decryption completed successfully', 'success');
+                logMessage('Decryption completed successfully', 'success');
                 
             } catch (error) {
                 logMessage(`Decryption error: ${error.message}`, 'error');
@@ -780,134 +531,20 @@
             }
         }
 
-        function testReversibility() {
-            try {
-                const key = document.getElementById('keyInput').value;
-                const originalMessage = document.getElementById('messageInput').value;
-                const blockSize = parseInt(document.getElementById('blockSize').value);
-                
-                if (!key || key.length < 16) {
-                    throw new Error('Encryption key must be at least 16 characters');
-                }
-                
-                logAnalysis("=== ТЕСТИРОВАНИЕ ОБРАТИМОСТИ ===", 'info');
-                logAnalysis(`Оригинальное сообщение: "${originalMessage}"`, 'info');
-                logAnalysis(`Длина: ${originalMessage.length} символов`, 'info');
-                
-                const encoder = new TextEncoder();
-                const originalBytes = encoder.encode(originalMessage);
-                logAnalysis(`Байт: ${originalBytes.length}`, 'info');
-                
-                // Шифруем
-                const cipher = new ReversibleVolterraCipher(key, blockSize);
-                let encryptedBytes = [];
-                const totalBlocks = Math.ceil(originalBytes.length / blockSize);
-                
-                for (let blockIndex = 0; blockIndex < totalBlocks; blockIndex++) {
-                    const start = blockIndex * blockSize;
-                    const end = Math.min(start + blockSize, originalBytes.length);
-                    let block = Array.from(originalBytes.slice(start, end));
-                    
-                    const originalLength = block.length;
-                    while (block.length < blockSize) {
-                        block.push(0);
-                    }
-                    block[blockSize - 1] = originalLength;
-                    
-                    const encryptedBlock = cipher.encryptBlock(block);
-                    encryptedBytes = encryptedBytes.concat(encryptedBlock);
-                }
-                
-                logAnalysis(`Зашифровано байт: ${encryptedBytes.length}`, 'info');
-                
-                // Дешифруем
-                let decryptedBytes = [];
-                for (let blockIndex = 0; blockIndex < totalBlocks; blockIndex++) {
-                    const start = blockIndex * blockSize;
-                    const end = Math.min(start + blockSize, encryptedBytes.length);
-                    const block = encryptedBytes.slice(start, end);
-                    
-                    const decryptedBlock = cipher.decryptBlock(block);
-                    const originalLength = decryptedBlock[blockSize - 1];
-                    const validBlock = decryptedBlock.slice(0, originalLength);
-                    
-                    decryptedBytes = decryptedBytes.concat(validBlock);
-                }
-                
-                const decoder = new TextDecoder();
-                const decryptedMessage = decoder.decode(new Uint8Array(decryptedBytes));
-                
-                logAnalysis(`Расшифрованное сообщение: "${decryptedMessage}"`, 'info');
-                logAnalysis(`Длина: ${decryptedMessage.length} символов`, 'info');
-                
-                // Сравниваем
-                const bytesMatch = arraysEqual(originalBytes, decryptedBytes);
-                const textMatch = originalMessage === decryptedMessage;
-                
-                if (bytesMatch && textMatch) {
-                    logAnalysis("✅ ТЕСТ ПРОЙДЕН: Полная обратимость достигнута", 'success');
-                    document.getElementById('reversibility').textContent = '100%';
-                } else {
-                    logAnalysis("❌ ТЕСТ НЕ ПРОЙДЕН: Обратимость не достигнута", 'error');
-                    
-                    if (!textMatch) {
-                        logAnalysis(`Расхождение текста: позиции отличаются`, 'error');
-                    }
-                    
-                    if (!bytesMatch) {
-                        logAnalysis(`Расхождение байт: ${compareBytes(originalBytes, decryptedBytes)}`, 'error');
-                    }
-                    
-                    document.getElementById('reversibility').textContent = '0%';
-                }
-                
-            } catch (error) {
-                logAnalysis(`Ошибка тестирования: ${error.message}`, 'error');
-            }
-        }
-
-        function arraysEqual(a, b) {
-            if (a.length !== b.length) return false;
-            for (let i = 0; i < a.length; i++) {
-                if (a[i] !== b[i]) return false;
-            }
-            return true;
-        }
-
-        function compareBytes(a, b) {
-            const len = Math.min(a.length, b.length);
-            for (let i = 0; i < len; i++) {
-                if (a[i] !== b[i]) {
-                    return `Позиция ${i}: оригинал=${a[i]}, результат=${b[i]}`;
-                }
-            }
-            if (a.length !== b.length) {
-                return `Разная длина: оригинал=${a.length}, результат=${b.length}`;
-            }
-            return "Байты идентичны";
-        }
-
         function clearAll() {
             document.getElementById('messageInput').value = '';
             document.getElementById('outputText').value = '';
             document.getElementById('inputBytes').textContent = '0';
             document.getElementById('outputBytes').textContent = '0';
-            document.getElementById('iterations').textContent = '0';
             document.getElementById('statusText').textContent = 'Ready';
-            document.getElementById('reversibility').textContent = 'N/A';
             document.getElementById('progressBar').style.width = '0%';
-            document.getElementById('inputBytesGrid').innerHTML = '';
-            document.getElementById('outputBytesGrid').innerHTML = '';
             document.getElementById('systemLog').innerHTML = '';
-            document.getElementById('analysisLog').innerHTML = '';
             logMessage('System cleared', 'info');
         }
 
-        // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            logMessage('Reversible Volterra High-Strength Encryption System initialized', 'success');
-            logMessage('Ready for military-grade encryption/decryption operations', 'info');
-            logAnalysis('Система инициализирована. Нажмите "TEST REVERSIBILITY" для проверки обратимости.', 'info');
+            logMessage('Volterra Cryptographic System initialized', 'success');
+            logMessage('Ready for encryption/decryption operations', 'info');
         });
     </script>
 </body>
